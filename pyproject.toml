@@ -1,0 +1,19 @@
+[project]
+name = "django-model-rag-demo"
+version = "0.1.0"
+description = "Integration demo for django-model-rag and django-minimal-rag, installed from their Git repositories."
+requires-python = ">=3.14"
+dependencies = [
+    "django>=5.2",
+    "django-minimal-rag",
+    "django-model-rag",
+]
+
+[tool.uv.sources]
+django-model-rag = { git = "https://github.com/gtolivier/django-model-rag", rev = "main" }
+django-minimal-rag = { git = "https://github.com/gtolivier/django-minimal-rag", rev = "main" }
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.9",
+]
