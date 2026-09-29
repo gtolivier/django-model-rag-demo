@@ -28,7 +28,7 @@ wheels = [
 [[package]]
 name = "django-minimal-rag"
 version = "0.1.0"
-source = { git = "https://github.com/gtolivier/django-minimal-rag?rev=main#225f869e5b3f8e07fde135cb26bf534aceb54069" }
+source = { git = "https://github.com/gtolivier/django-minimal-rag?rev=main#4fa5d0b6fa9a6c9c61971d533798f7da8ff23280" }
 dependencies = [
     { name = "django" },
     { name = "pgvector" },
@@ -38,7 +38,7 @@ dependencies = [
 [[package]]
 name = "django-model-rag"
 version = "0.1.0"
-source = { git = "https://github.com/gtolivier/django-model-rag?rev=main#6be49dc0e7037fd31dfae9ac667eb542846b8812" }
+source = { git = "https://github.com/gtolivier/django-model-rag?rev=main#0ad2e0538bde22c1f86b84bf8cac8c53023a1bb9" }
 dependencies = [
     { name = "django" },
 ]
