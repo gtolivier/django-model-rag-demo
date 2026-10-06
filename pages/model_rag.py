@@ -17,7 +17,9 @@ class AccordionItemExtractor(BaseExtractor[AccordionItem]):
 
 @rag.register_extractor(TextPlugin)
 class TextPluginExtractor(BaseExtractor[TextPlugin]):
-    def extract(self, instance: TextPlugin) -> NormalizedDocument:
+    def extract(self, instance: TextPlugin) -> NormalizedDocument | None:
+        if not instance.body.strip():
+            return None
         return self.build_document(
             instance,
             text=instance.body,
