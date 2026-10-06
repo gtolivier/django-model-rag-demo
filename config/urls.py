@@ -18,6 +18,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from catalog.views import product_detail
+from pages.views import page_detail
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("products/<int:pk>/", product_detail, name="product_detail"),
+    path("pages/<slug:slug>/", page_detail, name="page_detail"),
 ]
