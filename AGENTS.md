@@ -6,10 +6,37 @@ Instructions for coding agents working in this repository. Read
 ## Commands
 
 - Install: `uv sync`
+- Test: `uv run pytest`
 - Check: `uv run python manage.py check`
 - Lint: `uv run ruff check` — format: `uv run ruff format`
+- Type check: `uv run --group typecheck mypy` (strict, with the django-stubs plugin)
 
 Always go through `uv run`; do not rely on an activated virtualenv.
+
+## Layout
+
+- `config/` — the Django project (settings, URLs).
+- `catalog/`, `pages/` — the demo apps whose models django-model-rag reads.
+- `tests/` — pytest tests (`test_*.py`), run with pytest-django against
+  `config.settings`.
+
+## Test-driven development
+
+Features are built with the `/tdd:feature` skill of the
+[`tdd` plugin](https://github.com/gtolivier/agent-workflows). Its conventions
+for this repository:
+
+- **Test, lint, type-check and format commands:** those of the Commands
+  section above.
+- **Test files:** everything under `tests/`. Nothing outside `tests/` is a
+  test file.
+- **Production code:** `catalog/`, `pages/` and `config/`.
+- **Migrations:** generated, never written by hand. After changing a model,
+  run `uv run python manage.py makemigrations`, then
+  `uv run ruff format` (Django's output does not pass ruff).
+- **Package sources:** to read the code of django-model-rag or
+  django-minimal-rag, look only at the installed copy under `.venv/`, never
+  at a checkout elsewhere on disk: the demo tests what `uv.lock` installs.
 
 ## Rules
 
