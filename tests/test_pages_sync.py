@@ -96,6 +96,21 @@ def test_sync_skips_an_empty_accordion_item_and_trims_a_title_only_one(
     assert title_only_document.text == "Shipping"
 
 
+@pytest.mark.django_db
+def test_sync_titles_an_untitled_accordion_item_with_its_page_title_alone(
+    rag_store: DocumentStore,
+) -> None:
+    page = Page.objects.create(title="FAQ", slug="faq")
+    untitled = AccordionItem.objects.create(
+        page=page, title="", body="We ship within two days."
+    )
+
+    call_command("sync_model_rag")
+
+    [document] = rag_store[f"pages.accordionitem:{untitled.pk}"]
+    assert document.title == "FAQ"
+
+
 def _create_pages_with_blocks(*slugs: str) -> None:
     for slug in slugs:
         page = Page.objects.create(title=slug.title(), slug=slug)
