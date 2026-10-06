@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from django_model_rag import NormalizedDocument
+from django_model_rag import DocumentOutput, NormalizedDocument
 
 from config.rag_output import DictOutput
 
@@ -50,3 +50,13 @@ def test_prune_removes_the_unkept_keys_of_the_model_only() -> None:
     output.prune("catalog.product", {"catalog.product:1"})
 
     assert store == {"catalog.product:1": kept, "catalog.book:2": other_model}
+
+
+def test_dict_output_is_a_document_output_of_the_package() -> None:
+    document = _document("text")
+    store: dict[str, Sequence[NormalizedDocument]] = {}
+    output: DocumentOutput = DictOutput(store=store)
+
+    output.replace({document.source_key: [document]})
+
+    assert list(store[document.source_key]) == [document]
