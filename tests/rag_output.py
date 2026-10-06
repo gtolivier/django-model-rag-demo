@@ -25,3 +25,17 @@ class DictOutput:
         for key in list(self._store):
             if key.startswith(prefix) and key not in kept_keys:
                 del self._store[key]
+
+
+class OutputUnavailableError(Exception):
+    """What FailingOutput raises."""
+
+
+class FailingOutput:
+    """Fails on every call, as an output whose store cannot be reached would."""
+
+    def replace(self, groups: Mapping[str, Sequence[NormalizedDocument]]) -> None:
+        raise OutputUnavailableError("the output cannot be reached")
+
+    def prune(self, model_label: str, kept_keys: Collection[str]) -> None:
+        raise OutputUnavailableError("the output cannot be reached")
