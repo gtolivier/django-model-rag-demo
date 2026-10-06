@@ -1,5 +1,7 @@
 import pytest
 from django.core.management import call_command
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 
 from pages.models import AccordionItem, Page, TextPlugin
 from tests.conftest import DocumentStore
@@ -92,3 +94,32 @@ def test_sync_skips_an_empty_accordion_item_and_trims_a_title_only_one(
     assert f"pages.accordionitem:{empty.pk}" not in rag_store
     [title_only_document] = rag_store[f"pages.accordionitem:{title_only.pk}"]
     assert title_only_document.text == "Shipping"
+
+
+def _create_pages_with_blocks(*slugs: str) -> None:
+    for slug in slugs:
+        page = Page.objects.create(title=slug.title(), slug=slug)
+        TextPlugin.objects.create(page=page, body="We make kettles.")
+        AccordionItem.objects.create(
+            page=page, title="Shipping", body="We ship within two days."
+        )
+
+
+def _count_sync_queries() -> int:
+    with CaptureQueriesContext(connection) as context:
+        call_command("sync_model_rag", "pages.textplugin", "pages.accordionitem")
+    return len(context.captured_queries)
+
+
+@pytest.mark.django_db
+def test_sync_of_page_blocks_takes_as_many_queries_for_many_pages_as_for_one(
+    rag_store: DocumentStore,
+) -> None:
+    _create_pages_with_blocks("about")
+    queries_for_one_page = _count_sync_queries()
+
+    _create_pages_with_blocks("faq", "shipping")
+    queries_for_many_pages = _count_sync_queries()
+
+    assert len(rag_store) == 6
+    assert queries_for_many_pages == queries_for_one_page
