@@ -1,7 +1,6 @@
 from django_model_rag import DocumentOutput, NormalizedDocument
 
-from tests.conftest import DocumentStore
-from tests.rag_output import DictOutput
+from tests.rag_output import DictOutput, DocumentStore
 
 
 def _document(text: str) -> NormalizedDocument:

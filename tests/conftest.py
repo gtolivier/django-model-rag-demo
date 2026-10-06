@@ -1,10 +1,7 @@
-from collections.abc import Sequence
-
 import pytest
-from django_model_rag import NormalizedDocument
 from pytest_django.fixtures import Settings
 
-DocumentStore = dict[str, Sequence[NormalizedDocument]]
+from tests.rag_output import DocumentStore
 
 
 @pytest.fixture

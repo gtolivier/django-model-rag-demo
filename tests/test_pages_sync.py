@@ -4,7 +4,7 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 from pages.models import AccordionItem, Page, TextPlugin
-from tests.conftest import DocumentStore
+from tests.rag_output import DocumentStore
 
 
 @pytest.mark.django_db

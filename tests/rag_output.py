@@ -3,11 +3,13 @@ from collections.abc import Collection, Mapping, Sequence
 from django_model_rag import NormalizedDocument
 from django_model_rag.documents import build_source_key
 
+DocumentStore = dict[str, Sequence[NormalizedDocument]]
+
 
 class DictOutput:
     """Keeps the documents in a dict, under their source key."""
 
-    def __init__(self, store: dict[str, Sequence[NormalizedDocument]]) -> None:
+    def __init__(self, store: DocumentStore) -> None:
         self._store = store
 
     def replace(self, groups: Mapping[str, Sequence[NormalizedDocument]]) -> None:

@@ -4,7 +4,7 @@ import pytest
 from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks
 
 from catalog.models import Category, Product
-from tests.conftest import DocumentStore
+from tests.rag_output import DocumentStore
 
 
 @pytest.mark.django_db

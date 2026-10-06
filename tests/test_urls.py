@@ -6,7 +6,7 @@ from django.urls import resolve
 
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
-from tests.conftest import DocumentStore
+from tests.rag_output import DocumentStore
 
 
 def _captured_values(url: str) -> list[str]:
