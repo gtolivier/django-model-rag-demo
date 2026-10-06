@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_minimal_rag",
     "catalog",
     "pages",
+    "blog",
 ]
 
 MIDDLEWARE = [
