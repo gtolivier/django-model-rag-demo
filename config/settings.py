@@ -132,3 +132,10 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+
+# django-model-rag
+
+MODEL_RAG_OUTPUT = {
+    "BACKEND": "django_model_rag.output.ConsoleOutput",
+}
