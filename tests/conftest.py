@@ -16,7 +16,7 @@ def rag_store(settings: Settings) -> DocumentStore:
     """
     store: DocumentStore = {}
     settings.MODEL_RAG_OUTPUT = {
-        "BACKEND": "config.rag_output.DictOutput",
+        "BACKEND": "tests.rag_output.DictOutput",
         "OPTIONS": {"store": store},
     }
     return store
