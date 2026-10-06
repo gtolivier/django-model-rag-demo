@@ -30,9 +30,10 @@ class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
         text = f"{instance.title}\n\n{instance.body}".strip()
         if not text:
             return None
-        return self.build_block_document(
-            instance, text=text, title=f"{instance.page.title} — {instance.title}"
-        )
+        title = instance.page.title
+        if instance.title:
+            title = f"{title} — {instance.title}"
+        return self.build_block_document(instance, text=text, title=title)
 
 
 @rag.register_extractor(TextPlugin)
