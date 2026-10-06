@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Model, QuerySet
 from django_model_rag import SyncPipeline, rag
+from django_model_rag.documents import model_source_key
 from django_model_rag.output import configured_output
 
 _SIGNALS_SETTING = "MODEL_RAG_SIGNALS"
@@ -56,4 +57,6 @@ def _sync_instance(pipeline: SyncPipeline, instance: Model) -> None:
     try:
         pipeline.run_instance(instance)
     except Exception:
-        logger.exception("Syncing %s failed", instance)
+        logger.exception(
+            "Syncing %s failed", model_source_key(instance._meta.model, instance.pk)
+        )
