@@ -3,6 +3,7 @@ from decimal import Decimal
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
+from django_model_rag.documents import build_source_key
 from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks, Settings
 
 from catalog.models import Category, Product
@@ -101,3 +102,37 @@ def test_an_output_that_cannot_be_built_at_the_commit_of_a_page_or_category_edit
     assert page_errors
     assert Category.objects.get(pk=category.pk).name == "Cookware"
     assert Page.objects.get(pk=page.pk).title == "Help"
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("rag_store")
+def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_with_the_failing_instance_source_key(
+    settings: Settings,
+    caplog: pytest.LogCaptureFixture,
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+) -> None:
+    category, page = _category_and_page_with_dependents(
+        django_capture_on_commit_callbacks
+    )
+    product = Product.objects.get(category=category)
+    text_plugin = TextPlugin.objects.get(page=page)
+    accordion_item = AccordionItem.objects.get(page=page)
+    settings.MODEL_RAG_OUTPUT = {"BACKEND": "tests.rag_output.FailingOutput"}
+    caplog.set_level(logging.ERROR, logger="django_model_rag")
+
+    with django_capture_on_commit_callbacks(execute=True):
+        category.name = "Cookware"
+        category.save()
+    category_messages = [r.getMessage() for r in _logged_output_errors(caplog)]
+    caplog.clear()
+    with django_capture_on_commit_callbacks(execute=True):
+        page.title = "Help"
+        page.save()
+    page_messages = [r.getMessage() for r in _logged_output_errors(caplog)]
+
+    product_key = build_source_key("catalog.product", product.pk)
+    text_plugin_key = build_source_key("pages.textplugin", text_plugin.pk)
+    accordion_item_key = build_source_key("pages.accordionitem", accordion_item.pk)
+    assert any(product_key in message for message in category_messages)
+    assert any(text_plugin_key in message for message in page_messages)
+    assert any(accordion_item_key in message for message in page_messages)
