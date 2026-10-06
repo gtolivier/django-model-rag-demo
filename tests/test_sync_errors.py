@@ -129,6 +129,6 @@ def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_with
 
     category_messages = [record.getMessage() for record in category_errors]
     page_messages = [record.getMessage() for record in page_errors]
-    assert any("catalog.product" in message for message in category_messages)
-    assert any("pages.textplugin" in message for message in page_messages)
-    assert any("pages.accordionitem" in message for message in page_messages)
+    assert "Syncing catalog.product instances failed" in category_messages
+    assert "Syncing pages.textplugin instances failed" in page_messages
+    assert "Syncing pages.accordionitem instances failed" in page_messages
