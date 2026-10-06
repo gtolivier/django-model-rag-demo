@@ -13,10 +13,13 @@ class PageBlockExtractor[M: AccordionItem | TextPlugin](BaseExtractor[M]):
 
 @rag.register_extractor(AccordionItem)
 class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
-    def extract(self, instance: AccordionItem) -> NormalizedDocument:
+    def extract(self, instance: AccordionItem) -> NormalizedDocument | None:
+        text = f"{instance.title}\n\n{instance.body}".strip()
+        if not text:
+            return None
         return self.build_document(
             instance,
-            text=f"{instance.title}\n\n{instance.body}",
+            text=text,
             title=f"{instance.page.title} — {instance.title}",
             url=instance.page.get_absolute_url(),
         )
