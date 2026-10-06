@@ -28,8 +28,6 @@ testpaths = ["tests"]
 # --ds rather than DJANGO_SETTINGS_MODULE: an exported variable of that name
 # (from another project's shell) would take precedence over the ini option.
 addopts = ["--ds=config.settings"]
-# Makes the project packages (config, catalog, pages) importable.
-pythonpath = ["."]
 
 [tool.mypy]
 files = ["catalog", "pages", "config", "tests"]
