@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from django.conf import settings
@@ -5,6 +6,8 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django_model_rag import SyncPipeline, rag
 from django_model_rag.output import configured_output
+
+logger = logging.getLogger("django_model_rag")
 
 
 def sync_on_commit(*querysets: QuerySet[Any]) -> None:
@@ -23,6 +26,10 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
             # document reads in the same query, not one query per instance
             extractor = rag.new_extractor(queryset.model)
             for instance in extractor.get_queryset(queryset):
-                pipeline.run_instance(instance)
+                try:
+                    pipeline.run_instance(instance)
+                except Exception:
+                    # An error escaping a commit callback would break the commit.
+                    logger.exception("Syncing %s failed", instance)
 
     transaction.on_commit(sync_instances)
