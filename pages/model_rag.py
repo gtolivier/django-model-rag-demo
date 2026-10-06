@@ -32,7 +32,7 @@ class TextPluginExtractor(PageBlockExtractor[TextPlugin]):
             return None
         return self.build_document(
             instance,
-            text=instance.body,
+            text=instance.body.strip(),
             title=instance.page.title,
             url=instance.page.get_absolute_url(),
         )
