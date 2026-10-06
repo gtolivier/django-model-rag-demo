@@ -43,6 +43,19 @@ def test_sync_gives_no_document_for_an_empty_or_blank_text_block(
 
 
 @pytest.mark.django_db
+def test_sync_strips_surrounding_whitespace_from_a_text_block_body(
+    rag_store: DocumentStore,
+) -> None:
+    page = Page.objects.create(title="About us", slug="about")
+    block = TextPlugin.objects.create(page=page, body="\n  We make kettles.  \n")
+
+    call_command("sync_model_rag")
+
+    [document] = rag_store[f"pages.textplugin:{block.pk}"]
+    assert document.text == "We make kettles."
+
+
+@pytest.mark.django_db
 def test_sync_gives_each_accordion_item_of_a_page_its_own_document(
     rag_store: DocumentStore,
 ) -> None:
