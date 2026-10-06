@@ -10,4 +10,8 @@ class DictOutput:
         self._store = store
 
     def replace(self, groups: Mapping[str, Sequence[NormalizedDocument]]) -> None:
-        self._store.update(groups)
+        for key, documents in groups.items():
+            if documents:
+                self._store[key] = documents
+            else:
+                self._store.pop(key, None)
