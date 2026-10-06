@@ -22,7 +22,7 @@ def _logged_output_errors(caplog: pytest.LogCaptureFixture) -> list[logging.LogR
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("rag_store")
-def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged(
+def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_and_does_not_break_the_save(
     settings: Settings,
     caplog: pytest.LogCaptureFixture,
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
