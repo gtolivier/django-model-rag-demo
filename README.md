@@ -15,6 +15,7 @@ never uses a local or editable install of either package.
 
 django-model-rag is wired: the demo's models sync to documents.
 
+- `blog.Article` is the minimal example, below.
 - `catalog.Product` is registered with declared fields; `pages` blocks
   (`TextPlugin`, `AccordionItem`) go through custom extractors.
 - Saving or deleting an instance updates its documents when the transaction
@@ -24,6 +25,27 @@ django-model-rag is wired: the demo's models sync to documents.
   documents through `ConsoleOutput`.
 
 django-minimal-rag is installed but not wired yet.
+
+## Minimal example
+
+The `blog` app shows the whole integration for a plain model: add the app
+after `django_model_rag` in `INSTALLED_APPS`, then register the model in the
+app's `model_rag.py`.
+
+```python
+# blog/model_rag.py
+from django_model_rag import rag
+
+from blog.models import Article
+
+rag.register(Article)
+```
+
+Nothing else is needed: the text fields are guessed (`title`, then `body`),
+`title` gives the document title, and saving or deleting an article updates
+its document when the transaction commits. `catalog` and `pages` show what
+goes beyond that: declared fields, `follow`, custom extractors, and keeping
+dependent documents up to date.
 
 ## Usage
 
