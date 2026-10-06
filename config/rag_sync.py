@@ -27,11 +27,10 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
         return
 
     def sync_instances() -> None:
-        try:
-            pipeline = SyncPipeline(configured_output())
-        except Exception:
-            # An error escaping a commit callback would break the commit.
-            logger.exception("Building the output failed")
+        # Failures are logged, not raised: an error escaping a commit callback
+        # would break the commit.
+        pipeline = _build_pipeline()
+        if pipeline is None:
             return
         for queryset in querysets:
             # its extractor's get_queryset() loads the related rows each
@@ -43,10 +42,18 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
     transaction.on_commit(sync_instances)
 
 
+def _build_pipeline() -> SyncPipeline | None:
+    """Return a pipeline to the configured output, or ``None``, logging a failure."""
+    try:
+        return SyncPipeline(configured_output())
+    except Exception:
+        logger.exception("Building the output failed")
+        return None
+
+
 def _sync_instance(pipeline: SyncPipeline, instance: Model) -> None:
     """Hand the documents of ``instance`` to the output, logging a failure."""
     try:
         pipeline.run_instance(instance)
     except Exception:
-        # An error escaping a commit callback would break the commit.
         logger.exception("Syncing %s failed", instance)
