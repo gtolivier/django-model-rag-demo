@@ -1,9 +1,7 @@
 from collections.abc import Collection, Mapping, Sequence
 
 from django_model_rag import NormalizedDocument
-
-# Source keys read "app_label.model:pk"; the package does not export its builder.
-SOURCE_KEY_SEPARATOR = ":"
+from django_model_rag.documents import build_source_key
 
 
 class DictOutput:
@@ -20,7 +18,8 @@ class DictOutput:
                 self._store.pop(key, None)
 
     def prune(self, model_label: str, kept_keys: Collection[str]) -> None:
-        prefix = f"{model_label}{SOURCE_KEY_SEPARATOR}"
+        # A key with an empty pk is the prefix every key of the model shares.
+        prefix = build_source_key(model_label, "")
         for key in list(self._store):
             if key.startswith(prefix) and key not in kept_keys:
                 del self._store[key]
