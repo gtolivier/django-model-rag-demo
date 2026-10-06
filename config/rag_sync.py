@@ -1,5 +1,6 @@
 from typing import Any
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import QuerySet
 from django_model_rag import SyncPipeline, rag
@@ -12,6 +13,8 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
     For instances whose documents carry the fields of another model: the
     package syncs an instance on its own save, not on the save of what it reads.
     """
+    if not getattr(settings, "MODEL_RAG_SIGNALS", True):
+        return
 
     def sync_instances() -> None:
         pipeline = SyncPipeline(configured_output())
