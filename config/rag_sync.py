@@ -27,7 +27,12 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
         return
 
     def sync_instances() -> None:
-        pipeline = SyncPipeline(configured_output())
+        try:
+            pipeline = SyncPipeline(configured_output())
+        except Exception:
+            # An error escaping a commit callback would break the commit.
+            logger.exception("Building the output failed")
+            return
         for queryset in querysets:
             # its extractor's get_queryset() loads the related rows each
             # document reads in the same query, not one query per instance
