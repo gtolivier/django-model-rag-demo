@@ -1,13 +1,12 @@
 from typing import Any
 
-from django.db import transaction
 from django.db.models import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django_model_rag import NormalizedDocument, SyncPipeline, rag
+from django_model_rag import NormalizedDocument, rag
 from django_model_rag.extractors import BaseExtractor
-from django_model_rag.output import configured_output
 
+from config.rag_sync import sync_on_commit
 from pages.models import AccordionItem, Page, TextPlugin
 
 
@@ -16,6 +15,14 @@ class PageBlockExtractor[M: AccordionItem | TextPlugin](BaseExtractor[M]):
     def get_queryset(self, queryset: QuerySet[M]) -> QuerySet[M]:
         return queryset.select_related("page")
 
+    def build_block_document(
+        self, instance: M, *, text: str, title: str
+    ) -> NormalizedDocument:
+        # a block has no view of its own: its document links to its page
+        return self.build_document(
+            instance, text=text, title=title, url=instance.page.get_absolute_url()
+        )
+
 
 @rag.register_extractor(AccordionItem)
 class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
@@ -23,11 +30,8 @@ class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
         text = f"{instance.title}\n\n{instance.body}".strip()
         if not text:
             return None
-        return self.build_document(
-            instance,
-            text=text,
-            title=f"{instance.page.title} — {instance.title}",
-            url=instance.page.get_absolute_url(),
+        return self.build_block_document(
+            instance, text=text, title=f"{instance.page.title} — {instance.title}"
         )
 
 
@@ -37,12 +41,7 @@ class TextPluginExtractor(PageBlockExtractor[TextPlugin]):
         text = instance.body.strip()
         if not text:
             return None
-        return self.build_document(
-            instance,
-            text=text,
-            title=instance.page.title,
-            url=instance.page.get_absolute_url(),
-        )
+        return self.build_block_document(instance, text=text, title=instance.page.title)
 
 
 @receiver(post_save, sender=Page)
@@ -53,10 +52,7 @@ def sync_blocks_of_saved_page(
     if raw:
         return
 
-    def sync_blocks() -> None:
-        pipeline = SyncPipeline(configured_output())
-        for model in (AccordionItem, TextPlugin):
-            for block in model.objects.filter(page=instance.pk):
-                pipeline.run_instance(block)
-
-    transaction.on_commit(sync_blocks)
+    sync_on_commit(
+        AccordionItem.objects.filter(page=instance.pk),
+        TextPlugin.objects.filter(page=instance.pk),
+    )

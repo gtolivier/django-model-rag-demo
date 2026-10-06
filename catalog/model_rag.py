@@ -1,12 +1,11 @@
 from typing import Any
 
-from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django_model_rag import SyncPipeline, rag
-from django_model_rag.output import configured_output
+from django_model_rag import rag
 
 from catalog.models import Category, Product
+from config.rag_sync import sync_on_commit
 
 rag.register(
     Product,
@@ -24,9 +23,4 @@ def sync_products_of_saved_category(
     if raw:
         return
 
-    def sync_products() -> None:
-        pipeline = SyncPipeline(configured_output())
-        for product in Product.objects.filter(category=instance.pk):
-            pipeline.run_instance(product)
-
-    transaction.on_commit(sync_products)
+    sync_on_commit(Product.objects.filter(category=instance.pk))
