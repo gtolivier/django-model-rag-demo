@@ -28,11 +28,12 @@ class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
 @rag.register_extractor(TextPlugin)
 class TextPluginExtractor(PageBlockExtractor[TextPlugin]):
     def extract(self, instance: TextPlugin) -> NormalizedDocument | None:
-        if not instance.body.strip():
+        text = instance.body.strip()
+        if not text:
             return None
         return self.build_document(
             instance,
-            text=instance.body.strip(),
+            text=text,
             title=instance.page.title,
             url=instance.page.get_absolute_url(),
         )
