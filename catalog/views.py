@@ -6,4 +6,6 @@ from catalog.models import Product
 
 def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
     product = get_object_or_404(Product, pk=pk)
-    return HttpResponse(f"{product.name}\n\n{product.description}")
+    return HttpResponse(
+        f"{product.name}\n\n{product.description}", content_type="text/plain"
+    )

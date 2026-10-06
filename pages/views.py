@@ -6,4 +6,4 @@ from pages.models import Page
 
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
     page = get_object_or_404(Page, slug=slug)
-    return HttpResponse(page.title)
+    return HttpResponse(page.title, content_type="text/plain")
