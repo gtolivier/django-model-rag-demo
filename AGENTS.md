@@ -37,6 +37,13 @@ for this repository:
 - **Package sources:** to read the code of django-model-rag or
   django-minimal-rag, look only at the installed copy under `.venv/`, never
   at a checkout elsewhere on disk: the demo tests what `uv.lock` installs.
+- **Don't test the packages.** The demo's tests cover what the demo brings:
+  its models, extractors, registration, settings, URLs and wiring (signals in
+  a real project, cascades, query counts of its own extractors). A behavior
+  django-model-rag or django-minimal-rag already guarantees belongs to their
+  own suites, not here. Those tests are not in the installed wheel: read them
+  on GitHub, at the commit locked in `uv.lock`. A red test that is already
+  green is a strong hint the behavior is the package's.
 
 ## Rules
 
