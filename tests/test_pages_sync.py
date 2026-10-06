@@ -64,3 +64,18 @@ def test_sync_gives_each_accordion_item_of_a_page_its_own_document(
     assert second_document.title == "FAQ — Returns"
     assert second_document.text == "Returns\n\nReturns are free for 30 days."
     assert second_document.url == "/pages/faq/"
+
+
+@pytest.mark.django_db
+def test_sync_skips_an_empty_accordion_item_and_trims_a_title_only_one(
+    rag_store: DocumentStore,
+) -> None:
+    page = Page.objects.create(title="FAQ", slug="faq")
+    empty = AccordionItem.objects.create(page=page, title="", body="")
+    title_only = AccordionItem.objects.create(page=page, title="Shipping", body="")
+
+    call_command("sync_model_rag")
+
+    assert f"pages.accordionitem:{empty.pk}" not in rag_store
+    [title_only_document] = rag_store[f"pages.accordionitem:{title_only.pk}"]
+    assert title_only_document.text == "Shipping"
