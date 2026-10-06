@@ -3,9 +3,8 @@ from typing import Any
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Model, QuerySet
-from django_model_rag import SyncPipeline, configured_output, rag
-from django_model_rag.documents import model_source_key
+from django.db.models import QuerySet
+from django_model_rag import SyncPipeline, configured_output
 
 _SIGNALS_SETTING = "MODEL_RAG_SIGNALS"
 
@@ -26,20 +25,16 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
     if not _signals_enabled():
         return
 
-    def sync_instances() -> None:
+    def sync_querysets() -> None:
         # Failures are logged, not raised: an error escaping a commit callback
         # would break the commit.
         pipeline = _build_pipeline()
         if pipeline is None:
             return
         for queryset in querysets:
-            # its extractor's get_queryset() loads the related rows each
-            # document reads in the same query, not one query per instance
-            extractor = rag.new_extractor(queryset.model)
-            for instance in extractor.get_queryset(queryset):
-                _sync_instance(pipeline, instance)
+            _sync_queryset(pipeline, queryset)
 
-    transaction.on_commit(sync_instances)
+    transaction.on_commit(sync_querysets)
 
 
 def _build_pipeline() -> SyncPipeline | None:
@@ -51,11 +46,15 @@ def _build_pipeline() -> SyncPipeline | None:
         return None
 
 
-def _sync_instance(pipeline: SyncPipeline, instance: Model) -> None:
-    """Hand the documents of ``instance`` to the output, logging a failure."""
+def _sync_queryset(pipeline: SyncPipeline, queryset: QuerySet[Any]) -> None:
+    """Hand the documents of ``queryset`` to the output, logging a failure.
+
+    The instances go in batches: a failure names their model, not the
+    instance that failed.
+    """
     try:
-        pipeline.run_instance(instance)
+        pipeline.run_queryset(queryset)
     except Exception:
         logger.exception(
-            "Syncing %s failed", model_source_key(instance._meta.model, instance.pk)
+            "Syncing %s instances failed", queryset.model._meta.label_lower
         )

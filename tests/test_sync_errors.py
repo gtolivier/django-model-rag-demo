@@ -3,7 +3,6 @@ from decimal import Decimal
 
 import pytest
 from django.core.exceptions import ImproperlyConfigured
-from django_model_rag.documents import build_source_key
 from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks, Settings
 
 from catalog.models import Category, Product
@@ -114,7 +113,7 @@ def test_an_output_that_cannot_be_built_at_the_commit_of_a_page_or_category_edit
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("rag_store")
-def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_with_the_failing_instance_source_key(
+def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_with_the_failing_model_label(
     settings: Settings,
     caplog: pytest.LogCaptureFixture,
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
@@ -122,9 +121,6 @@ def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_with
     category, page = _category_and_page_with_dependents(
         django_capture_on_commit_callbacks
     )
-    product = Product.objects.get(category=category)
-    text_plugin = TextPlugin.objects.get(page=page)
-    accordion_item = AccordionItem.objects.get(page=page)
     settings.MODEL_RAG_OUTPUT = {"BACKEND": "tests.rag_output.FailingOutput"}
 
     category_errors, page_errors = _errors_logged_by_editing_the_category_then_the_page(
@@ -133,9 +129,6 @@ def test_an_output_error_at_the_commit_of_a_page_or_category_edit_is_logged_with
 
     category_messages = [record.getMessage() for record in category_errors]
     page_messages = [record.getMessage() for record in page_errors]
-    product_key = build_source_key("catalog.product", product.pk)
-    text_plugin_key = build_source_key("pages.textplugin", text_plugin.pk)
-    accordion_item_key = build_source_key("pages.accordionitem", accordion_item.pk)
-    assert any(product_key in message for message in category_messages)
-    assert any(text_plugin_key in message for message in page_messages)
-    assert any(accordion_item_key in message for message in page_messages)
+    assert "Syncing catalog.product instances failed" in category_messages
+    assert "Syncing pages.textplugin instances failed" in page_messages
+    assert "Syncing pages.accordionitem instances failed" in page_messages
