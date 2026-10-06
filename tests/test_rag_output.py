@@ -34,3 +34,19 @@ def test_replace_removes_the_key_of_an_empty_group_and_ignores_unknown_keys() ->
     output.replace({held.source_key: [], absent_key: []})
 
     assert store == {}
+
+
+def test_prune_removes_the_unkept_keys_of_the_model_only() -> None:
+    kept = [_document("kept text")]
+    unkept = [_document("unkept text")]
+    other_model = [_document("other model text")]
+    store: dict[str, Sequence[NormalizedDocument]] = {
+        "catalog.product:1": kept,
+        "catalog.product:2": unkept,
+        "catalog.book:2": other_model,
+    }
+    output = DictOutput(store=store)
+
+    output.prune("catalog.product", {"catalog.product:1"})
+
+    assert store == {"catalog.product:1": kept, "catalog.book:2": other_model}
