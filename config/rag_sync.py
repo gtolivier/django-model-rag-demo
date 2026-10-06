@@ -25,7 +25,7 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
     if not _signals_enabled():
         return
 
-    def sync_instances() -> None:
+    def sync_querysets() -> None:
         # Failures are logged, not raised: an error escaping a commit callback
         # would break the commit.
         pipeline = _build_pipeline()
@@ -34,7 +34,7 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
         for queryset in querysets:
             _sync_queryset(pipeline, queryset)
 
-    transaction.on_commit(sync_instances)
+    transaction.on_commit(sync_querysets)
 
 
 def _build_pipeline() -> SyncPipeline | None:
