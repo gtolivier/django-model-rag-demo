@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 
 from django_model_rag import NormalizedDocument
 
@@ -15,3 +15,9 @@ class DictOutput:
                 self._store[key] = documents
             else:
                 self._store.pop(key, None)
+
+    def prune(self, model_label: str, keep: Collection[str]) -> None:
+        prefix = f"{model_label}:"
+        for key in list(self._store):
+            if key.startswith(prefix) and key not in keep:
+                del self._store[key]
