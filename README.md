@@ -13,14 +13,26 @@ never uses a local or editable install of either package.
 
 ## Status
 
-Skeleton: the project loads both packages as Django apps
-(`manage.py check`). Nothing else is wired yet.
+django-model-rag is wired: the demo's models sync to documents.
+
+- `catalog.Product` is registered with declared fields; `pages` blocks
+  (`TextPlugin`, `AccordionItem`) go through custom extractors.
+- Saving or deleting an instance updates its documents when the transaction
+  commits. Editing a page or a category also updates the documents of its
+  blocks or products.
+- `manage.py sync_model_rag` syncs everything; the project prints the
+  documents through `ConsoleOutput`.
+
+django-minimal-rag is installed but not wired yet.
 
 ## Usage
 
 ```sh
 uv sync
 uv run python manage.py check
+uv run python manage.py migrate
+uv run python manage.py sync_model_rag
+uv run pytest
 ```
 
 The two packages are locked to specific commits in `uv.lock`. To move to
