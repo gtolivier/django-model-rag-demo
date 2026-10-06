@@ -1,8 +1,7 @@
-from collections.abc import Sequence
-
 from django_model_rag import DocumentOutput, NormalizedDocument
 
 from config.rag_output import DictOutput
+from tests.conftest import DocumentStore
 
 
 def _document(text: str) -> NormalizedDocument:
@@ -17,7 +16,7 @@ def _document(text: str) -> NormalizedDocument:
 def test_replace_stores_each_group_in_place_of_what_its_key_held() -> None:
     old = _document("old text")
     new = _document("new text")
-    store: dict[str, Sequence[NormalizedDocument]] = {new.source_key: [old]}
+    store: DocumentStore = {new.source_key: [old]}
     output = DictOutput(store=store)
 
     output.replace({new.source_key: [new]})
@@ -28,7 +27,7 @@ def test_replace_stores_each_group_in_place_of_what_its_key_held() -> None:
 def test_replace_removes_the_key_of_an_empty_group_and_ignores_unknown_keys() -> None:
     held = _document("held text")
     absent_key = "a key the store does not hold"
-    store: dict[str, Sequence[NormalizedDocument]] = {held.source_key: [held]}
+    store: DocumentStore = {held.source_key: [held]}
     output = DictOutput(store=store)
 
     output.replace({held.source_key: [], absent_key: []})
@@ -40,7 +39,7 @@ def test_prune_removes_the_unkept_keys_of_the_model_only() -> None:
     kept = [_document("kept text")]
     unkept = [_document("unkept text")]
     other_model = [_document("other model text")]
-    store: dict[str, Sequence[NormalizedDocument]] = {
+    store: DocumentStore = {
         "catalog.product:1": kept,
         "catalog.product:2": unkept,
         "catalog.book:2": other_model,
@@ -54,7 +53,7 @@ def test_prune_removes_the_unkept_keys_of_the_model_only() -> None:
 
 def test_dict_output_is_a_document_output_of_the_package() -> None:
     document = _document("text")
-    store: dict[str, Sequence[NormalizedDocument]] = {}
+    store: DocumentStore = {}
     output: DocumentOutput = DictOutput(store=store)
 
     output.replace({document.source_key: [document]})
