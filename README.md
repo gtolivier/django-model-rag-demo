@@ -28,9 +28,22 @@ django-minimal-rag is installed but not wired yet.
 
 ## Minimal example
 
-The `blog` app shows the whole integration for a plain model: add the app
-after `django_model_rag` in `INSTALLED_APPS`, then register the model in the
-app's `model_rag.py`.
+The `blog` app shows the whole integration for a plain model. Two settings:
+
+```python
+# config/settings.py
+INSTALLED_APPS = [
+    # ...
+    "django_model_rag",
+    "blog",
+]
+
+MODEL_RAG_OUTPUT = {
+    "BACKEND": "django_model_rag.output.ConsoleOutput",
+}
+```
+
+and one registration, in the app's `model_rag.py`:
 
 ```python
 # blog/model_rag.py
@@ -41,11 +54,11 @@ from blog.models import Article
 rag.register(Article)
 ```
 
-Nothing else is needed: the text fields are guessed (`title`, then `body`),
-`title` gives the document title, and saving or deleting an article updates
-its document when the transaction commits. `catalog` and `pages` show what
-goes beyond that: declared fields, `follow`, custom extractors, and keeping
-dependent documents up to date.
+The text fields are guessed: `title`, then `body`. The first one gives the
+document title; `title_field=` names another field. From there, the documents
+stay in sync as described in [Status](#status). `catalog` and `pages` show
+what goes beyond that: declared fields, `follow`, custom extractors, and
+keeping dependent documents up to date.
 
 ## Usage
 

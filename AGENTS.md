@@ -16,7 +16,9 @@ Always go through `uv run`; do not rely on an activated virtualenv.
 ## Layout
 
 - `config/` — the Django project (settings, URLs).
-- `catalog/`, `pages/` — the demo apps whose models django-model-rag reads.
+- `blog/` — the minimal example: one model, registered with
+  `rag.register()` alone.
+- `catalog/`, `pages/` — the demo apps that show the advanced cases.
 - `tests/` — pytest tests (`test_*.py`), run with pytest-django against
   `config.settings`.
 
@@ -30,7 +32,7 @@ for this repository:
   section above.
 - **Test files:** everything under `tests/`. Nothing outside `tests/` is a
   test file.
-- **Production code:** `catalog/`, `pages/` and `config/`.
+- **Production code:** `blog/`, `catalog/`, `pages/` and `config/`.
 - **Migrations:** generated, never written by hand. After changing a model,
   run `uv run python manage.py makemigrations`, then
   `uv run ruff format` (Django's output does not pass ruff).
