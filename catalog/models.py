@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Category(models.Model):
@@ -12,4 +13,4 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     def get_absolute_url(self) -> str:
-        return f"/products/{self.pk}/"
+        return reverse("product_detail", kwargs={"pk": self.pk})

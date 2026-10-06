@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Page(models.Model):
@@ -6,7 +7,7 @@ class Page(models.Model):
     slug = models.SlugField(unique=True)
 
     def get_absolute_url(self) -> str:
-        return f"/pages/{self.slug}/"
+        return reverse("page_detail", kwargs={"slug": self.slug})
 
 
 class AccordionItem(models.Model):

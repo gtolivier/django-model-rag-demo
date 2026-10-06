@@ -23,6 +23,6 @@ from pages.views import page_detail
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("products/<int:pk>/", product_detail),
-    path("pages/<slug:slug>/", page_detail),
+    path("products/<int:pk>/", product_detail, name="product_detail"),
+    path("pages/<slug:slug>/", page_detail, name="page_detail"),
 ]
