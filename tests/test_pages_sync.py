@@ -26,6 +26,23 @@ def test_sync_gives_each_text_block_of_a_page_its_own_document(
 
 
 @pytest.mark.django_db
+def test_sync_gives_no_document_for_an_empty_or_blank_text_block(
+    rag_store: DocumentStore,
+) -> None:
+    page = Page.objects.create(title="About us", slug="about")
+    empty = TextPlugin.objects.create(page=page, body="")
+    blank = TextPlugin.objects.create(page=page, body="  \n\t ")
+    filled = TextPlugin.objects.create(page=page, body="We make kettles.")
+
+    call_command("sync_model_rag")
+
+    assert f"pages.textplugin:{empty.pk}" not in rag_store
+    assert f"pages.textplugin:{blank.pk}" not in rag_store
+    [filled_document] = rag_store[f"pages.textplugin:{filled.pk}"]
+    assert filled_document.text == "We make kettles."
+
+
+@pytest.mark.django_db
 def test_sync_gives_each_accordion_item_of_a_page_its_own_document(
     rag_store: DocumentStore,
 ) -> None:
