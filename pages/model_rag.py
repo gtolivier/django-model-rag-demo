@@ -46,10 +46,15 @@ class TextPluginExtractor(PageBlockExtractor[TextPlugin]):
 
 @receiver(post_save, sender=Page)
 def sync_blocks_of_saved_page(
-    sender: type[Page], instance: Page, raw: bool = False, **kwargs: Any
+    sender: type[Page],
+    instance: Page,
+    created: bool = False,
+    raw: bool = False,
+    **kwargs: Any,
 ) -> None:
-    # the blocks' documents carry the page's title and url
-    if raw:
+    # the blocks' documents carry the page's title and url. A new page has no
+    # blocks yet: each one added later syncs on its own save.
+    if raw or created:
         return
 
     sync_on_commit(

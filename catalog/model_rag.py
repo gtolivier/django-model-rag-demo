@@ -17,10 +17,15 @@ rag.register(
 
 @receiver(post_save, sender=Category)
 def sync_products_of_saved_category(
-    sender: type[Category], instance: Category, raw: bool = False, **kwargs: Any
+    sender: type[Category],
+    instance: Category,
+    created: bool = False,
+    raw: bool = False,
+    **kwargs: Any,
 ) -> None:
-    # the products' documents carry the category's name
-    if raw:
+    # the products' documents carry the category's name. A new category has no
+    # products yet: each one added later syncs on its own save.
+    if raw or created:
         return
 
     sync_on_commit(Product.objects.filter(category=instance.pk))
