@@ -68,3 +68,38 @@ def test_editing_a_category_updates_the_documents_of_its_products(
     [toaster_document] = rag_store[f"catalog.product:{toaster.pk}"]
     assert kettle_document.text.endswith("\n\nCookware")
     assert toaster_document.text.endswith("\n\nCookware")
+
+
+@pytest.mark.django_db
+def test_deleting_a_category_removes_the_documents_of_its_products(
+    rag_store: DocumentStore,
+    django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
+) -> None:
+    with django_capture_on_commit_callbacks(execute=True):
+        category = Category.objects.create(name="Kitchen")
+        kettle = Product.objects.create(
+            name="Kettle",
+            description="Boils a litre of water in two minutes.",
+            price=Decimal("29.90"),
+            category=category,
+        )
+        toaster = Product.objects.create(
+            name="Toaster",
+            description="Toasts four slices at once.",
+            price=Decimal("39.90"),
+            category=category,
+        )
+        other_category = Category.objects.create(name="Garden")
+        hose = Product.objects.create(
+            name="Hose",
+            description="Twenty metres of flexible hose.",
+            price=Decimal("24.90"),
+            category=other_category,
+        )
+
+    with django_capture_on_commit_callbacks(execute=True):
+        category.delete()
+
+    assert f"catalog.product:{kettle.pk}" not in rag_store
+    assert f"catalog.product:{toaster.pk}" not in rag_store
+    assert f"catalog.product:{hose.pk}" in rag_store
