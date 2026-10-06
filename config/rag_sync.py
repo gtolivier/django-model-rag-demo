@@ -4,9 +4,8 @@ from typing import Any
 from django.conf import settings
 from django.db import transaction
 from django.db.models import Model, QuerySet
-from django_model_rag import SyncPipeline, rag
+from django_model_rag import SyncPipeline, configured_output, rag
 from django_model_rag.documents import model_source_key
-from django_model_rag.output import configured_output
 
 _SIGNALS_SETTING = "MODEL_RAG_SIGNALS"
 
