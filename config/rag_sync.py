@@ -7,7 +7,14 @@ from django.db.models import Model, QuerySet
 from django_model_rag import SyncPipeline, rag
 from django_model_rag.output import configured_output
 
+_SIGNALS_SETTING = "MODEL_RAG_SIGNALS"
+
 logger = logging.getLogger("django_model_rag")
+
+
+def _signals_enabled() -> bool:
+    """Return whether the package's signals sync anything, as the settings say."""
+    return bool(getattr(settings, _SIGNALS_SETTING, True))
 
 
 def sync_on_commit(*querysets: QuerySet[Any]) -> None:
@@ -16,7 +23,7 @@ def sync_on_commit(*querysets: QuerySet[Any]) -> None:
     For instances whose documents carry the fields of another model: the
     package syncs an instance on its own save, not on the save of what it reads.
     """
-    if not getattr(settings, "MODEL_RAG_SIGNALS", True):
+    if not _signals_enabled():
         return
 
     def sync_instances() -> None:
