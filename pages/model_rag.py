@@ -1,11 +1,18 @@
+from django.db.models import QuerySet
 from django_model_rag import NormalizedDocument, rag
 from django_model_rag.extractors import BaseExtractor
 
 from pages.models import AccordionItem, TextPlugin
 
 
+class PageBlockExtractor[M: AccordionItem | TextPlugin](BaseExtractor[M]):
+    # each block's document reads its page: load it in the same query
+    def get_queryset(self, queryset: QuerySet[M]) -> QuerySet[M]:
+        return queryset.select_related("page")
+
+
 @rag.register_extractor(AccordionItem)
-class AccordionItemExtractor(BaseExtractor[AccordionItem]):
+class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
     def extract(self, instance: AccordionItem) -> NormalizedDocument:
         return self.build_document(
             instance,
@@ -16,7 +23,7 @@ class AccordionItemExtractor(BaseExtractor[AccordionItem]):
 
 
 @rag.register_extractor(TextPlugin)
-class TextPluginExtractor(BaseExtractor[TextPlugin]):
+class TextPluginExtractor(PageBlockExtractor[TextPlugin]):
     def extract(self, instance: TextPlugin) -> NormalizedDocument | None:
         if not instance.body.strip():
             return None
