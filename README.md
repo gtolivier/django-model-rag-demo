@@ -22,7 +22,9 @@ django-model-rag is wired: the demo's models sync to documents.
   commits. Editing a page or a category also updates the documents of its
   blocks or products, which declare what they read (`follow=["category"]`,
   `depends_on=["page"]`): the package does the rest, with no receiver of the
-  project's own.
+  project's own. A missing or invalid `MODEL_RAG_OUTPUT` raises
+  `ImproperlyConfigured` at the save, before the row is written — that of a
+  page or a category, created or edited, included.
 - `manage.py sync_model_rag` syncs everything; the project prints the
   documents through `ConsoleOutput`.
 
