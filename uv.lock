@@ -115,7 +115,7 @@ dependencies = [
 [[package]]
 name = "django-model-rag"
 version = "0.1.0"
-source = { git = "https://github.com/gtolivier/django-model-rag?rev=main#c9cff9d6874b3c791a5f6e6390e3224913956012" }
+source = { git = "https://github.com/gtolivier/django-model-rag?rev=main#b9d8578fec81da0321152a374c4b54cd9481af74" }
 dependencies = [
     { name = "django" },
 ]
