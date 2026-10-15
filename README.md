@@ -110,9 +110,20 @@ Three environment variables point the demo elsewhere:
 | `RAG_EMBEDDING_MODEL` | `bge-m3` |
 | `RAG_LLM_MODEL` | `mistral-small3.2` |
 
-After changing `RAG_EMBEDDING_MODEL`, run `sync_model_rag` then
-`embed_pending` again: `ask` only reads the chunks the current model
-embedded.
+`RAG_BASE_URL` takes no trailing slash: the paths (`/embeddings`,
+`/chat/completions`) are appended to it as is. After changing
+`RAG_EMBEDDING_MODEL`, run `sync_model_rag` then `embed_pending` again: `ask`
+only reads the chunks the current model embedded.
+
+Known limits of `ask`, a demo command:
+
+- Errors end in a traceback: Ollama not running, a model not pulled,
+  `--limit 0`.
+- Requests time out after 120 seconds, a setting no variable overrides; a
+  slow first load of a model can exceed it.
+- It does not tell a question nothing answers from an embedding model with no
+  chunks yet: both print "Nothing indexed is close enough to the question."
+- An empty answer from the model (`null` content) prints as `None`.
 
 The two packages are locked to specific commits in `uv.lock`. To move to
 their latest `main`:
