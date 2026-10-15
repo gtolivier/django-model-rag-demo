@@ -9,6 +9,8 @@ Instructions for coding agents working in this repository. Read
 - Database: `docker compose up -d --wait` (PostgreSQL with pgvector, port
   5434), needed by the tests and by every `manage.py` command that touches
   the database (`migrate`, `makemigrations`, `sync_model_rag`, `runserver`…)
+- Ollama: needed only to run `embed_pending` and `ask` for real; the tests
+  never reach it (`httpx.MockTransport`, django-minimal-rag's fakes)
 - Test: `uv run pytest`
 - Check: `uv run python manage.py check`
 - Lint: `uv run ruff check` — format: `uv run ruff format`
@@ -22,6 +24,8 @@ Always go through `uv run`; do not rely on an activated virtualenv.
 - `blog/` — the minimal example: one model, registered with
   `rag.register()` alone.
 - `catalog/`, `pages/` — the demo apps that show the advanced cases.
+- `assistant/` — the Ollama backends of django-minimal-rag and the
+  `embed_pending` and `ask` commands.
 - `tests/` — pytest tests (`test_*.py`), run with pytest-django against
   `config.settings`.
 
@@ -35,7 +39,8 @@ for this repository:
   section above.
 - **Test files:** everything under `tests/`. Nothing outside `tests/` is a
   test file.
-- **Production code:** `blog/`, `catalog/`, `pages/` and `config/`.
+- **Production code:** `assistant/`, `blog/`, `catalog/`, `pages/` and
+  `config/`.
 - **Migrations:** generated, never written by hand. After changing a model,
   run `uv run python manage.py makemigrations`, then
   `uv run ruff format` (Django's output does not pass ruff).

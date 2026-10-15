@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "catalog",
     "pages",
     "blog",
+    "assistant",
 ]
 
 MIDDLEWARE = [
@@ -149,5 +150,31 @@ MAILERS = {
 # django-model-rag
 
 MODEL_RAG_OUTPUT = {
-    "BACKEND": "django_model_rag.output.ConsoleOutput",
+    "BACKEND": "django_minimal_rag.indexing.Indexer",
+}
+
+
+# django-minimal-rag
+
+OLLAMA_BASE_URL = os.environ.get("RAG_BASE_URL") or "http://localhost:11434/v1"
+OLLAMA_TIMEOUT_SECONDS = 120.0
+
+MINIMAL_RAG_DEFER_EMBEDDING = True
+
+MINIMAL_RAG_EMBEDDINGS = {
+    "BACKEND": "assistant.backends.OllamaEmbeddings",
+    "OPTIONS": {
+        "model": os.environ.get("RAG_EMBEDDING_MODEL") or "bge-m3",
+        "base_url": OLLAMA_BASE_URL,
+        "timeout": OLLAMA_TIMEOUT_SECONDS,
+    },
+}
+
+MINIMAL_RAG_LLM = {
+    "BACKEND": "assistant.backends.OllamaLLM",
+    "OPTIONS": {
+        "model": os.environ.get("RAG_LLM_MODEL") or "mistral-small3.2",
+        "base_url": OLLAMA_BASE_URL,
+        "timeout": OLLAMA_TIMEOUT_SECONDS,
+    },
 }

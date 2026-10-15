@@ -25,12 +25,23 @@ django-model-rag is wired: the demo's models sync to documents.
   project's own. A missing or invalid `MODEL_RAG_OUTPUT` raises
   `ImproperlyConfigured` at the save, before the row is written — that of a
   page or a category, created or edited, included.
-- `manage.py sync_model_rag` syncs everything; the project prints the
-  documents through `ConsoleOutput`.
+- `manage.py sync_model_rag` syncs everything.
 
-django-minimal-rag is installed and its tables are migrated, but it is not
-wired yet. It needs PostgreSQL with pgvector, so the demo runs on that
-database: `compose.yaml` starts one on port 5434.
+django-minimal-rag is wired behind it: `MODEL_RAG_OUTPUT` is its `Indexer`,
+so the documents land in its chunk tables, in PostgreSQL with pgvector
+(`compose.yaml` starts one on port 5434).
+
+- Embeddings and answers come from [Ollama](https://ollama.com), through its
+  OpenAI-compatible API: `bge-m3` for embeddings, `mistral-small3.2` for
+  answers. The backends live in `assistant/backends.py`.
+- Embedding is deferred (`MINIMAL_RAG_DEFER_EMBEDDING = True`): saving an
+  instance stores its chunks without a vector, so a save never waits on
+  Ollama, nor fails when it is down. `manage.py embed_pending` embeds them.
+- `manage.py ask "question"` prints the answer, then its sources, one
+  "title — URL" per line. It reads as an anonymous reader (no permissions),
+  and says so when nothing indexed is close enough to the question.
+  `--max-distance` (default 0.5) and `--limit` (default 5) tune the
+  retrieval.
 
 ## Minimal example
 
@@ -48,6 +59,9 @@ MODEL_RAG_OUTPUT = {
     "BACKEND": "django_model_rag.output.ConsoleOutput",
 }
 ```
+
+(`ConsoleOutput` prints the documents; the demo itself sends them to
+django-minimal-rag, as described in [Status](#status).)
 
 and one registration, in the app's `model_rag.py`:
 
@@ -73,9 +87,43 @@ docker compose up -d --wait
 uv sync
 uv run python manage.py check
 uv run python manage.py migrate
-uv run python manage.py sync_model_rag
 uv run pytest
 ```
+
+To ask questions, install [Ollama](https://ollama.com), start it, and pull
+the two models:
+
+```sh
+ollama pull bge-m3
+ollama pull mistral-small3.2
+uv run python manage.py sync_model_rag
+uv run python manage.py embed_pending
+uv run python manage.py ask "What is on sale?"
+```
+
+Run `embed_pending` again after editing content: new chunks wait for it.
+Three environment variables point the demo elsewhere:
+
+| Variable | Default |
+|---|---|
+| `RAG_BASE_URL` | `http://localhost:11434/v1` |
+| `RAG_EMBEDDING_MODEL` | `bge-m3` |
+| `RAG_LLM_MODEL` | `mistral-small3.2` |
+
+`RAG_BASE_URL` takes no trailing slash: the paths (`/embeddings`,
+`/chat/completions`) are appended to it as is. After changing
+`RAG_EMBEDDING_MODEL`, run `sync_model_rag` then `embed_pending` again: `ask`
+only reads the chunks the current model embedded.
+
+Known limits of `ask`, a demo command:
+
+- Errors end in a traceback: Ollama not running, a model not pulled,
+  `--limit 0`.
+- Requests time out after 120 seconds, a setting no variable overrides; a
+  slow first load of a model can exceed it.
+- It does not tell a question nothing answers from an embedding model with no
+  chunks yet: both print "Nothing indexed is close enough to the question."
+- An empty answer from the model (`null` content) prints as `None`.
 
 The two packages are locked to specific commits in `uv.lock`. To move to
 their latest `main`:
