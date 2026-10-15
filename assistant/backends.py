@@ -1,5 +1,23 @@
+import httpx
+
+
 class OllamaEmbeddings:
-    def __init__(self, model: str, base_url: str, timeout: float) -> None:
+    def __init__(
+        self,
+        model: str,
+        base_url: str,
+        timeout: float,
+        client: httpx.Client | None = None,
+    ) -> None:
         self.model = model
         self.base_url = base_url
         self.timeout = timeout
+        self.client = client or httpx.Client(timeout=timeout)
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        response = self.client.post(
+            f"{self.base_url}/embeddings",
+            json={"model": self.model, "input": texts},
+        )
+        response.raise_for_status()
+        return [item["embedding"] for item in response.json()["data"]]
