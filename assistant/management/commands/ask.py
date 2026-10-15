@@ -14,7 +14,10 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         result = answer(
-            options["question"], permissions=frozenset(), max_distance=MAX_DISTANCE
+            options["question"],
+            permissions=frozenset(),
+            max_distance=MAX_DISTANCE,
+            limit=5,
         )
         if result is None:
             self.stdout.write("Nothing indexed is close enough to the question.")
