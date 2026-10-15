@@ -1,11 +1,27 @@
+import importlib
 import json
+from collections.abc import Iterator
 
 import httpx
 import pytest
 from django_minimal_rag.embeddings import get_embeddings
 from django_minimal_rag.llm import get_llm
+from pytest_django.fixtures import Settings
 
+import config.settings
 from assistant.backends import OllamaEmbeddings, OllamaLLM
+
+
+@pytest.fixture
+def settings_env() -> Iterator[pytest.MonkeyPatch]:
+    """Give the test a monkeypatch for the environment `config.settings` reads.
+
+    Once the variables are restored, the module is reloaded again so that no
+    other test sees the values computed from them.
+    """
+    with pytest.MonkeyPatch.context() as env:
+        yield env
+    importlib.reload(config.settings)
 
 
 def test_project_settings_build_the_default_ollama_backends() -> None:
@@ -18,6 +34,27 @@ def test_project_settings_build_the_default_ollama_backends() -> None:
     assert isinstance(llm, OllamaLLM)
     assert llm.model == "mistral-small3.2"
     assert llm.base_url == "http://localhost:11434/v1"
+
+
+def test_rag_environment_variables_override_the_ollama_backend_defaults(
+    settings_env: pytest.MonkeyPatch, settings: Settings
+) -> None:
+    settings_env.setenv("RAG_BASE_URL", "http://ollama.internal:8080/v1")
+    settings_env.setenv("RAG_EMBEDDING_MODEL", "nomic-embed-text")
+    settings_env.setenv("RAG_LLM_MODEL", "llama3.2")
+    reloaded = importlib.reload(config.settings)
+    settings.MINIMAL_RAG_EMBEDDINGS = reloaded.MINIMAL_RAG_EMBEDDINGS
+    settings.MINIMAL_RAG_LLM = reloaded.MINIMAL_RAG_LLM
+
+    embeddings = get_embeddings()
+    llm = get_llm()
+
+    assert isinstance(embeddings, OllamaEmbeddings)
+    assert embeddings.model == "nomic-embed-text"
+    assert embeddings.base_url == "http://ollama.internal:8080/v1"
+    assert isinstance(llm, OllamaLLM)
+    assert llm.model == "llama3.2"
+    assert llm.base_url == "http://ollama.internal:8080/v1"
 
 
 @pytest.mark.parametrize("model", ["nomic-embed-text", "mxbai-embed-large"])
