@@ -156,7 +156,7 @@ MODEL_RAG_OUTPUT = {
 
 # django-minimal-rag
 
-OLLAMA_BASE_URL = "http://localhost:11434/v1"
+OLLAMA_BASE_URL = os.environ.get("RAG_BASE_URL") or "http://localhost:11434/v1"
 OLLAMA_TIMEOUT_SECONDS = 120.0
 
 MINIMAL_RAG_DEFER_EMBEDDING = True
@@ -164,7 +164,7 @@ MINIMAL_RAG_DEFER_EMBEDDING = True
 MINIMAL_RAG_EMBEDDINGS = {
     "BACKEND": "assistant.backends.OllamaEmbeddings",
     "OPTIONS": {
-        "model": "bge-m3",
+        "model": os.environ.get("RAG_EMBEDDING_MODEL") or "bge-m3",
         "base_url": OLLAMA_BASE_URL,
         "timeout": OLLAMA_TIMEOUT_SECONDS,
     },
@@ -173,7 +173,7 @@ MINIMAL_RAG_EMBEDDINGS = {
 MINIMAL_RAG_LLM = {
     "BACKEND": "assistant.backends.OllamaLLM",
     "OPTIONS": {
-        "model": "mistral-small3.2",
+        "model": os.environ.get("RAG_LLM_MODEL") or "mistral-small3.2",
         "base_url": OLLAMA_BASE_URL,
         "timeout": OLLAMA_TIMEOUT_SECONDS,
     },
