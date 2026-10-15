@@ -128,6 +128,7 @@ dependencies = [
     { name = "django" },
     { name = "django-minimal-rag" },
     { name = "django-model-rag" },
+    { name = "psycopg", extra = ["binary"] },
 ]
 
 [package.dev-dependencies]
@@ -145,6 +146,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2" },
     { name = "django-minimal-rag", git = "https://github.com/gtolivier/django-minimal-rag?rev=main" },
     { name = "django-model-rag", git = "https://github.com/gtolivier/django-model-rag?rev=main" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
 ]
 
 [package.metadata.requires-dev]

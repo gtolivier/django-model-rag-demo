@@ -7,6 +7,7 @@ dependencies = [
     "django>=5.2",
     "django-minimal-rag",
     "django-model-rag",
+    "psycopg[binary]>=3.3.6",
 ]
 
 [tool.uv.sources]
