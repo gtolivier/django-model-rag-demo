@@ -20,4 +20,5 @@ class OllamaEmbeddings:
             json={"model": self.model, "input": texts},
         )
         response.raise_for_status()
-        return [item["embedding"] for item in response.json()["data"]]
+        data = sorted(response.json()["data"], key=lambda item: item["index"])
+        return [item["embedding"] for item in data]
