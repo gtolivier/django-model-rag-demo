@@ -75,6 +75,38 @@ def test_ollama_embeddings_embed_orders_vectors_by_the_index_of_their_text() -> 
     assert vectors == [[0.1, 0.1], [0.2, 0.2], [0.3, 0.3]]
 
 
+def test_ollama_embeddings_embed_sends_requests_with_the_configured_timeout() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "object": "list",
+                "data": [{"object": "embedding", "index": 0, "embedding": [0.1, 0.2]}],
+                "model": "nomic-embed-text",
+            },
+        )
+
+    embeddings = OllamaEmbeddings(
+        model="nomic-embed-text",
+        base_url="http://localhost:11434/v1",
+        timeout=120.0,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    embeddings.embed(["a text"])
+
+    assert len(requests) == 1
+    assert requests[0].extensions["timeout"] == {
+        "connect": 120.0,
+        "read": 120.0,
+        "write": 120.0,
+        "pool": 120.0,
+    }
+
+
 def test_ollama_embeddings_embed_raises_when_the_server_answers_an_error() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, json={"error": "model runner crashed"})
