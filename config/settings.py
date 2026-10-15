@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # django-minimal-rag stores permissions in an ArrayField.
+    "django.contrib.postgres",
     "django_model_rag",
     "django_minimal_rag",
     "catalog",
@@ -80,10 +82,19 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# django-minimal-rag needs PostgreSQL with pgvector. The defaults reach the
+# database that compose.yaml starts, on the address it binds; the libpq
+# environment variables (PGDATABASE, PGHOST, PGPORT, PGUSER, PGPASSWORD) point
+# them elsewhere. An empty variable counts as unset, so it cannot send libpq
+# to its own defaults (port 5432).
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("PGDATABASE") or "django_model_rag_demo",
+        "HOST": os.environ.get("PGHOST") or "127.0.0.1",
+        "PORT": os.environ.get("PGPORT") or "5434",
+        "USER": os.environ.get("PGUSER") or "postgres",
+        "PASSWORD": os.environ.get("PGPASSWORD") or "postgres",
     }
 }
 

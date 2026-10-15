@@ -105,7 +105,7 @@ wheels = [
 [[package]]
 name = "django-minimal-rag"
 version = "0.1.0"
-source = { git = "https://github.com/gtolivier/django-minimal-rag?rev=main#8c9f83c54967725c8940c6e14e7f8f16931a105e" }
+source = { git = "https://github.com/gtolivier/django-minimal-rag?rev=main#84559d7c51e69da76dd632f72c173f6b7cfbd8ff" }
 dependencies = [
     { name = "django" },
     { name = "pgvector" },
@@ -115,7 +115,7 @@ dependencies = [
 [[package]]
 name = "django-model-rag"
 version = "0.1.0"
-source = { git = "https://github.com/gtolivier/django-model-rag?rev=main#41001fb1dde8427d4e61732a0bb3dd9d41d91bd7" }
+source = { git = "https://github.com/gtolivier/django-model-rag?rev=main#7f1499489f0ec5ff7875d7354eb850e8ae35ba58" }
 dependencies = [
     { name = "django" },
 ]
@@ -128,6 +128,7 @@ dependencies = [
     { name = "django" },
     { name = "django-minimal-rag" },
     { name = "django-model-rag" },
+    { name = "psycopg", extra = ["binary"] },
 ]
 
 [package.dev-dependencies]
@@ -145,6 +146,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2" },
     { name = "django-minimal-rag", git = "https://github.com/gtolivier/django-minimal-rag?rev=main" },
     { name = "django-model-rag", git = "https://github.com/gtolivier/django-model-rag?rev=main" },
+    { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
 ]
 
 [package.metadata.requires-dev]

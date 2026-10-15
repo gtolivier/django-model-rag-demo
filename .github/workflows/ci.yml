@@ -8,6 +8,21 @@ on:
 jobs:
   integration:
     runs-on: ubuntu-latest
+    services:
+      # PostgreSQL with pgvector, as compose.yaml starts it locally: same
+      # image and port, so the settings' defaults reach the server. Only
+      # pytest runs here, and it creates its own test database: the
+      # django_model_rag_demo database that compose.yaml adds is not needed.
+      postgres:
+        image: pgvector/pgvector:0.8.7-pg18
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -h localhost -U postgres"
+          --health-interval 2s
+          --health-retries 15
     steps:
       - uses: actions/checkout@v7
       # setup-uv publishes no major tags (no @v10): pin the full version.
