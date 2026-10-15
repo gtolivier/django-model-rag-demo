@@ -28,7 +28,7 @@
   "pk": 4,
   "fields": {
     "title": "Summer closing",
-    "body": "The shop closes for its summer break from 4 to 18 August. The last orders are shipped on 31 July, and shipping starts again on 19 August."
+    "body": "The shop closes for its summer break from 4 to 18 August. Orders are shipped until Wednesday 29 July, and shipping starts again on Wednesday 19 August."
   }
 },
 {
@@ -224,7 +224,7 @@
   "fields": {
     "page": 4,
     "title": "Which cheeses can I eat while pregnant?",
-    "body": "Each product says whether its milk is raw or pasteurised. French health guidance advises pregnant women to avoid raw-milk cheeses, except hard cooked cheeses such as Comté and Beaufort, rind removed. Our pasteurised cheeses are Époisses, Mimolette and Bleu d'Auvergne. Ask your doctor or midwife if in doubt."
+    "body": "French health guidance for pregnant women: avoid raw-milk cheeses, except hard cooked cheeses such as Comté and Beaufort; remove the rind of every cheese; avoid ready-grated cheese. Soft cheeses with a bloomy or washed rind, such as Brie, Camembert or Époisses, are best avoided even when pasteurised. Each product says whether its milk is raw or pasteurised. Ask your doctor or midwife if in doubt."
   }
 },
 {
@@ -266,7 +266,7 @@
   "pk": 3,
   "fields": {
     "page": 2,
-    "body": "We ship in insulated boxes with ice packs, from Monday to Wednesday only, so that no cheese spends a weekend in transit. Delivery in mainland France takes 24 to 48 hours. Shipping costs €9.90, and is free for orders above €60."
+    "body": "We ship in insulated boxes with ice packs, from Monday to Wednesday only, so that no cheese spends a weekend in transit. Delivery in mainland France takes 24 to 48 hours; it costs €9.90, and is free for orders above €60."
   }
 },
 {
