@@ -2,8 +2,22 @@ import json
 
 import httpx
 import pytest
+from django_minimal_rag.embeddings import get_embeddings
+from django_minimal_rag.llm import get_llm
 
 from assistant.backends import OllamaEmbeddings, OllamaLLM
+
+
+def test_project_settings_build_the_default_ollama_backends() -> None:
+    embeddings = get_embeddings()
+    llm = get_llm()
+
+    assert isinstance(embeddings, OllamaEmbeddings)
+    assert embeddings.model == "bge-m3"
+    assert embeddings.base_url == "http://localhost:11434/v1"
+    assert isinstance(llm, OllamaLLM)
+    assert llm.model == "mistral-small3.2"
+    assert llm.base_url == "http://localhost:11434/v1"
 
 
 @pytest.mark.parametrize("model", ["nomic-embed-text", "mxbai-embed-large"])
