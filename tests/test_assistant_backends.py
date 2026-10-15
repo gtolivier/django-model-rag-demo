@@ -183,6 +183,44 @@ def test_ollama_llm_complete_posts_the_chat_and_returns_the_answer(
     }
 
 
+def test_ollama_llm_complete_sends_requests_with_the_configured_timeout() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "object": "chat.completion",
+                "model": "llama3.2",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": "An answer."},
+                        "finish_reason": "stop",
+                    }
+                ],
+            },
+        )
+
+    llm = OllamaLLM(
+        model="llama3.2",
+        base_url="http://localhost:11434/v1",
+        timeout=90.0,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    llm.complete("Which books mention Lyon?", system="Answer briefly.")
+
+    assert len(requests) == 1
+    assert requests[0].extensions["timeout"] == {
+        "connect": 90.0,
+        "read": 90.0,
+        "write": 90.0,
+        "pool": 90.0,
+    }
+
+
 def test_ollama_llm_complete_raises_when_the_server_answers_an_error() -> None:
     def handler(request: httpx.Request) -> httpx.Response:
         return httpx.Response(500, json={"error": "model runner crashed"})
