@@ -46,3 +46,30 @@ def test_ollama_embeddings_embed_posts_to_the_openai_compatible_endpoint() -> No
         "model": "nomic-embed-text",
         "input": ["a text"],
     }
+
+
+def test_ollama_embeddings_embed_orders_vectors_by_the_index_of_their_text() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "object": "list",
+                "data": [
+                    {"object": "embedding", "index": 2, "embedding": [0.3, 0.3]},
+                    {"object": "embedding", "index": 0, "embedding": [0.1, 0.1]},
+                    {"object": "embedding", "index": 1, "embedding": [0.2, 0.2]},
+                ],
+                "model": "nomic-embed-text",
+            },
+        )
+
+    embeddings = OllamaEmbeddings(
+        model="nomic-embed-text",
+        base_url="http://localhost:11434/v1",
+        timeout=30.0,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    vectors = embeddings.embed(["first", "second", "third"])
+
+    assert vectors == [[0.1, 0.1], [0.2, 0.2], [0.3, 0.3]]
