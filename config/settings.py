@@ -83,16 +83,18 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 # django-minimal-rag needs PostgreSQL with pgvector. The defaults reach the
-# database that compose.yaml starts; the libpq environment variables
-# (PGDATABASE, PGHOST, PGPORT, PGUSER, PGPASSWORD) point them elsewhere.
+# database that compose.yaml starts, on the address it binds; the libpq
+# environment variables (PGDATABASE, PGHOST, PGPORT, PGUSER, PGPASSWORD) point
+# them elsewhere. An empty variable counts as unset, so it cannot send libpq
+# to its own defaults (port 5432).
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("PGDATABASE", "django_model_rag_demo"),
-        "HOST": os.environ.get("PGHOST", "localhost"),
-        "PORT": os.environ.get("PGPORT", "5434"),
-        "USER": os.environ.get("PGUSER", "postgres"),
-        "PASSWORD": os.environ.get("PGPASSWORD", "postgres"),
+        "NAME": os.environ.get("PGDATABASE") or "django_model_rag_demo",
+        "HOST": os.environ.get("PGHOST") or "127.0.0.1",
+        "PORT": os.environ.get("PGPORT") or "5434",
+        "USER": os.environ.get("PGUSER") or "postgres",
+        "PASSWORD": os.environ.get("PGPASSWORD") or "postgres",
     }
 }
 
