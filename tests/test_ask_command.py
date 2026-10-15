@@ -61,3 +61,19 @@ def test_ask_prints_a_source_without_url_as_its_title_alone(
         "Fill it with vinegar, wait an hour, then rinse.",
         "Descaling notes",
     ]
+
+
+def test_ask_says_so_when_nothing_indexed_is_close_enough(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fake_answer(question: str, **kwargs: object) -> None:
+        return None
+
+    monkeypatch.setattr("assistant.management.commands.ask.answer", fake_answer)
+    stdout = StringIO()
+
+    call_command("ask", "How do I descale a kettle?", stdout=stdout)
+
+    assert stdout.getvalue().splitlines() == [
+        "Nothing indexed is close enough to the question.",
+    ]
