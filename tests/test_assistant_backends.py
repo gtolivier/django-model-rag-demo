@@ -3,7 +3,7 @@ import json
 import httpx
 import pytest
 
-from assistant.backends import OllamaEmbeddings
+from assistant.backends import OllamaEmbeddings, OllamaLLM
 
 
 @pytest.mark.parametrize("model", ["nomic-embed-text", "mxbai-embed-large"])
@@ -120,3 +120,64 @@ def test_ollama_embeddings_embed_raises_when_the_server_answers_an_error() -> No
 
     with pytest.raises(httpx.HTTPStatusError):
         embeddings.embed(["a text"])
+
+
+@pytest.mark.parametrize(
+    ("model", "prompt", "system", "answer"),
+    [
+        (
+            "llama3.2",
+            "Which books mention Lyon?",
+            "Answer from the context only.",
+            "Two books mention Lyon.",
+        ),
+        (
+            "mistral",
+            "Quel est le prix du vélo ?",
+            "Réponds en français, brièvement.",
+            "Le vélo coûte 450 euros.",
+        ),
+    ],
+)
+def test_ollama_llm_complete_posts_the_chat_and_returns_the_answer(
+    model: str, prompt: str, system: str, answer: str
+) -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(
+            200,
+            json={
+                "object": "chat.completion",
+                "model": model,
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": answer},
+                        "finish_reason": "stop",
+                    }
+                ],
+            },
+        )
+
+    llm = OllamaLLM(
+        model=model,
+        base_url="http://localhost:11434/v1",
+        timeout=30.0,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    completion = llm.complete(prompt, system=system)
+
+    assert completion == answer
+    assert len(requests) == 1
+    assert requests[0].method == "POST"
+    assert str(requests[0].url) == "http://localhost:11434/v1/chat/completions"
+    assert json.loads(requests[0].content) == {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt},
+        ],
+    }
