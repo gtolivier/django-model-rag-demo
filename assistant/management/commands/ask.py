@@ -20,4 +20,7 @@ class Command(BaseCommand):
             return
         self.stdout.write(result.text)
         for citation in result.citations:
-            self.stdout.write(f"{citation.title} — {citation.url}")
+            if citation.url:
+                self.stdout.write(f"{citation.title} — {citation.url}")
+            else:
+                self.stdout.write(citation.title)
