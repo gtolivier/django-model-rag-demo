@@ -1,0 +1,280 @@
+[
+{
+  "model": "blog.article",
+  "pk": 1,
+  "fields": {
+    "title": "Spring goat cheeses are back",
+    "body": "Goat cheeses follow the seasons: goats give milk from early spring to autumn. The best ones come from April to June, when the herds graze fresh grass. Our Crottins de Chavignol and Sainte-Maure de Touraine are back on the counter."
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 2,
+  "fields": {
+    "title": "Pairing French cheese and wine",
+    "body": "The simplest rule: pair a cheese with a wine from the same region. Crottin de Chavignol with a Sancerre, Comté with a vin jaune from the Jura, Époisses with a red Burgundy. Blue cheeses are the exception: Roquefort is best with a sweet Sauternes."
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 3,
+  "fields": {
+    "title": "How to cut a cheese",
+    "body": "Everyone should get some rind and some heart. Cut a round cheese like a cake, from the centre. Cut a wedge of Brie along its length, never taking off its tip. Cut a log, such as Sainte-Maure, in rounds."
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 4,
+  "fields": {
+    "title": "Summer closing",
+    "body": "The shop closes for its summer break from 4 to 18 August. The last orders are shipped on 31 July, and shipping starts again on 19 August."
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 1,
+  "fields": {
+    "name": "Soft cheeses"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 2,
+  "fields": {
+    "name": "Goat cheeses"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 3,
+  "fields": {
+    "name": "Hard cheeses"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 4,
+  "fields": {
+    "name": "Blue cheeses"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 1,
+  "fields": {
+    "name": "Brie de Meaux AOP",
+    "description": "Raw cow's milk, from the Île-de-France region east of Paris. A wide, thin disc with a white bloomy rind, ripened at least four weeks: creamy, with a taste of mushrooms and hazelnut. Sold by the 250 g slice.",
+    "price": "6.50",
+    "category": 1
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 2,
+  "fields": {
+    "name": "Camembert de Normandie AOP",
+    "description": "Raw cow's milk from Normandy, ladled into its moulds by hand. A whole 250 g cheese in its wooden box. We sell it ripe: soft to the touch at the centre, with a rich, slightly farmy taste.",
+    "price": "7.90",
+    "category": 1
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 3,
+  "fields": {
+    "name": "Époisses AOP",
+    "description": "Pasteurised cow's milk, from Burgundy. A washed-rind cheese: its orange rind is washed with marc de Bourgogne, a grape brandy, while it ripens. Strong smell, runny and mellow inside. A whole 250 g cheese.",
+    "price": "12.50",
+    "category": 1
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 4,
+  "fields": {
+    "name": "Crottin de Chavignol AOP",
+    "description": "Raw goat's milk, from the Sancerre hills in the Loire Valley. A small 60 g cheese, fresh and lemony when young, nutty and crumbly once ripened. Sold by the piece.",
+    "price": "3.20",
+    "category": 2
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 5,
+  "fields": {
+    "name": "Sainte-Maure de Touraine AOP",
+    "description": "Raw goat's milk, from Touraine in the Loire Valley. A 250 g log with a rye straw through its centre and an ash-dusted rind. Dense and slightly salty, with a hint of hazelnut.",
+    "price": "9.80",
+    "category": 2
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 6,
+  "fields": {
+    "name": "Comté AOP, 18 months",
+    "description": "Raw cow's milk, from the Jura mountains. A hard cooked cheese aged 18 months in cellars: firm, with crunchy crystals and a taste of roasted nuts and brown butter. Sold by the 250 g piece.",
+    "price": "8.90",
+    "category": 3
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 7,
+  "fields": {
+    "name": "Beaufort AOP",
+    "description": "Raw cow's milk, from the Savoie Alps, made from the milk of a single herd. A hard cooked cheese, supple and fruity, with notes of alpine flowers. Sold by the 250 g piece.",
+    "price": "9.50",
+    "category": 3
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 8,
+  "fields": {
+    "name": "Mimolette, aged 18 months",
+    "description": "Pasteurised cow's milk, from the Lille area in northern France. A round cheese, bright orange inside, aged 18 months: hard, sweet and caramel-like. Its rough rind is not eaten. Sold by the 250 g piece.",
+    "price": "7.20",
+    "category": 3
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 9,
+  "fields": {
+    "name": "Roquefort AOP",
+    "description": "Raw ewe's milk, ripened in the natural caves of Mount Combalou, in Aveyron. Moist and creamy, with green-blue veins, salty and tangy. Sold by the 200 g piece.",
+    "price": "8.40",
+    "category": 4
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 10,
+  "fields": {
+    "name": "Bleu d'Auvergne AOP",
+    "description": "Pasteurised cow's milk, from the Auvergne volcanoes. A blue cheese milder than Roquefort, soft and buttery. A good first blue. Sold by the 250 g piece.",
+    "price": "5.60",
+    "category": 4
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 1,
+  "fields": {
+    "title": "About us",
+    "slug": "about"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 2,
+  "fields": {
+    "title": "Delivery",
+    "slug": "delivery"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 3,
+  "fields": {
+    "title": "Cheese boards",
+    "slug": "cheese-boards"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 4,
+  "fields": {
+    "title": "Questions",
+    "slug": "faq"
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 1,
+  "fields": {
+    "page": 2,
+    "title": "Do you ship outside France?",
+    "body": "Yes, to Belgium, Luxembourg, Germany and the Netherlands, in 48 to 72 hours, for €19.90. We do not ship outside the European Union."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 2,
+  "fields": {
+    "page": 2,
+    "title": "What if I am not at home?",
+    "body": "The carrier leaves the parcel at a nearby pick-up point. An unopened box keeps the cheese cool for 48 hours."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 3,
+  "fields": {
+    "page": 4,
+    "title": "How should I store cheese?",
+    "body": "Wrap it in waxed or cheese paper, never in cling film, and keep it in the vegetable drawer of the fridge. Take it out one hour before eating: cheese tastes best at room temperature."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 4,
+  "fields": {
+    "page": 4,
+    "title": "Which cheeses can I eat while pregnant?",
+    "body": "Each product says whether its milk is raw or pasteurised. French health guidance advises pregnant women to avoid raw-milk cheeses, except hard cooked cheeses such as Comté and Beaufort, rind removed. Our pasteurised cheeses are Époisses, Mimolette and Bleu d'Auvergne. Ask your doctor or midwife if in doubt."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 5,
+  "fields": {
+    "page": 4,
+    "title": "Can I eat the rind?",
+    "body": "The rinds of Brie, Camembert and goat cheeses can be eaten. Those of Comté, Beaufort and Mimolette are too hard: cut them off."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 6,
+  "fields": {
+    "page": 4,
+    "title": "Can I freeze cheese?",
+    "body": "We do not advise it: freezing breaks the texture. Grated hard cheese freezes well for cooking."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 1,
+  "fields": {
+    "page": 1,
+    "body": "Fromagerie du Marché is a small cheese shop that sells French cheeses only. Most of them are AOP cheeses, bought directly from farms, cooperatives and cellars. We ripen the soft and goat cheeses ourselves, in our own cellar, until they are ready to eat."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 2,
+  "fields": {
+    "page": 1,
+    "body": "Opening hours: Tuesday to Saturday from 9 am to 7 pm, Sunday from 9 am to 1 pm. The shop is closed on Mondays."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 3,
+  "fields": {
+    "page": 2,
+    "body": "We ship in insulated boxes with ice packs, from Monday to Wednesday only, so that no cheese spends a weekend in transit. Delivery in mainland France takes 24 to 48 hours. Shipping costs €9.90, and is free for orders above €60."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 4,
+  "fields": {
+    "page": 3,
+    "body": "We make cheese boards for weddings, birthdays and company events, for 10 to 200 guests, with bread and a choice of jams. Count 100 to 150 g of cheese per guest after a meal, and 200 to 250 g when the board is the main course. Order at least one week ahead."
+  }
+}
+]

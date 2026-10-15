@@ -99,6 +99,9 @@ DATABASES = {
     }
 }
 
+# The demo content (`loaddata demo`) spans several apps: it lives at the root.
+FIXTURE_DIRS = [BASE_DIR / "fixtures"]
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
