@@ -12,13 +12,15 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument("question")
+        parser.add_argument("--max-distance", type=float, default=MAX_DISTANCE)
+        parser.add_argument("--limit", type=int, default=MAX_CHUNKS)
 
     def handle(self, *args: Any, **options: Any) -> None:
         result = answer(
             options["question"],
             permissions=frozenset(),
-            max_distance=MAX_DISTANCE,
-            limit=MAX_CHUNKS,
+            max_distance=options["max_distance"],
+            limit=options["limit"],
         )
         if result is None:
             self.stdout.write("Nothing indexed is close enough to the question.")
