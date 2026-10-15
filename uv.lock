@@ -127,7 +127,7 @@ wheels = [
 [[package]]
 name = "django-minimal-rag"
 version = "0.1.0"
-source = { git = "https://github.com/gtolivier/django-minimal-rag?rev=main#84559d7c51e69da76dd632f72c173f6b7cfbd8ff" }
+source = { git = "https://github.com/gtolivier/django-minimal-rag?rev=main#b143bd7a3737fe05384448d4ce780b8652f836d9" }
 dependencies = [
     { name = "django" },
     { name = "pgvector" },
