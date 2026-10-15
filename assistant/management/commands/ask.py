@@ -17,6 +17,7 @@ class Command(BaseCommand):
             options["question"], permissions=frozenset(), max_distance=MAX_DISTANCE
         )
         if result is None:
+            self.stdout.write("Nothing indexed is close enough to the question.")
             return
         self.stdout.write(result.text)
         for citation in result.citations:
