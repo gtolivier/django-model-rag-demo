@@ -152,3 +152,24 @@ MAILERS = {
 MODEL_RAG_OUTPUT = {
     "BACKEND": "django_model_rag.output.ConsoleOutput",
 }
+
+
+# django-minimal-rag
+
+MINIMAL_RAG_EMBEDDINGS = {
+    "BACKEND": "assistant.backends.OllamaEmbeddings",
+    "OPTIONS": {
+        "model": "bge-m3",
+        "base_url": "http://localhost:11434/v1",
+        "timeout": 120.0,
+    },
+}
+
+MINIMAL_RAG_LLM = {
+    "BACKEND": "assistant.backends.OllamaLLM",
+    "OPTIONS": {
+        "model": "mistral-small3.2",
+        "base_url": "http://localhost:11434/v1",
+        "timeout": 120.0,
+    },
+}
