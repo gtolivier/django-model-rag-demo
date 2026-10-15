@@ -1,6 +1,6 @@
 import importlib
 import json
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 import httpx
 import pytest
@@ -10,6 +10,8 @@ from pytest_django.fixtures import Settings
 
 import config.settings
 from assistant.backends import OllamaEmbeddings, OllamaLLM
+
+LOCAL_OLLAMA_URL = "http://localhost:11434/v1"
 
 
 @pytest.fixture
@@ -22,6 +24,17 @@ def settings_env() -> Iterator[pytest.MonkeyPatch]:
     with pytest.MonkeyPatch.context() as env:
         yield env
     importlib.reload(config.settings)
+
+
+def client_served_by(
+    handler: Callable[[httpx.Request], httpx.Response],
+) -> httpx.Client:
+    """Return an httpx client whose requests are answered by `handler`."""
+    return httpx.Client(transport=httpx.MockTransport(handler))
+
+
+def crashed_model_runner(request: httpx.Request) -> httpx.Response:
+    return httpx.Response(500, json={"error": "model runner crashed"})
 
 
 def test_project_settings_build_the_default_ollama_backends() -> None:
@@ -59,9 +72,7 @@ def test_rag_environment_variables_override_the_ollama_backend_defaults(
 
 @pytest.mark.parametrize("model", ["nomic-embed-text", "mxbai-embed-large"])
 def test_ollama_embeddings_exposes_the_configured_model(model: str) -> None:
-    embeddings = OllamaEmbeddings(
-        model=model, base_url="http://localhost:11434/v1", timeout=30.0
-    )
+    embeddings = OllamaEmbeddings(model=model, base_url=LOCAL_OLLAMA_URL, timeout=30.0)
 
     assert embeddings.model == model
 
@@ -82,9 +93,9 @@ def test_ollama_embeddings_embed_posts_to_the_openai_compatible_endpoint() -> No
 
     embeddings = OllamaEmbeddings(
         model="nomic-embed-text",
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=30.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(handler),
     )
 
     vectors = embeddings.embed(["a text"])
@@ -116,9 +127,9 @@ def test_ollama_embeddings_embed_orders_vectors_by_the_index_of_their_text() -> 
 
     embeddings = OllamaEmbeddings(
         model="nomic-embed-text",
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=30.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(handler),
     )
 
     vectors = embeddings.embed(["first", "second", "third"])
@@ -142,9 +153,9 @@ def test_ollama_embeddings_embed_sends_requests_with_the_configured_timeout() ->
 
     embeddings = OllamaEmbeddings(
         model="nomic-embed-text",
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=120.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(handler),
     )
 
     embeddings.embed(["a text"])
@@ -159,14 +170,11 @@ def test_ollama_embeddings_embed_sends_requests_with_the_configured_timeout() ->
 
 
 def test_ollama_embeddings_embed_raises_when_the_server_answers_an_error() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(500, json={"error": "model runner crashed"})
-
     embeddings = OllamaEmbeddings(
         model="nomic-embed-text",
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=30.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(crashed_model_runner),
     )
 
     with pytest.raises(httpx.HTTPStatusError):
@@ -214,9 +222,9 @@ def test_ollama_llm_complete_posts_the_chat_and_returns_the_answer(
 
     llm = OllamaLLM(
         model=model,
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=30.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(handler),
     )
 
     completion = llm.complete(prompt, system=system)
@@ -256,9 +264,9 @@ def test_ollama_llm_complete_sends_requests_with_the_configured_timeout() -> Non
 
     llm = OllamaLLM(
         model="llama3.2",
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=90.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(handler),
     )
 
     llm.complete("Which books mention Lyon?", system="Answer briefly.")
@@ -273,14 +281,11 @@ def test_ollama_llm_complete_sends_requests_with_the_configured_timeout() -> Non
 
 
 def test_ollama_llm_complete_raises_when_the_server_answers_an_error() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        return httpx.Response(500, json={"error": "model runner crashed"})
-
     llm = OllamaLLM(
         model="llama3.2",
-        base_url="http://localhost:11434/v1",
+        base_url=LOCAL_OLLAMA_URL,
         timeout=30.0,
-        client=httpx.Client(transport=httpx.MockTransport(handler)),
+        client=client_served_by(crashed_model_runner),
     )
 
     with pytest.raises(httpx.HTTPStatusError):

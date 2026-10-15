@@ -3,18 +3,14 @@ from io import StringIO
 import pytest
 from django.core.management import call_command
 from django_minimal_rag.models import Chunk
-from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks, Settings
+from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks
 
 from blog.models import Article
 
 
 @pytest.mark.django_db
-def test_embed_pending_reports_zero_chunks_when_none_is_waiting(
-    settings: Settings,
-) -> None:
-    settings.MINIMAL_RAG_EMBEDDINGS = {
-        "BACKEND": "django_minimal_rag.embeddings.FakeEmbeddings",
-    }
+@pytest.mark.usefixtures("fake_embeddings")
+def test_embed_pending_reports_zero_chunks_when_none_is_waiting() -> None:
     stdout = StringIO()
 
     call_command("embed_pending", stdout=stdout)
@@ -23,13 +19,10 @@ def test_embed_pending_reports_zero_chunks_when_none_is_waiting(
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("fake_embeddings")
 def test_embed_pending_embeds_the_waiting_chunks_and_reports_their_count(
-    settings: Settings,
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
-    settings.MINIMAL_RAG_EMBEDDINGS = {
-        "BACKEND": "django_minimal_rag.embeddings.FakeEmbeddings",
-    }
     with django_capture_on_commit_callbacks(execute=True):
         Article.objects.create(
             title="Descaling a kettle",

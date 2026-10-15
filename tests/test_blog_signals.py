@@ -1,19 +1,15 @@
 import pytest
 from django_minimal_rag.models import Chunk
-from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks, Settings
+from pytest_django.fixtures import DjangoCaptureOnCommitCallbacks
 
 from blog.models import Article
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("fake_embeddings")
 def test_saving_an_article_stores_its_text_in_chunks_left_for_embed_pending(
-    settings: Settings,
     django_capture_on_commit_callbacks: DjangoCaptureOnCommitCallbacks,
 ) -> None:
-    settings.MINIMAL_RAG_EMBEDDINGS = {
-        "BACKEND": "django_minimal_rag.embeddings.FakeEmbeddings",
-    }
-
     with django_capture_on_commit_callbacks(execute=True):
         article = Article.objects.create(
             title="Descaling a kettle",
