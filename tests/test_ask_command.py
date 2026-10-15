@@ -97,3 +97,32 @@ def test_ask_asks_as_an_anonymous_reader_within_distance_and_limit_defaults(
             {"permissions": frozenset(), "max_distance": 0.5, "limit": 5},
         )
     ]
+
+
+def test_ask_passes_the_max_distance_and_limit_options_to_answer(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, dict[str, object]]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> None:
+        calls.append((question, kwargs))
+
+    monkeypatch.setattr("assistant.management.commands.ask.answer", fake_answer)
+
+    call_command(
+        "ask",
+        "How do I descale a kettle?",
+        "--max-distance",
+        "0.8",
+        "--limit",
+        "3",
+        stdout=StringIO(),
+    )
+
+    assert len(calls) == 1
+    question, kwargs = calls[0]
+    assert question == "How do I descale a kettle?"
+    assert kwargs["max_distance"] == 0.8
+    assert type(kwargs["max_distance"]) is float
+    assert kwargs["limit"] == 3
+    assert type(kwargs["limit"]) is int
