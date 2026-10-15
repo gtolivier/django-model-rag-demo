@@ -28,7 +28,9 @@ django-model-rag is wired: the demo's models sync to documents.
 - `manage.py sync_model_rag` syncs everything; the project prints the
   documents through `ConsoleOutput`.
 
-django-minimal-rag is installed but not wired yet.
+django-minimal-rag is installed and its tables are migrated, but it is not
+wired yet. It needs PostgreSQL with pgvector, so the demo runs on that
+database: `compose.yaml` starts one on port 5434.
 
 ## Minimal example
 
@@ -67,6 +69,7 @@ keeping dependent documents up to date.
 ## Usage
 
 ```sh
+docker compose up -d --wait
 uv sync
 uv run python manage.py check
 uv run python manage.py migrate
