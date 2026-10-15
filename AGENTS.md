@@ -26,6 +26,9 @@ Always go through `uv run`; do not rely on an activated virtualenv.
 - `catalog/`, `pages/` — the demo apps that show the advanced cases.
 - `assistant/` — the Ollama backends of django-minimal-rag and the
   `embed_pending` and `ask` commands.
+- `fixtures/demo.json` — the demo content (`loaddata demo`). Generated, not
+  written by hand: change the content in the database, then
+  `uv run python manage.py dumpdata blog catalog pages --indent 2 -o fixtures/demo.json`.
 - `tests/` — pytest tests (`test_*.py`), run with pytest-django against
   `config.settings`.
 
