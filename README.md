@@ -93,8 +93,9 @@ uv run pytest
 To ask questions, install [Ollama](https://ollama.com), start it, and pull
 the two models. `loaddata demo` fills the database with demo content: a
 French cheese shop, with its cheeses, its pages (delivery, cheese boards,
-questions) and a few blog posts. `loaddata` does not go through the signals,
-so `sync_model_rag` turns the content into documents afterwards:
+questions) and a few blog posts. django-model-rag ignores the raw saves
+`loaddata` makes, so `sync_model_rag` turns the content into documents
+afterwards. Load it into an empty database:
 
 ```sh
 ollama pull bge-m3
@@ -108,8 +109,11 @@ uv run python manage.py ask "Which cheeses can I eat while pregnant?"
 Other questions the content answers: "What wine goes with Comté?", "Do you
 deliver to Belgium?", "How much cheese per guest for a wedding?", "Is the shop
 open in mid-August?". "What is the capital of Peru?" finds nothing close
-enough. Loading the fixture again resets the demo content to its original
-state; it does not remove objects added since.
+enough.
+
+The fixture sets primary keys: loading it again overwrites the objects that
+hold them, and fails when another object already uses one of its slugs. Run
+`sync_model_rag` and `embed_pending` after any load.
 
 Run `embed_pending` again after editing content: new chunks wait for it.
 Three environment variables point the demo elsewhere:
