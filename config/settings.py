@@ -150,7 +150,7 @@ MAILERS = {
 # django-model-rag
 
 MODEL_RAG_OUTPUT = {
-    "BACKEND": "django_model_rag.output.ConsoleOutput",
+    "BACKEND": "django_minimal_rag.indexing.Indexer",
 }
 
 
@@ -158,6 +158,8 @@ MODEL_RAG_OUTPUT = {
 
 OLLAMA_BASE_URL = "http://localhost:11434/v1"
 OLLAMA_TIMEOUT_SECONDS = 120.0
+
+MINIMAL_RAG_DEFER_EMBEDDING = True
 
 MINIMAL_RAG_EMBEDDINGS = {
     "BACKEND": "assistant.backends.OllamaEmbeddings",
