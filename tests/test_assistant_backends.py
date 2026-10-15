@@ -73,3 +73,18 @@ def test_ollama_embeddings_embed_orders_vectors_by_the_index_of_their_text() -> 
     vectors = embeddings.embed(["first", "second", "third"])
 
     assert vectors == [[0.1, 0.1], [0.2, 0.2], [0.3, 0.3]]
+
+
+def test_ollama_embeddings_embed_raises_when_the_server_answers_an_error() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(500, json={"error": "model runner crashed"})
+
+    embeddings = OllamaEmbeddings(
+        model="nomic-embed-text",
+        base_url="http://localhost:11434/v1",
+        timeout=30.0,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    with pytest.raises(httpx.HTTPStatusError):
+        embeddings.embed(["a text"])
