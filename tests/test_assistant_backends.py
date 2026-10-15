@@ -181,3 +181,18 @@ def test_ollama_llm_complete_posts_the_chat_and_returns_the_answer(
             {"role": "user", "content": prompt},
         ],
     }
+
+
+def test_ollama_llm_complete_raises_when_the_server_answers_an_error() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(500, json={"error": "model runner crashed"})
+
+    llm = OllamaLLM(
+        model="llama3.2",
+        base_url="http://localhost:11434/v1",
+        timeout=30.0,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    with pytest.raises(httpx.HTTPStatusError):
+        llm.complete("Which books mention Lyon?", system="Answer briefly.")
