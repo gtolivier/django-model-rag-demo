@@ -1,6 +1,11 @@
+from collections.abc import Sequence
 from typing import Any
 
 import httpx
+
+# Backends are built on every get_embeddings() / get_llm() call, so they share
+# one client (and its connection pool) rather than each opening one.
+shared_client = httpx.Client()
 
 
 class OllamaBackend:
@@ -14,7 +19,7 @@ class OllamaBackend:
         self.model = model
         self.base_url = base_url
         self.timeout = timeout
-        self.client = client or httpx.Client(timeout=timeout)
+        self.client = client or shared_client
 
     def post(self, path: str, payload: dict[str, Any]) -> Any:
         response = self.client.post(
@@ -25,8 +30,8 @@ class OllamaBackend:
 
 
 class OllamaEmbeddings(OllamaBackend):
-    def embed(self, texts: list[str]) -> list[list[float]]:
-        answer = self.post("/embeddings", {"model": self.model, "input": texts})
+    def embed(self, texts: Sequence[str]) -> list[list[float]]:
+        answer = self.post("/embeddings", {"model": self.model, "input": list(texts)})
         embeddings_in_input_order = sorted(
             answer["data"], key=lambda item: item["index"]
         )
