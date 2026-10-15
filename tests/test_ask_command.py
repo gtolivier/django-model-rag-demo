@@ -77,3 +77,23 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
     assert stdout.getvalue().splitlines() == [
         "Nothing indexed is close enough to the question.",
     ]
+
+
+def test_ask_asks_as_an_anonymous_reader_within_distance_and_limit_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: list[tuple[str, dict[str, object]]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> None:
+        calls.append((question, kwargs))
+
+    monkeypatch.setattr("assistant.management.commands.ask.answer", fake_answer)
+
+    call_command("ask", "How do I descale a kettle?", stdout=StringIO())
+
+    assert calls == [
+        (
+            "How do I descale a kettle?",
+            {"permissions": frozenset(), "max_distance": 0.5, "limit": 5},
+        )
+    ]
