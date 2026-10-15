@@ -1,7 +1,7 @@
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandParser
-from django_minimal_rag.answering import answer
+from django_minimal_rag.answering import Citation, answer
 
 MAX_DISTANCE = 0.5
 
@@ -20,7 +20,10 @@ class Command(BaseCommand):
             return
         self.stdout.write(result.text)
         for citation in result.citations:
-            if citation.url:
-                self.stdout.write(f"{citation.title} — {citation.url}")
-            else:
-                self.stdout.write(citation.title)
+            self.stdout.write(source_line(citation))
+
+
+def source_line(citation: Citation) -> str:
+    if not citation.url:
+        return citation.title
+    return f"{citation.title} — {citation.url}"
