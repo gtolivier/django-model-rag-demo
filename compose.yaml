@@ -6,7 +6,9 @@
 #   uv run python manage.py migrate
 #
 # The settings default to this database; the libpq environment variables
-# (PGHOST, PGPORT, PGUSER, PGPASSWORD) point them elsewhere.
+# (PGDATABASE, PGHOST, PGPORT, PGUSER, PGPASSWORD) point them elsewhere. The
+# data is kept in the pgdata volume across `docker compose down`; add `-v` to
+# start again from an empty database.
 services:
   postgres:
     image: pgvector/pgvector:0.8.7-pg18
@@ -19,3 +21,8 @@ services:
       test: ["CMD", "pg_isready", "-h", "localhost", "-U", "postgres"]
       interval: 2s
       retries: 15
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+volumes:
+  pgdata:

@@ -7,7 +7,8 @@ Instructions for coding agents working in this repository. Read
 
 - Install: `uv sync`
 - Database: `docker compose up -d --wait` (PostgreSQL with pgvector, port
-  5434), needed by the tests and by `manage.py migrate`
+  5434), needed by the tests and by every `manage.py` command that touches
+  the database (`migrate`, `makemigrations`, `sync_model_rag`, `runserver`…)
 - Test: `uv run pytest`
 - Check: `uv run python manage.py check`
 - Lint: `uv run ruff check` — format: `uv run ruff format`
