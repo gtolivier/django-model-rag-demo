@@ -298,6 +298,22 @@ def test_page_view_shows_the_text_of_its_blocks(
 
 
 @pytest.mark.django_db
+def test_page_view_shows_its_text_blocks_in_pk_order_whatever_the_insertion_order(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    page = Page.objects.create(title="About us", slug="about")
+    later = TextPlugin.objects.create(pk=10, page=page, body="Since 1998.")
+    earlier = TextPlugin.objects.create(pk=5, page=page, body="We make kettles.")
+
+    response = client.get(page.get_absolute_url())
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    positions = [content.index(block.body) for block in (earlier, later)]
+    assert positions == sorted(positions)
+
+
+@pytest.mark.django_db
 def test_article_view_shows_its_title_and_body(
     client: Client, rag_store: DocumentStore
 ) -> None:
