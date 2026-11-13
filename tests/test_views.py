@@ -171,6 +171,27 @@ def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
 
 
 @pytest.mark.django_db
+def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    oldest = Page.objects.create(title="About us", slug="about")
+    middle = Page.objects.create(title="FAQ", slug="faq")
+    newest = Page.objects.create(title="Delivery", slug="delivery")
+    oldest.title = "Our story"
+    oldest.save()
+
+    response = client.get(reverse("product_list"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    positions = [
+        content.index(f'href="{page.get_absolute_url()}"')
+        for page in (oldest, middle, newest)
+    ]
+    assert positions == sorted(positions)
+
+
+@pytest.mark.django_db
 def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
     client: Client, rag_store: DocumentStore
 ) -> None:
