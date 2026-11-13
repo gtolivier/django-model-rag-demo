@@ -120,6 +120,15 @@ The fixture sets primary keys: loading it again overwrites the objects that
 hold them, and fails when another object already uses one of its slugs. Run
 `sync_model_rag` and `embed_pending` after any load.
 
+To edit the content, create an account, start the server and open
+<http://localhost:8000/admin/>: articles, categories, products, and pages
+with their blocks inline.
+
+```sh
+uv run python manage.py createsuperuser
+uv run python manage.py runserver
+```
+
 Run `embed_pending` again after editing content: new chunks wait for it.
 Three environment variables point the demo elsewhere:
 
@@ -140,9 +149,20 @@ Known limits of `ask`, a demo command:
   `--limit 0`.
 - Requests time out after 120 seconds, a setting no variable overrides; a
   slow first load of a model can exceed it.
-- It does not tell a question nothing answers from an embedding model with no
-  chunks yet: both print "Nothing indexed is close enough to the question."
+- "Nothing indexed is close enough to the question." is printed without
+  calling the model, so it is in English whatever the language of the
+  question (when the model is called, it answers in the language of the
+  question). It is also what an embedding model with no chunks yet gets: the
+  two cases look the same.
 - An empty answer from the model (`null` content) prints as `None`.
+- The default `--max-distance` suits questions in the language of the
+  content, English. A question in another language lands farther from the
+  chunks that answer it: with `--limit 20`, "Quels fromages proposez-vous ?"
+  finds 2 extracts where "Which cheeses do you sell?" finds 19.
+- A question that asks for a whole list ("which cheeses do you sell?") gets
+  at most `--limit` extracts, the nearest ones: similarity search does not
+  enumerate a catalog. `--limit 20 --max-distance 0.6` lists the ten cheeses,
+  slowly.
 
 The two packages are locked to specific commits in `uv.lock`. To move to
 their latest `main`:
