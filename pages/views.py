@@ -13,5 +13,9 @@ def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
     return render(
         request,
         "pages/page_detail.html",
-        {"page": page, "text_blocks": page.textplugin_set.order_by("pk")},
+        {
+            "page": page,
+            "text_blocks": page.textplugin_set.order_by("pk"),
+            "accordion_items": page.accordionitem_set.order_by("pk"),
+        },
     )
