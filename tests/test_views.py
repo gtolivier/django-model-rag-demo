@@ -211,6 +211,19 @@ def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
 
 
 @pytest.mark.django_db
+def test_home_page_is_served_in_english_at_the_root_and_in_french_under_fr(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english_response = client.get("/")
+    french_response = client.get("/fr/")
+
+    assert english_response.status_code == 200
+    assert english_response.headers.get("Content-Language") == "en"
+    assert french_response.status_code == 200
+    assert french_response.headers.get("Content-Language") == "fr"
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
     ["product_list", "product_detail", "page_detail", "article_list", "article_detail"],
