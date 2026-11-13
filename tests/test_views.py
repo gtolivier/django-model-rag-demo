@@ -59,6 +59,35 @@ def test_product_view_shows_its_price_and_category_name(
 
 
 @pytest.mark.django_db
+def test_product_list_shows_every_product_name_with_a_link_to_its_page(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    category = Category.objects.create(name="Kitchen")
+    kettle = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=category,
+    )
+    toaster = Product.objects.create(
+        name="Toaster",
+        description="Browns two slices at once.",
+        price=Decimal("24.50"),
+        category=category,
+    )
+
+    url = reverse("product_list")
+    response = client.get(url)
+
+    assert url == "/products/"
+    assert response.status_code == 200
+    content = response.content.decode()
+    for product in (kettle, toaster):
+        assert product.name in content
+        assert f'href="{product.get_absolute_url()}"' in content
+
+
+@pytest.mark.django_db
 def test_page_view_shows_the_text_of_its_blocks(
     client: Client, rag_store: DocumentStore
 ) -> None:
