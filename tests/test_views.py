@@ -132,6 +132,44 @@ def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "view",
+    ["product_list", "product_detail", "page_detail", "article_list", "article_detail"],
+)
+def test_every_view_links_to_the_product_list_the_article_list_and_every_page(
+    client: Client, rag_store: DocumentStore, view: str
+) -> None:
+    product = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Kitchen"),
+    )
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+    )
+    about = Page.objects.create(title="About us", slug="about")
+    faq = Page.objects.create(title="FAQ", slug="faq")
+    urls = {
+        "product_list": reverse("product_list"),
+        "product_detail": product.get_absolute_url(),
+        "page_detail": about.get_absolute_url(),
+        "article_list": reverse("article_list"),
+        "article_detail": article.get_absolute_url(),
+    }
+
+    response = client.get(urls[view])
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert f'href="{reverse("product_list")}"' in content
+    assert f'href="{reverse("article_list")}"' in content
+    for page in (about, faq):
+        assert f'href="{page.get_absolute_url()}"' in content
+
+
+@pytest.mark.django_db
 def test_product_list_shows_each_product_category_name_and_price(
     client: Client, rag_store: DocumentStore
 ) -> None:
