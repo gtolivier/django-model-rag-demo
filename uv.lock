@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -150,6 +150,7 @@ dependencies = [
     { name = "django" },
     { name = "django-minimal-rag" },
     { name = "django-model-rag" },
+    { name = "django-stubs-ext" },
     { name = "httpx" },
     { name = "psycopg", extra = ["binary"] },
 ]
@@ -169,6 +170,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2" },
     { name = "django-minimal-rag", git = "https://github.com/gtolivier/django-minimal-rag?rev=main" },
     { name = "django-model-rag", git = "https://github.com/gtolivier/django-model-rag?rev=main" },
+    { name = "django-stubs-ext", specifier = ">=6.1.2" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.6" },
 ]

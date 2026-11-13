@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+import django_stubs_ext
+
+# Lets the admin classes take type arguments (ModelAdmin[Product]) at runtime,
+# as mypy's strict mode asks.
+django_stubs_ext.monkeypatch()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
