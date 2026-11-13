@@ -3,6 +3,7 @@ from decimal import Decimal
 import pytest
 from django.test import Client
 from django.urls import reverse
+from django.utils.html import escape
 
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
@@ -10,7 +11,7 @@ from tests.rag_output import DocumentStore
 
 
 @pytest.mark.django_db
-def test_product_and_page_views_respond_in_plain_text(
+def test_product_and_page_views_respond_in_escaped_html(
     client: Client, rag_store: DocumentStore
 ) -> None:
     category = Category.objects.create(name="Kitchen")
@@ -27,8 +28,14 @@ def test_product_and_page_views_respond_in_plain_text(
 
     assert product_response.status_code == 200
     assert page_response.status_code == 200
-    assert product_response["Content-Type"].startswith("text/plain")
-    assert page_response["Content-Type"].startswith("text/plain")
+    assert product_response["Content-Type"].startswith("text/html")
+    assert page_response["Content-Type"].startswith("text/html")
+    product_content = product_response.content.decode()
+    page_content = page_response.content.decode()
+    assert escape("<b>Kettle</b>") in product_content
+    assert "<b>Kettle</b>" not in product_content
+    assert escape("<i>FAQ</i>") in page_content
+    assert "<i>FAQ</i>" not in page_content
 
 
 @pytest.mark.django_db
