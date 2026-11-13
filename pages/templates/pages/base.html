@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% endblock %}Fromagerie du Marché</title>
+<style>
+  :root { --ink: #2b2118; --muted: #6b5d4f; --paper: #fbf7ef; --card: #fff; --line: #e6dccb; --accent: #8a4b14; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.6 Georgia, "Times New Roman", serif; }
+  a { color: var(--accent); }
+  header, main, footer { max-width: 52rem; margin: 0 auto; padding: 0 1rem; }
+  header { padding-top: 1.5rem; border-bottom: 1px solid var(--line); }
+  .shop { margin: 0; font-size: 1.6rem; }
+  .shop a { color: var(--ink); text-decoration: none; }
+  nav ul { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .75rem 0 1rem; padding: 0; list-style: none; font-family: system-ui, sans-serif; font-size: .95rem; }
+  nav a { text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  main { padding-top: 1rem; padding-bottom: 2rem; }
+  h1 { font-size: 1.9rem; line-height: 1.2; }
+  .meta { color: var(--muted); font-family: system-ui, sans-serif; }
+  .price { font-weight: bold; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 1rem; margin: 0 0 2rem; padding: 0; list-style: none; }
+  .card { padding: 1rem; background: var(--card); border: 1px solid var(--line); border-radius: .5rem; }
+  .card a { display: block; margin-bottom: .25rem; font-weight: bold; }
+  .list { padding-left: 1.2rem; }
+  details { margin: .5rem 0; padding: .5rem 1rem; background: var(--card); border: 1px solid var(--line); border-radius: .5rem; }
+  summary { cursor: pointer; font-weight: bold; }
+  footer { padding-top: 1rem; padding-bottom: 2rem; border-top: 1px solid var(--line); color: var(--muted); font-family: system-ui, sans-serif; font-size: .9rem; }
+</style>
+</head>
+<body>
+<header>
+  <p class="shop"><a href="{% url 'home' %}">Fromagerie du Marché</a></p>
+  <nav>{% include "pages/nav.html" %}</nav>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+<footer>
+  <p>A demo shop for
+    <a href="https://github.com/gtolivier/django-model-rag">django-model-rag</a> and
+    <a href="https://github.com/gtolivier/django-minimal-rag">django-minimal-rag</a>.</p>
+</footer>
+</body>
+</html>

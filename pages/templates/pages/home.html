@@ -1,0 +1,10 @@
+{% extends "pages/base.html" %}
+{% block content %}
+<h1>Welcome to the Fromagerie du Marché</h1>
+<p>A small, fictional French cheese shop: its cheeses, its pages and its
+blog posts are plain Django models. django-model-rag turns them into
+documents, and django-minimal-rag indexes them so that questions about the
+shop can be answered from its own content.</p>
+<p>Browse the <a href="{% url 'product_list' %}">cheeses</a> or read the
+<a href="{% url 'article_list' %}">articles</a>.</p>
+{% endblock %}

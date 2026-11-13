@@ -2,16 +2,24 @@ from decimal import Decimal
 
 import pytest
 from django.core.management import call_command
-from django.urls import resolve
+from django.urls import Resolver404, resolve
 
+from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
 from tests.rag_output import DocumentStore
 
 
 def _captured_values(url: str) -> list[str]:
-    """Resolve ``url`` and give what its route captured, as strings."""
-    match = resolve(url)
+    """Resolve ``url`` and give what its route captured, as strings.
+
+    A url no route matches (an empty one included) fails the test,
+    naming that url.
+    """
+    try:
+        match = resolve(url)
+    except Resolver404:
+        pytest.fail(f"{url!r} resolves to no route")
     return [str(value) for value in (*match.args, *match.kwargs.values())]
 
 
@@ -40,3 +48,18 @@ def test_each_document_url_resolves_to_a_route_capturing_its_object(
     assert str(product.pk) in _captured_values(product_document.url)
     assert "faq" in _captured_values(text_document.url)
     assert "faq" in _captured_values(accordion_document.url)
+
+
+@pytest.mark.django_db
+def test_an_article_document_url_resolves_to_a_route_capturing_the_article(
+    rag_store: DocumentStore,
+) -> None:
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="A cup of vinegar, an hour, and a rinse.",
+    )
+
+    call_command("sync_model_rag")
+
+    [article_document] = rag_store[f"blog.article:{article.pk}"]
+    assert str(article.pk) in _captured_values(article_document.url)
