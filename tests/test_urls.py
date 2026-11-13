@@ -13,12 +13,13 @@ from tests.rag_output import DocumentStore
 def _captured_values(url: str) -> list[str]:
     """Resolve ``url`` and give what its route captured, as strings.
 
-    A url no route matches (an empty one included) captured nothing.
+    A url no route matches (an empty one included) fails the test,
+    naming that url.
     """
     try:
         match = resolve(url)
     except Resolver404:
-        return []
+        pytest.fail(f"{url!r} resolves to no route")
     return [str(value) for value in (*match.args, *match.kwargs.values())]
 
 
