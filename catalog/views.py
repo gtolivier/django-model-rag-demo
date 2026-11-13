@@ -5,9 +5,8 @@ from catalog.models import Product
 
 
 def product_list(request: HttpRequest) -> HttpResponse:
-    return render(
-        request, "catalog/product_list.html", {"products": Product.objects.all()}
-    )
+    products = Product.objects.select_related("category")
+    return render(request, "catalog/product_list.html", {"products": products})
 
 
 def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
