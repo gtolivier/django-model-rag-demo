@@ -112,10 +112,7 @@ def test_article_list_shows_every_article_title_with_a_link_to_its_page(
         assert f'href="{article.get_absolute_url()}"' in content
 
 
-@pytest.mark.django_db
-def test_article_list_shows_the_most_recently_created_article_first(
-    client: Client, rag_store: DocumentStore
-) -> None:
+def _create_three_articles_oldest_first() -> tuple[Article, Article, Article]:
     oldest = Article.objects.create(
         title="Descaling a kettle",
         body="Fill it with white vinegar and leave it overnight.",
@@ -128,6 +125,14 @@ def test_article_list_shows_the_most_recently_created_article_first(
         title="Sharpening knives",
         body="Hold the blade at twenty degrees against the stone.",
     )
+    return oldest, middle, newest
+
+
+@pytest.mark.django_db
+def test_article_list_shows_the_most_recently_created_article_first(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    oldest, middle, newest = _create_three_articles_oldest_first()
 
     response = client.get(reverse("article_list"))
 
@@ -144,18 +149,7 @@ def test_article_list_shows_the_most_recently_created_article_first(
 def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
     client: Client, rag_store: DocumentStore
 ) -> None:
-    oldest = Article.objects.create(
-        title="Descaling a kettle",
-        body="Fill it with white vinegar and leave it overnight.",
-    )
-    middle = Article.objects.create(
-        title="Toasting bagels",
-        body="Use the bagel setting to brown only the cut side.",
-    )
-    newest = Article.objects.create(
-        title="Sharpening knives",
-        body="Hold the blade at twenty degrees against the stone.",
-    )
+    oldest, middle, newest = _create_three_articles_oldest_first()
     oldest.body = "Fill it with citric acid and leave it for an hour."
     oldest.save()
 
