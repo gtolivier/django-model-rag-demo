@@ -89,6 +89,30 @@ def test_product_list_shows_every_product_name_with_a_link_to_its_page(
 
 
 @pytest.mark.django_db
+def test_article_list_shows_every_article_title_with_a_link_to_its_page(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    descaling = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+    )
+    toasting = Article.objects.create(
+        title="Toasting bagels",
+        body="Use the bagel setting to brown only the cut side.",
+    )
+
+    url = reverse("article_list")
+    response = client.get(url)
+
+    assert url == "/blog/"
+    assert response.status_code == 200
+    content = response.content.decode()
+    for article in (descaling, toasting):
+        assert article.title in content
+        assert f'href="{article.get_absolute_url()}"' in content
+
+
+@pytest.mark.django_db
 def test_product_list_shows_each_product_category_name_and_price(
     client: Client, rag_store: DocumentStore
 ) -> None:
