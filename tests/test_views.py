@@ -201,6 +201,28 @@ def test_article_list_shows_only_the_articles_of_the_active_language(
 
 
 @pytest.mark.django_db
+def test_article_view_does_not_find_an_article_of_the_other_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language="en",
+    )
+    french = Article.objects.create(
+        title="Détartrer une bouilloire",
+        body="Remplissez-la de vinaigre blanc et laissez agir une nuit.",
+        language="fr",
+    )
+
+    french_under_root = client.get(f"/blog/{french.pk}/")
+    english_under_fr = client.get(f"/fr/blog/{english.pk}/")
+
+    assert french_under_root.status_code == 404
+    assert english_under_fr.status_code == 404
+
+
+@pytest.mark.django_db
 def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
     client: Client, rag_store: DocumentStore
 ) -> None:
