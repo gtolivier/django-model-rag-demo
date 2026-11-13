@@ -5,7 +5,7 @@ from blog.models import Article
 
 
 def article_list(request: HttpRequest) -> HttpResponse:
-    articles = Article.objects.all()
+    articles = Article.objects.order_by("-pk")
     return render(request, "blog/article_list.html", {"articles": articles})
 
 

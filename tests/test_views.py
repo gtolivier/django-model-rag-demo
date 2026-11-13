@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from decimal import Decimal
 
 import pytest
@@ -112,6 +113,84 @@ def test_article_list_shows_every_article_title_with_a_link_to_its_page(
         assert f'href="{article.get_absolute_url()}"' in content
 
 
+def _assert_in_order(content: str, needles: Sequence[str]) -> None:
+    positions = [content.index(needle) for needle in needles]
+    assert positions == sorted(positions)
+
+
+def _create_three_articles_oldest_first() -> tuple[Article, Article, Article]:
+    oldest = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+    )
+    middle = Article.objects.create(
+        title="Toasting bagels",
+        body="Use the bagel setting to brown only the cut side.",
+    )
+    newest = Article.objects.create(
+        title="Sharpening knives",
+        body="Hold the blade at twenty degrees against the stone.",
+    )
+    return oldest, middle, newest
+
+
+@pytest.mark.django_db
+def test_article_list_shows_the_most_recently_created_article_first(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    oldest, middle, newest = _create_three_articles_oldest_first()
+
+    response = client.get(reverse("article_list"))
+
+    assert response.status_code == 200
+    _assert_in_order(
+        response.content.decode(),
+        [
+            f'href="{article.get_absolute_url()}"'
+            for article in (newest, middle, oldest)
+        ],
+    )
+
+
+@pytest.mark.django_db
+def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    oldest, middle, newest = _create_three_articles_oldest_first()
+    oldest.body = "Fill it with citric acid and leave it for an hour."
+    oldest.save()
+
+    response = client.get(reverse("article_list"))
+
+    assert response.status_code == 200
+    _assert_in_order(
+        response.content.decode(),
+        [
+            f'href="{article.get_absolute_url()}"'
+            for article in (newest, middle, oldest)
+        ],
+    )
+
+
+@pytest.mark.django_db
+def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    oldest = Page.objects.create(title="About us", slug="about")
+    middle = Page.objects.create(title="FAQ", slug="faq")
+    newest = Page.objects.create(title="Delivery", slug="delivery")
+    oldest.title = "Our story"
+    oldest.save()
+
+    response = client.get(reverse("product_list"))
+
+    assert response.status_code == 200
+    _assert_in_order(
+        response.content.decode(),
+        [f'href="{page.get_absolute_url()}"' for page in (oldest, middle, newest)],
+    )
+
+
 @pytest.mark.django_db
 def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
     client: Client, rag_store: DocumentStore
@@ -216,6 +295,42 @@ def test_page_view_shows_the_text_of_its_blocks(
     assert "Since 1998." in content
     assert "Shipping" in content
     assert "We ship within two days." in content
+
+
+@pytest.mark.django_db
+def test_page_view_shows_its_text_blocks_in_pk_order_whatever_the_insertion_order(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    page = Page.objects.create(title="About us", slug="about")
+    later = TextPlugin.objects.create(pk=10, page=page, body="Since 1998.")
+    earlier = TextPlugin.objects.create(pk=5, page=page, body="We make kettles.")
+
+    response = client.get(page.get_absolute_url())
+
+    assert response.status_code == 200
+    _assert_in_order(
+        response.content.decode(), [block.body for block in (earlier, later)]
+    )
+
+
+@pytest.mark.django_db
+def test_page_view_shows_its_accordion_items_in_pk_order_whatever_the_insertion_order(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    page = Page.objects.create(title="FAQ", slug="faq")
+    later = AccordionItem.objects.create(
+        pk=10, page=page, title="Returns", body="Returns are free for 30 days."
+    )
+    earlier = AccordionItem.objects.create(
+        pk=5, page=page, title="Shipping", body="We ship within two days."
+    )
+
+    response = client.get(page.get_absolute_url())
+
+    assert response.status_code == 200
+    _assert_in_order(
+        response.content.decode(), [item.body for item in (earlier, later)]
+    )
 
 
 @pytest.mark.django_db
