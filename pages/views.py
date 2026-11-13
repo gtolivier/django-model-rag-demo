@@ -10,4 +10,8 @@ def home(request: HttpRequest) -> HttpResponse:
 
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
     page = get_object_or_404(Page, slug=slug)
-    return render(request, "pages/page_detail.html", {"page": page})
+    return render(
+        request,
+        "pages/page_detail.html",
+        {"page": page, "text_blocks": page.textplugin_set.order_by("pk")},
+    )

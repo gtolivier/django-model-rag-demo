@@ -2,7 +2,7 @@
 {% block title %}{{ page.title }} — {% endblock %}
 {% block content %}
 <h1>{{ page.title }}</h1>
-{% for plugin in page.textplugin_set.all %}{{ plugin.body|linebreaks }}
+{% for plugin in text_blocks %}{{ plugin.body|linebreaks }}
 {% endfor %}{% for item in page.accordionitem_set.all %}<details>
   <summary>{{ item.title }}</summary>
   {{ item.body|linebreaks }}
