@@ -141,6 +141,36 @@ def test_article_list_shows_the_most_recently_created_article_first(
 
 
 @pytest.mark.django_db
+def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    oldest = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+    )
+    middle = Article.objects.create(
+        title="Toasting bagels",
+        body="Use the bagel setting to brown only the cut side.",
+    )
+    newest = Article.objects.create(
+        title="Sharpening knives",
+        body="Hold the blade at twenty degrees against the stone.",
+    )
+    oldest.body = "Fill it with citric acid and leave it for an hour."
+    oldest.save()
+
+    response = client.get(reverse("article_list"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    positions = [
+        content.index(f'href="{article.get_absolute_url()}"')
+        for article in (newest, middle, oldest)
+    ]
+    assert positions == sorted(positions)
+
+
+@pytest.mark.django_db
 def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
     client: Client, rag_store: DocumentStore
 ) -> None:
