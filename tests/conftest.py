@@ -1,7 +1,22 @@
+from collections.abc import Iterator
+
 import pytest
+from django.utils import translation
 from pytest_django.fixtures import Settings
 
 from tests.rag_output import DocumentStore
+
+
+@pytest.fixture(autouse=True)
+def _reset_active_language() -> Iterator[None]:
+    """Give every test the default language back.
+
+    LocaleMiddleware activates the request's language in the test thread and
+    nothing deactivates it: after a request under /fr/, the next test's
+    `reverse()` would build French URLs.
+    """
+    yield
+    translation.deactivate()
 
 
 @pytest.fixture

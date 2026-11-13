@@ -173,6 +173,34 @@ def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
 
 
 @pytest.mark.django_db
+def test_article_list_shows_only_the_articles_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language="en",
+    )
+    french = Article.objects.create(
+        title="Détartrer une bouilloire",
+        body="Remplissez-la de vinaigre blanc et laissez agir une nuit.",
+        language="fr",
+    )
+
+    english_response = client.get("/blog/")
+    french_response = client.get("/fr/blog/")
+
+    assert english_response.status_code == 200
+    english_content = english_response.content.decode()
+    assert english.title in english_content
+    assert french.title not in english_content
+    assert french_response.status_code == 200
+    french_content = french_response.content.decode()
+    assert french.title in french_content
+    assert english.title not in french_content
+
+
+@pytest.mark.django_db
 def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
     client: Client, rag_store: DocumentStore
 ) -> None:
