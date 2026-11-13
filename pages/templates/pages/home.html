@@ -1,7 +1,1 @@
-<ul>
-  <li><a href="{% url 'product_list' %}">Products</a></li>
-  <li><a href="{% url 'article_list' %}">Articles</a></li>
-{% for page in pages %}
-  <li><a href="{{ page.get_absolute_url }}">{{ page.title }}</a></li>
-{% endfor %}
-</ul>
+{% include "pages/nav.html" %}

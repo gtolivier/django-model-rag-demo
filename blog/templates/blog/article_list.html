@@ -1,3 +1,4 @@
+{% include "pages/nav.html" %}
 <ul>
 {% for article in articles %}
   <li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>

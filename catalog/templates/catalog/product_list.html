@@ -1,3 +1,4 @@
+{% include "pages/nav.html" %}
 <ul>
 {% for product in products %}
   <li><a href="{{ product.get_absolute_url }}">{{ product.name }}</a> {{ product.category.name }} {{ product.price }}</li>

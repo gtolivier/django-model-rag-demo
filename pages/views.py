@@ -5,7 +5,7 @@ from pages.models import Page
 
 
 def home(request: HttpRequest) -> HttpResponse:
-    return render(request, "pages/home.html", {"pages": Page.objects.all()})
+    return render(request, "pages/home.html")
 
 
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
