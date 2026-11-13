@@ -2,7 +2,8 @@ from decimal import Decimal
 
 import pytest
 from django.core.management import call_command
-from django.urls import Resolver404, resolve
+from django.urls import Resolver404, resolve, reverse
+from django.utils import translation
 
 from blog.models import Article
 from catalog.models import Category, Product
@@ -63,3 +64,8 @@ def test_an_article_document_url_resolves_to_a_route_capturing_the_article(
 
     [article_document] = rag_store[f"blog.article:{article.pk}"]
     assert str(article.pk) in _captured_values(article_document.url)
+
+
+def test_the_admin_index_stays_outside_the_language_prefix_in_french() -> None:
+    with translation.override("fr"):
+        assert reverse("admin:index") == "/admin/"
