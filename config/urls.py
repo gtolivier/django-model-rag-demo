@@ -20,9 +20,10 @@ from django.urls import path
 
 from blog.views import article_detail, article_list
 from catalog.views import product_detail, product_list
-from pages.views import page_detail
+from pages.views import home, page_detail
 
 urlpatterns = [
+    path("", home, name="home"),
     path("admin/", admin.site.urls),
     path("blog/", article_list, name="article_list"),
     path("blog/<int:pk>/", article_detail, name="article_detail"),
