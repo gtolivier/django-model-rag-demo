@@ -6,6 +6,7 @@ from django.utils.text import Truncator
 class Page(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+    language = models.CharField(max_length=8, default="en")
 
     def get_absolute_url(self) -> str:
         return reverse("page_detail", kwargs={"slug": self.slug})

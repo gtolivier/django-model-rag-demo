@@ -15,7 +15,11 @@ class PageBlockExtractor[M: AccordionItem | TextPlugin](BaseExtractor[M]):
     ) -> NormalizedDocument:
         # a block has no view of its own: its document links to its page
         return self.build_document(
-            instance, text=text, title=title, url=instance.page.get_absolute_url()
+            instance,
+            text=text,
+            title=title,
+            url=instance.page.get_absolute_url(),
+            language=instance.page.language,
         )
 
 
