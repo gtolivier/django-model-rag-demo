@@ -9,7 +9,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
-    page = get_object_or_404(Page, slug=slug)
+    page = get_object_or_404(Page, slug=slug, language=request.LANGUAGE_CODE)
     return render(
         request,
         "pages/page_detail.html",
