@@ -457,6 +457,20 @@ def test_page_view_shows_its_accordion_items_in_pk_order_whatever_the_insertion_
 
 
 @pytest.mark.django_db
+def test_page_view_does_not_find_a_page_of_the_other_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    Page.objects.create(title="Delivery", slug="delivery", language="en")
+    Page.objects.create(title="Livraison", slug="livraison", language="fr")
+
+    french_under_root = client.get("/pages/livraison/")
+    english_under_fr = client.get("/fr/pages/delivery/")
+
+    assert french_under_root.status_code == 404
+    assert english_under_fr.status_code == 404
+
+
+@pytest.mark.django_db
 def test_article_view_shows_its_title_and_body(
     client: Client, rag_store: DocumentStore
 ) -> None:
