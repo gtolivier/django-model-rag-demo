@@ -314,6 +314,26 @@ def test_page_view_shows_its_text_blocks_in_pk_order_whatever_the_insertion_orde
 
 
 @pytest.mark.django_db
+def test_page_view_shows_its_accordion_items_in_pk_order_whatever_the_insertion_order(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    page = Page.objects.create(title="FAQ", slug="faq")
+    later = AccordionItem.objects.create(
+        pk=10, page=page, title="Returns", body="Returns are free for 30 days."
+    )
+    earlier = AccordionItem.objects.create(
+        pk=5, page=page, title="Shipping", body="We ship within two days."
+    )
+
+    response = client.get(page.get_absolute_url())
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    positions = [content.index(item.body) for item in (earlier, later)]
+    assert positions == sorted(positions)
+
+
+@pytest.mark.django_db
 def test_article_view_shows_its_title_and_body(
     client: Client, rag_store: DocumentStore
 ) -> None:
