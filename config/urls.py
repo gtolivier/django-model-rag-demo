@@ -18,11 +18,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from blog.views import article_detail
 from catalog.views import product_detail, product_list
 from pages.views import page_detail
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("blog/<int:pk>/", article_detail, name="article_detail"),
     path("products/", product_list, name="product_list"),
     path("products/<int:pk>/", product_detail, name="product_detail"),
     path("pages/<slug:slug>/", page_detail, name="page_detail"),
