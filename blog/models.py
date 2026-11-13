@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import override
 
 
 class Article(models.Model):
@@ -11,4 +12,5 @@ class Article(models.Model):
         return self.title
 
     def get_absolute_url(self) -> str:
-        return reverse("article_detail", kwargs={"pk": self.pk})
+        with override(self.language):
+            return reverse("article_detail", kwargs={"pk": self.pk})
