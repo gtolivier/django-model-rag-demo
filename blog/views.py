@@ -11,5 +11,5 @@ def article_list(request: HttpRequest) -> HttpResponse:
 
 
 def article_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    article = get_object_or_404(Article, pk=pk)
+    article = get_object_or_404(Article, pk=pk, language=get_language())
     return render(request, "blog/article_detail.html", {"article": article})
