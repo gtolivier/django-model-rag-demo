@@ -39,6 +39,26 @@ def test_product_and_page_views_respond_in_escaped_html(
 
 
 @pytest.mark.django_db
+def test_product_view_shows_its_price_and_category_name(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    category = Category.objects.create(name="Small appliances")
+    product = Product.objects.create(
+        name="Toaster",
+        description="Browns two slices at once.",
+        price=Decimal("29.90"),
+        category=category,
+    )
+
+    response = client.get(product.get_absolute_url())
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "29.90" in content
+    assert "Small appliances" in content
+
+
+@pytest.mark.django_db
 def test_page_view_shows_the_text_of_its_blocks(
     client: Client, rag_store: DocumentStore
 ) -> None:
