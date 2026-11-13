@@ -5,6 +5,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
 
+from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
 from tests.rag_output import DocumentStore
@@ -134,3 +135,20 @@ def test_page_view_shows_the_text_of_its_blocks(
     assert "Since 1998." in content
     assert "Shipping" in content
     assert "We ship within two days." in content
+
+
+@pytest.mark.django_db
+def test_article_view_shows_its_title_and_body(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+    )
+
+    response = client.get(article.get_absolute_url())
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Descaling a kettle" in content
+    assert "Fill it with white vinegar and leave it overnight." in content
