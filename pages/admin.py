@@ -16,5 +16,5 @@ class AccordionItemInline(admin.StackedInline[AccordionItem, Page]):
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin[Page]):
     list_display = ("title", "slug")
-    prepopulated_fields = {"slug": ("title",)}  # noqa: RUF012
+    prepopulated_fields = {"slug": ("title",)}
     inlines = (TextPluginInline, AccordionItemInline)
