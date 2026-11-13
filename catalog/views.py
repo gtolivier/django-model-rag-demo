@@ -10,5 +10,5 @@ def product_list(request: HttpRequest) -> HttpResponse:
 
 
 def product_detail(request: HttpRequest, pk: int) -> HttpResponse:
-    product = get_object_or_404(Product, pk=pk)
+    product = get_object_or_404(Product.objects.select_related("category"), pk=pk)
     return render(request, "catalog/product_detail.html", {"product": product})
