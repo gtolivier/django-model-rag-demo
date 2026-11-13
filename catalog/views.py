@@ -5,7 +5,7 @@ from catalog.models import Product
 
 
 def product_list(request: HttpRequest) -> HttpResponse:
-    products = Product.objects.select_related("category")
+    products = Product.objects.select_related("category").order_by("category", "pk")
     return render(request, "catalog/product_list.html", {"products": products})
 
 

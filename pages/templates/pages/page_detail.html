@@ -1,6 +1,11 @@
-{% include "pages/nav.html" %}
+{% extends "pages/base.html" %}
+{% block title %}{{ page.title }} — {% endblock %}
+{% block content %}
 <h1>{{ page.title }}</h1>
 {% for plugin in page.textplugin_set.all %}<p>{{ plugin.body }}</p>
-{% endfor %}{% for item in page.accordionitem_set.all %}<h2>{{ item.title }}</h2>
-<p>{{ item.body }}</p>
+{% endfor %}{% for item in page.accordionitem_set.all %}<details>
+  <summary>{{ item.title }}</summary>
+  <p>{{ item.body }}</p>
+</details>
 {% endfor %}
+{% endblock %}
