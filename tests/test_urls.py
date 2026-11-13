@@ -66,6 +66,33 @@ def test_an_article_document_url_resolves_to_a_route_capturing_the_article(
     assert str(article.pk) in _captured_values(article_document.url)
 
 
+@pytest.mark.django_db
+def test_a_product_url_is_in_the_product_language_whatever_the_active_one() -> None:
+    category = Category.objects.create(name="Kitchen")
+    english = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=category,
+        language="en",
+    )
+    french = Product.objects.create(
+        name="Bouilloire",
+        description="Fait bouillir un litre d'eau en deux minutes.",
+        price=Decimal("31.40"),
+        category=category,
+        language="fr",
+    )
+
+    with translation.override("en"):
+        french_url = french.get_absolute_url()
+    with translation.override("fr"):
+        english_url = english.get_absolute_url()
+
+    assert french_url == f"/fr/products/{french.pk}/"
+    assert english_url == f"/products/{english.pk}/"
+
+
 def test_the_admin_index_stays_outside_the_language_prefix_in_french() -> None:
     with translation.override("fr"):
         assert reverse("admin:index") == "/admin/"
