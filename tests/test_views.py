@@ -322,6 +322,33 @@ def test_product_list_shows_only_the_products_of_the_active_language(
 
 
 @pytest.mark.django_db
+def test_product_view_does_not_find_a_product_of_the_other_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    category = Category.objects.create(name="Kitchen")
+    english = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=category,
+        language="en",
+    )
+    french = Product.objects.create(
+        name="Bouilloire",
+        description="Fait bouillir un litre d'eau en deux minutes.",
+        price=Decimal("31.40"),
+        category=category,
+        language="fr",
+    )
+
+    french_under_root = client.get(f"/products/{french.pk}/")
+    english_under_fr = client.get(f"/fr/products/{english.pk}/")
+
+    assert french_under_root.status_code == 404
+    assert english_under_fr.status_code == 404
+
+
+@pytest.mark.django_db
 def test_page_view_shows_the_text_of_its_blocks(
     client: Client, rag_store: DocumentStore
 ) -> None:
