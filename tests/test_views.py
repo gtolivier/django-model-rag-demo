@@ -113,6 +113,25 @@ def test_article_list_shows_every_article_title_with_a_link_to_its_page(
 
 
 @pytest.mark.django_db
+def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    about = Page.objects.create(title="About us", slug="about")
+    faq = Page.objects.create(title="FAQ", slug="faq")
+
+    url = reverse("home")
+    response = client.get(url)
+
+    assert url == "/"
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert f'href="{reverse("product_list")}"' in content
+    assert f'href="{reverse("article_list")}"' in content
+    for page in (about, faq):
+        assert f'href="{page.get_absolute_url()}"' in content
+
+
+@pytest.mark.django_db
 def test_product_list_shows_each_product_category_name_and_price(
     client: Client, rag_store: DocumentStore
 ) -> None:
