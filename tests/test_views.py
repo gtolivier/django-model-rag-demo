@@ -88,6 +88,33 @@ def test_product_list_shows_every_product_name_with_a_link_to_its_page(
 
 
 @pytest.mark.django_db
+def test_product_list_shows_each_product_category_name_and_price(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Small appliances"),
+    )
+    Product.objects.create(
+        name="Rake",
+        description="Gathers leaves without scratching the lawn.",
+        price=Decimal("14.75"),
+        category=Category.objects.create(name="Garden tools"),
+    )
+
+    response = client.get(reverse("product_list"))
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Small appliances" in content
+    assert "29.90" in content
+    assert "Garden tools" in content
+    assert "14.75" in content
+
+
+@pytest.mark.django_db
 def test_page_view_shows_the_text_of_its_blocks(
     client: Client, rag_store: DocumentStore
 ) -> None:
