@@ -14,6 +14,7 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=8, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    language = models.CharField(max_length=8, default="en")
 
     def get_absolute_url(self) -> str:
         return reverse("product_detail", kwargs={"pk": self.pk})
