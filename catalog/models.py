@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import override
 
 
 class Category(models.Model):
@@ -17,7 +18,8 @@ class Product(models.Model):
     language = models.CharField(max_length=8, default="en")
 
     def get_absolute_url(self) -> str:
-        return reverse("product_detail", kwargs={"pk": self.pk})
+        with override(self.language):
+            return reverse("product_detail", kwargs={"pk": self.pk})
 
     def __str__(self) -> str:
         return self.name
