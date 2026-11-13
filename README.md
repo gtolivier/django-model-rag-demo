@@ -26,6 +26,8 @@ django-model-rag is wired: the demo's models sync to documents.
   `ImproperlyConfigured` at the save, before the row is written — that of a
   page or a category, created or edited, included.
 - `manage.py sync_model_rag` syncs everything.
+- `runserver` shows the shop: its home page, the cheeses by category, each
+  page and the blog, as plain Django views and templates.
 
 django-minimal-rag is wired behind it: `MODEL_RAG_OUTPUT` is its `Indexer`,
 so the documents land in its chunk tables, in PostgreSQL with pgvector
@@ -105,6 +107,9 @@ uv run python manage.py sync_model_rag
 uv run python manage.py embed_pending
 uv run python manage.py ask "Which cheeses can I eat while pregnant?"
 ```
+
+`uv run python manage.py runserver` then shows the shop at
+http://127.0.0.1:8000/.
 
 Other questions the content answers: "What wine goes with Comté?", "Do you
 deliver to Belgium?", "How much cheese per guest for a wedding?", "Is the shop
