@@ -5,6 +5,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
+from django.utils.translation import override
 
 from blog.models import Article
 from catalog.models import Category, Product
@@ -325,6 +326,55 @@ def test_every_view_links_to_the_product_list_the_article_list_and_every_page(
     assert f'href="{reverse("article_list")}"' in content
     for page in (about, faq):
         assert f'href="{page.get_absolute_url()}"' in content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(("language", "other_home"), [("en", "/fr/"), ("fr", "/")])
+@pytest.mark.parametrize(
+    "view",
+    [
+        "home",
+        "product_list",
+        "product_detail",
+        "page_detail",
+        "article_list",
+        "article_detail",
+    ],
+)
+def test_every_view_links_to_the_home_of_the_other_language(
+    client: Client,
+    rag_store: DocumentStore,
+    view: str,
+    language: str,
+    other_home: str,
+) -> None:
+    product = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Kitchen"),
+        language=language,
+    )
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language=language,
+    )
+    page = Page.objects.create(title="About us", slug="about", language=language)
+    with override(language):
+        urls = {
+            "home": reverse("home"),
+            "product_list": reverse("product_list"),
+            "product_detail": product.get_absolute_url(),
+            "page_detail": page.get_absolute_url(),
+            "article_list": reverse("article_list"),
+            "article_detail": article.get_absolute_url(),
+        }
+
+    response = client.get(urls[view])
+
+    assert response.status_code == 200
+    assert f'href="{other_home}"' in response.content.decode()
 
 
 @pytest.mark.django_db
