@@ -17,19 +17,19 @@ Including another URLconf
 
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
-from django.urls import path
+from django.urls import URLPattern, URLResolver, path
 
 from blog.views import article_detail, article_list
 from catalog.views import product_detail, product_list
 from pages.views import home, page_detail
 
-urlpatterns = [
+urlpatterns: list[URLPattern | URLResolver] = [
     path("admin/", admin.site.urls),
-    path("pages/<slug:slug>/", page_detail, name="page_detail"),
 ]
 
 urlpatterns += i18n_patterns(
     path("", home, name="home"),
+    path("pages/<slug:slug>/", page_detail, name="page_detail"),
     path("blog/", article_list, name="article_list"),
     path("blog/<int:pk>/", article_detail, name="article_detail"),
     path("products/", product_list, name="product_list"),

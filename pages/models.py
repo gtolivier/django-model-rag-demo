@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import Truncator
+from django.utils.translation import override
 
 
 class Page(models.Model):
@@ -9,7 +10,8 @@ class Page(models.Model):
     language = models.CharField(max_length=8, default="en")
 
     def get_absolute_url(self) -> str:
-        return reverse("page_detail", kwargs={"slug": self.slug})
+        with override(self.language):
+            return reverse("page_detail", kwargs={"slug": self.slug})
 
     def __str__(self) -> str:
         return self.title
