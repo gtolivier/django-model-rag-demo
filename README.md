@@ -173,8 +173,9 @@ Known limits of `ask`, a demo command:
   a "yes", which the content does not say.
 - A question that asks for a whole list ("which cheeses do you sell?") gets
   at most `--limit` extracts, the nearest ones: similarity search does not
-  enumerate a catalog. `--limit 20 --max-distance 0.6` lists the ten cheeses,
-  slowly.
+  enumerate a catalog. `--limit 30 --max-distance 0.6` brings the ten cheeses
+  into the extracts, slowly, and the model may still leave one out of its
+  answer.
 
 The two packages are locked to specific commits in `uv.lock`. To move to
 their latest `main`:
