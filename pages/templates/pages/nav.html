@@ -1,7 +1,14 @@
+{% load i18n %}
 <ul>
   <li><a href="{% url 'product_list' %}">Products</a></li>
   <li><a href="{% url 'article_list' %}">Articles</a></li>
 {% for page in nav_pages %}
   <li><a href="{{ page.get_absolute_url }}">{{ page.title }}</a></li>
 {% endfor %}
+{% get_current_language as current_language %}
+{% if current_language == 'fr' %}
+  {% language 'en' %}<li><a href="{% url 'home' %}">English</a></li>{% endlanguage %}
+{% else %}
+  {% language 'fr' %}<li><a href="{% url 'home' %}">Français</a></li>{% endlanguage %}
+{% endif %}
 </ul>
