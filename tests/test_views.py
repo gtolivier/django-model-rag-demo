@@ -242,6 +242,22 @@ def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
 
 
 @pytest.mark.django_db
+def test_nav_lists_only_the_pages_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english = Page.objects.create(title="Delivery", slug="delivery", language="en")
+    french = Page.objects.create(title="Livraison", slug="livraison", language="fr")
+
+    english_response = client.get("/")
+    french_response = client.get("/fr/")
+
+    assert english_response.status_code == 200
+    assert list(english_response.context["nav_pages"]) == [english]
+    assert french_response.status_code == 200
+    assert list(french_response.context["nav_pages"]) == [french]
+
+
+@pytest.mark.django_db
 def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
     client: Client, rag_store: DocumentStore
 ) -> None:
