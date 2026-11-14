@@ -220,7 +220,7 @@
   "pk": 9,
   "fields": {
     "name": "Roquefort AOP",
-    "description": "Raw milk of Lacaune ewes, ripened at least 90 days in the natural caves of Mount Combalou, at Roquefort-sur-Soulzon in Aveyron. Cracks in the rock, called fleurines, bring in cool, damp air that feeds its blue mould, Penicillium roqueforti.\n\nMoist and creamy, with green-blue veins, salty and tangy. It crumbles: cut it with a wire or a knife dipped in hot water. Serve it with walnuts, a pear or a little honey, and a sweet Sauternes. Sold by the 200 g piece, in its foil.",
+    "description": "Raw milk of Lacaune ewes, ripened in the natural caves of Mount Combalou, at Roquefort-sur-Soulzon in Aveyron, and aged at least 90 days in all. Cracks in the rock, called fleurines, bring in cool, damp air that feeds its blue mould, Penicillium roqueforti.\n\nMoist and creamy, with green-blue veins, salty and tangy. It crumbles: cut it with a wire or a knife dipped in hot water. Serve it with walnuts, a pear or a little honey, and a sweet Sauternes. Sold by the 200 g piece, in its foil.",
     "price": "8.40",
     "category": 4,
     "language": "en"
@@ -330,7 +330,7 @@
   "pk": 19,
   "fields": {
     "name": "Roquefort AOP",
-    "description": "Lait cru de brebis lacaune, affiné au moins 90 jours dans les caves naturelles du Combalou, à Roquefort-sur-Soulzon, en Aveyron. Des failles dans la roche, les fleurines, y font circuler un air frais et humide qui nourrit sa moisissure bleue, le Penicillium roqueforti.\n\nHumide et crémeux, avec des veines vert-bleu, salé et piquant. Il s'émiette : coupez-le au fil ou avec un couteau trempé dans l'eau chaude. Servez-le avec des noix, une poire ou un peu de miel, et un sauternes moelleux. Vendu en morceau de 200 g, dans sa feuille d'aluminium.",
+    "description": "Lait cru de brebis lacaune, affiné dans les caves naturelles du Combalou, à Roquefort-sur-Soulzon, en Aveyron ; son affinage dure au moins 90 jours en tout. Des failles dans la roche, les fleurines, y font circuler un air frais et humide qui nourrit sa moisissure bleue, le Penicillium roqueforti.\n\nHumide et crémeux, avec des veines vert-bleu, salé et piquant. Il s'émiette : coupez-le au fil ou avec un couteau trempé dans l'eau chaude. Servez-le avec des noix, une poire ou un peu de miel, et un sauternes moelleux. Vendu en morceau de 200 g, dans sa feuille d'aluminium.",
     "price": "8.40",
     "category": 8,
     "language": "fr"
@@ -434,7 +434,7 @@
   "fields": {
     "page": 2,
     "title": "What if I am not at home?",
-    "body": "The carrier leaves the parcel at a nearby pick-up point and lets you know where. An unopened box keeps the cheese cool for 48 hours: collect it the same day or the next, and put the cheese in the fridge as soon as you are home."
+    "body": "The carrier leaves the parcel at a nearby pick-up point and lets you know where. An unopened box keeps the cheese cool for 48 hours: collect it as soon as you can, and put the cheese in the fridge as soon as you are home."
   }
 },
 {
@@ -488,7 +488,7 @@
   "fields": {
     "page": 6,
     "title": "Que se passe-t-il si je ne suis pas chez moi ?",
-    "body": "Le transporteur dépose le colis dans un point relais proche et vous indique lequel. Une boîte non ouverte garde le fromage au frais pendant 48 heures : récupérez-la le jour même ou le lendemain, et mettez le fromage au réfrigérateur dès votre retour."
+    "body": "Le transporteur dépose le colis dans un point relais proche et vous indique lequel. Une boîte non ouverte garde le fromage au frais pendant 48 heures : récupérez-la au plus vite, et mettez le fromage au réfrigérateur dès votre retour."
   }
 },
 {
