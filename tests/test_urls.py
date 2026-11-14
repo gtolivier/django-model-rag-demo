@@ -115,6 +115,20 @@ def test_an_article_url_is_in_the_article_language_whatever_the_active_one() -> 
     assert english_url == f"/blog/{english.pk}/"
 
 
+@pytest.mark.django_db
+def test_a_page_url_is_in_the_page_language_whatever_the_active_one() -> None:
+    english = Page.objects.create(title="FAQ", slug="faq", language="en")
+    french = Page.objects.create(title="Questions", slug="questions", language="fr")
+
+    with translation.override("en"):
+        french_url = french.get_absolute_url()
+    with translation.override("fr"):
+        english_url = english.get_absolute_url()
+
+    assert french_url == f"/fr/pages/{french.slug}/"
+    assert english_url == f"/pages/{english.slug}/"
+
+
 def test_the_admin_index_stays_outside_the_language_prefix_in_french() -> None:
     with translation.override("fr"):
         assert reverse("admin:index") == "/admin/"
