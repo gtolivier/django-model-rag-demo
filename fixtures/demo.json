@@ -4,7 +4,7 @@
   "pk": 1,
   "fields": {
     "title": "Spring goat cheeses are back",
-    "body": "Goat cheeses follow the seasons: goats give milk from early spring to autumn. The best ones come from April to June, when the herds graze fresh grass. Our Crottins de Chavignol and Sainte-Maure de Touraine are back on the counter.",
+    "body": "Goat cheeses follow the seasons: goats give milk from early spring to autumn, after their kids are born at the end of winter. For a long time, there was almost no goat cheese in winter.\n\nThe best ones come from April to June, when the herds graze fresh grass and flowers: the milk is rich and the cheeses taste of it. Our Crottins de Chavignol and Sainte-Maure de Touraine are back on the counter. We ripen them ourselves, in our cellar.\n\nYoung, after about two weeks, they are fresh and lemony. A few weeks more make them denser and nuttier. Try them with a white wine from the Loire, such as a Sancerre or a Vouvray, or warm a crottin on toast over a green salad.",
     "language": "en"
   }
 },
@@ -13,7 +13,7 @@
   "pk": 2,
   "fields": {
     "title": "Pairing French cheese and wine",
-    "body": "The simplest rule: pair a cheese with a wine from the same region. Crottin de Chavignol with a Sancerre, Comté with a vin jaune from the Jura, Époisses with a red Burgundy. Blue cheeses are the exception: Roquefort is best with a sweet Sauternes.",
+    "body": "The simplest rule: pair a cheese with a wine from the same region. Crottin de Chavignol with a Sancerre, Comté with a vin jaune from the Jura, Époisses with a red Burgundy. Cheese and wine have grown up together, on the same soil, and they rarely clash.\n\nWhite wines go with more cheeses than red ones: their freshness cuts through the fat, where the tannins of a red can taste bitter. Goat cheeses love a crisp Loire white; mountain cheeses such as Beaufort go with a white from Savoie.\n\nBlue cheeses are the exception: Roquefort is best with a sweet Sauternes, whose sugar balances its salt. Wine is not the only choice either: a dry cider with Camembert, a beer from the North with Mimolette. On a board, serve the cheeses from the mildest to the strongest, and the wines in the same order.",
     "language": "en"
   }
 },
@@ -22,7 +22,7 @@
   "pk": 3,
   "fields": {
     "title": "How to cut a cheese",
-    "body": "Everyone should get some rind and some heart. Cut a round cheese like a cake, from the centre. Cut a wedge of Brie along its length, never taking off its tip. Cut a log, such as Sainte-Maure, in rounds.",
+    "body": "Everyone should get some rind and some heart: the taste changes from the outside of a cheese to its centre, and a good cut shares both.\n\nCut a round cheese, such as Camembert, like a cake, from the centre. Cut a wedge of Brie along its length, never taking off its tip: the tip is the creamiest part, and taking it leaves the rind to the others. Cut a log, such as Sainte-Maure, in rounds, after pulling out its straw.\n\nCut hard cheeses, such as Comté or Beaufort, in thin slices, and take off the rind on the plate. Blue cheeses crumble: use a wire, or a knife dipped in hot water. On a board, give the blue its own knife, so that its taste does not spread to the others.",
     "language": "en"
   }
 },
@@ -31,7 +31,7 @@
   "pk": 4,
   "fields": {
     "title": "Summer closing",
-    "body": "The shop closes for its summer break from 4 to 18 August. Orders are shipped until Wednesday 29 July, and shipping starts again on Wednesday 19 August.",
+    "body": "The shop closes for its summer break from 4 to 18 August. It stays open until Sunday 2 August, at the usual hours, and opens again on Wednesday 19 August.\n\nOrders are shipped until Wednesday 29 July. Orders placed after that are shipped from Wednesday 19 August, when shipping starts again, in the order they arrived. Cheese boards for events during the break cannot be made: order them for before 2 August or after 19 August.",
     "language": "en"
   }
 },
@@ -40,7 +40,7 @@
   "pk": 5,
   "fields": {
     "title": "Les fromages de chèvre de printemps sont de retour",
-    "body": "Les fromages de chèvre suivent les saisons : les chèvres donnent du lait du début du printemps à l'automne. Les meilleurs arrivent d'avril à juin, quand les troupeaux broutent l'herbe fraîche. Nos Crottins de Chavignol et nos Sainte-Maure de Touraine sont de retour au comptoir.",
+    "body": "Les fromages de chèvre suivent les saisons : les chèvres donnent du lait du début du printemps à l'automne, après la naissance de leurs chevreaux à la fin de l'hiver. Longtemps, on ne trouvait presque pas de fromage de chèvre en hiver.\n\nLes meilleurs arrivent d'avril à juin, quand les troupeaux broutent l'herbe fraîche et les fleurs : le lait est riche, et les fromages en ont le goût. Nos Crottins de Chavignol et nos Sainte-Maure de Touraine sont de retour au comptoir. Nous les affinons nous-mêmes, dans notre cave.\n\nJeunes, après une quinzaine de jours, ils sont frais et citronnés. Quelques semaines de plus les rendent plus denses et plus noisetés. Essayez-les avec un blanc de Loire, comme un sancerre ou un vouvray, ou faites chauffer un crottin sur une tartine posée sur une salade verte.",
     "language": "fr"
   }
 },
@@ -49,7 +49,7 @@
   "pk": 6,
   "fields": {
     "title": "Associer fromage et vin français",
-    "body": "La règle la plus simple : associer un fromage à un vin de la même région. Crottin de Chavignol avec un Sancerre, Comté avec un vin jaune du Jura, Époisses avec un bourgogne rouge. Les fromages bleus font exception : le roquefort se marie mieux avec un sauternes moelleux.",
+    "body": "La règle la plus simple : associer un fromage à un vin de la même région. Crottin de Chavignol avec un sancerre, comté avec un vin jaune du Jura, époisses avec un bourgogne rouge. Fromage et vin ont grandi ensemble, sur la même terre, et se contrarient rarement.\n\nLes vins blancs vont avec plus de fromages que les rouges : leur fraîcheur répond au gras, là où les tanins d'un rouge peuvent devenir amers. Les chèvres aiment un blanc de Loire vif ; les fromages de montagne comme le beaufort vont avec un blanc de Savoie.\n\nLes fromages bleus font exception : le roquefort se marie mieux avec un sauternes moelleux, dont le sucre équilibre le sel. Le vin n'est pas le seul choix non plus : un cidre brut avec le camembert, une bière du Nord avec la mimolette. Sur un plateau, servez les fromages du plus doux au plus fort, et les vins dans le même ordre.",
     "language": "fr"
   }
 },
@@ -58,7 +58,7 @@
   "pk": 7,
   "fields": {
     "title": "Comment couper un fromage",
-    "body": "Chacun doit avoir un peu de croûte et un peu de cœur. Coupez un fromage rond comme un gâteau, à partir du centre. Coupez une part de brie dans la longueur, sans jamais retirer sa pointe. Coupez une bûche, comme la sainte-maure, en rondelles.",
+    "body": "Chacun doit avoir un peu de croûte et un peu de cœur : le goût change de l'extérieur d'un fromage à son centre, et une bonne coupe partage les deux.\n\nCoupez un fromage rond, comme le camembert, comme un gâteau, à partir du centre. Coupez une part de brie dans la longueur, sans jamais retirer sa pointe : la pointe est la partie la plus crémeuse, et la prendre laisse la croûte aux autres. Coupez une bûche, comme la sainte-maure, en rondelles, après avoir retiré sa paille.\n\nCoupez les fromages à pâte dure, comme le comté ou le beaufort, en fines lamelles, et retirez la croûte dans l'assiette. Les bleus s'émiettent : utilisez un fil, ou un couteau trempé dans l'eau chaude. Sur un plateau, donnez au bleu son propre couteau, pour que son goût ne passe pas aux autres.",
     "language": "fr"
   }
 },
@@ -67,7 +67,7 @@
   "pk": 8,
   "fields": {
     "title": "Fermeture estivale",
-    "body": "La boutique ferme pour ses vacances d'été du 4 au 18 août. Les commandes sont expédiées jusqu'au mercredi 29 juillet, et les expéditions reprennent le mercredi 19 août.",
+    "body": "La boutique ferme pour ses vacances d'été du 4 au 18 août. Elle reste ouverte jusqu'au dimanche 2 août, aux horaires habituels, et rouvre le mercredi 19 août.\n\nLes commandes sont expédiées jusqu'au mercredi 29 juillet. Les commandes passées après cette date sont expédiées à partir du mercredi 19 août, quand les expéditions reprennent, dans leur ordre d'arrivée. Nous ne pouvons pas préparer de plateaux pour des événements pendant la fermeture : commandez-les pour avant le 2 août ou après le 19 août.",
     "language": "fr"
   }
 },
@@ -132,7 +132,7 @@
   "pk": 1,
   "fields": {
     "name": "Brie de Meaux AOP",
-    "description": "Raw cow's milk, from the Île-de-France region east of Paris. A wide, thin disc with a white bloomy rind, ripened at least four weeks: creamy, with a taste of mushrooms and hazelnut. Sold by the 250 g slice.",
+    "description": "Raw cow's milk, from Seine-et-Marne, in the Île-de-France region east of Paris. A wide, thin disc about 36 cm across and close to 3 kg, its curd scooped into the moulds with a perforated shovel, then salted by hand. It ripens at least four weeks and grows a white bloomy rind.\n\nCreamy and supple, with a taste of mushrooms and hazelnut that gets stronger as it ripens. Take it out of the fridge an hour before serving, and cut it along its length. Good with a baguette and a glass of Champagne or a light red. Sold by the 250 g slice.",
     "price": "6.50",
     "category": 1,
     "language": "en"
@@ -143,7 +143,7 @@
   "pk": 2,
   "fields": {
     "name": "Camembert de Normandie AOP",
-    "description": "Raw cow's milk from Normandy, ladled into its moulds by hand. A whole 250 g cheese in its wooden box. We sell it ripe: soft to the touch at the centre, with a rich, slightly farmy taste.",
+    "description": "Raw cow's milk from Normandy, ladled into its moulds by hand, in several layers, which keeps the curd light. It ripens at least three weeks and grows a thin white bloomy rind. A whole 250 g cheese, about 11 cm across, in its wooden box.\n\nWe sell it ripe: soft to the touch at the centre, with a rich, slightly farmy taste and a hint of mushroom. Keep it in its box, and take it out an hour before eating. Cut it like a cake, from the centre. Try it with a dry Normandy cider.",
     "price": "7.90",
     "category": 1,
     "language": "en"
@@ -154,7 +154,7 @@
   "pk": 3,
   "fields": {
     "name": "Époisses AOP",
-    "description": "Pasteurised cow's milk, from Burgundy. A washed-rind cheese: its orange rind is washed with marc de Bourgogne, a grape brandy, while it ripens. Strong smell, runny and mellow inside. A whole 250 g cheese.",
+    "description": "Pasteurised cow's milk, from Burgundy, around the village of Époisses in the Côte-d'Or. A washed-rind cheese: during at least four weeks of ripening, its rind is washed by hand, first with salted water, then with more and more marc de Bourgogne, a grape brandy. It turns orange and slightly sticky.\n\nStrong smell, but a mellow, runny and slightly sweet heart: when fully ripe, it is eaten with a spoon. A whole 250 g cheese in its wooden box. Keep it in the box, away from other cheeses, and serve it with a red Burgundy.",
     "price": "12.50",
     "category": 1,
     "language": "en"
@@ -165,7 +165,7 @@
   "pk": 4,
   "fields": {
     "name": "Crottin de Chavignol AOP",
-    "description": "Raw goat's milk, from the Sancerre hills in the Loire Valley. A small 60 g cheese, fresh and lemony when young, nutty and crumbly once ripened. Sold by the piece.",
+    "description": "Raw goat's milk, from the village of Chavignol and the Sancerre hills in the Loire Valley. A small 60 g cheese with a thin natural rind, ripened at least ten days.\n\nYoung, it is white, fresh and lemony; after a few weeks, its rind dries and turns blue-grey, and the heart becomes nutty, crumbly and stronger. Serve it with a Sancerre, or make a crottin chaud: cut it in half, put it on a slice of bread, grill it for a few minutes and serve it on a green salad. Best from spring to autumn. Sold by the piece.",
     "price": "3.20",
     "category": 2,
     "language": "en"
@@ -176,7 +176,7 @@
   "pk": 5,
   "fields": {
     "name": "Sainte-Maure de Touraine AOP",
-    "description": "Raw goat's milk, from Touraine in the Loire Valley. A 250 g log with a rye straw through its centre and an ash-dusted rind. Dense and slightly salty, with a hint of hazelnut.",
+    "description": "Raw goat's milk, from Touraine in the Loire Valley. A 250 g log with a rye straw through its centre, which holds the soft curd together; the straw is engraved with the name of the cheese and of its maker. Its rind is dusted with salted charcoal ash, then ripened at least ten days.\n\nDense and slightly salty, with a hint of hazelnut that grows as it ripens. Pull out the straw, then cut the log in rounds. Good with a white Vouvray or a red Chinon, both from Touraine. Best from spring to autumn.",
     "price": "9.80",
     "category": 2,
     "language": "en"
@@ -187,7 +187,7 @@
   "pk": 6,
   "fields": {
     "name": "Comté AOP, 18 months",
-    "description": "Raw cow's milk, from the Jura mountains. A hard cooked cheese aged 18 months in cellars: firm, with crunchy crystals and a taste of roasted nuts and brown butter. Sold by the 250 g piece.",
+    "description": "Raw cow's milk, from the Jura mountains, where Montbéliarde cows graze open pastures. The milk goes each day to a fruitière, a village dairy, where it is made in copper vats into wheels of about 40 kg. Comté ripens at least four months; ours spends 18 months in the cellar.\n\nA hard cooked cheese: firm, with crunchy crystals and a taste of roasted nuts and brown butter. Cut off the rind. Serve it in thin slices with a vin jaune from the Jura, or grate it into a gratin. Sold by the 250 g piece.",
     "price": "8.90",
     "category": 3,
     "language": "en"
@@ -198,7 +198,7 @@
   "pk": 7,
   "fields": {
     "name": "Beaufort AOP",
-    "description": "Raw cow's milk, from the Savoie Alps, made from the milk of a single herd. A hard cooked cheese, supple and fruity, with notes of alpine flowers. Sold by the 250 g piece.",
+    "description": "Raw cow's milk, from the Savoie Alps. Ours is a summer Beaufort, made from June to October, when the Tarine and Abondance cows graze high mountain pastures. Its wheels, of about 40 kg, have a concave heel, shaped by the wooden hoop that holds them, and ripen at least five months.\n\nA hard cooked cheese, supple and fruity, with notes of alpine flowers and a long finish. Cut off the rind. Serve it with a white wine from Savoie, or melt it in a fondue. Sold by the 250 g piece.",
     "price": "9.50",
     "category": 3,
     "language": "en"
@@ -209,7 +209,7 @@
   "pk": 8,
   "fields": {
     "name": "Mimolette, aged 18 months",
-    "description": "Pasteurised cow's milk, from the Lille area in northern France. A round cheese, bright orange inside, aged 18 months: hard, sweet and caramel-like. Its rough rind is not eaten. Sold by the 250 g piece.",
+    "description": "Pasteurised cow's milk, from the Lille area in northern France. Not an AOP cheese. A round cheese, bright orange inside: the colour comes from annatto, a natural plant dye. As it ages, tiny cheese mites dig into its rind and let it breathe, which gives it its rough, pitted look.\n\nMimolette is sold young, at three months, up to extra-old, at 18 months or more. Ours is aged 18 months: hard, sweet and caramel-like, with a hint of hazelnut. Its rind is not eaten. Serve it in thin shavings or small cubes, with a beer from northern France. Sold by the 250 g piece.",
     "price": "7.20",
     "category": 3,
     "language": "en"
@@ -220,7 +220,7 @@
   "pk": 9,
   "fields": {
     "name": "Roquefort AOP",
-    "description": "Raw ewe's milk, ripened in the natural caves of Mount Combalou, in Aveyron. Moist and creamy, with green-blue veins, salty and tangy. Sold by the 200 g piece.",
+    "description": "Raw milk of Lacaune ewes, ripened at least 90 days in the natural caves of Mount Combalou, at Roquefort-sur-Soulzon in Aveyron. Cracks in the rock, called fleurines, bring in cool, damp air that feeds its blue mould, Penicillium roqueforti.\n\nMoist and creamy, with green-blue veins, salty and tangy. It crumbles: cut it with a wire or a knife dipped in hot water. Serve it with walnuts, a pear or a little honey, and a sweet Sauternes. Sold by the 200 g piece, in its foil.",
     "price": "8.40",
     "category": 4,
     "language": "en"
@@ -231,7 +231,7 @@
   "pk": 10,
   "fields": {
     "name": "Bleu d'Auvergne AOP",
-    "description": "Pasteurised cow's milk, from the Auvergne volcanoes. A blue cheese milder than Roquefort, soft and buttery. A good first blue. Sold by the 250 g piece.",
+    "description": "Pasteurised cow's milk, from the Auvergne volcanoes. The young cheeses are pierced with needles to let air reach the heart, where the blue mould grows; they ripen at least four weeks in a cool, damp cellar.\n\nA blue cheese milder than Roquefort, soft and buttery, with a gentle tang. A good first blue. It melts well into a sauce or a quiche, and goes with a red wine from the Auvergne. Sold by the 250 g piece.",
     "price": "5.60",
     "category": 4,
     "language": "en"
@@ -242,7 +242,7 @@
   "pk": 11,
   "fields": {
     "name": "Brie de Meaux AOP",
-    "description": "Lait cru de vache, de la région Île-de-France, à l'est de Paris. Un disque large et fin à croûte fleurie blanche, affiné au moins quatre semaines : crémeux, avec un goût de champignon et de noisette. Vendu à la part de 250 g.",
+    "description": "Lait cru de vache, de Seine-et-Marne, en Île-de-France, à l'est de Paris. Un disque large et fin d'environ 36 cm de diamètre et près de 3 kg, dont le caillé est versé dans les moules à la pelle à brie, puis salé à la main. Il s'affine au moins quatre semaines et se couvre d'une croûte fleurie blanche.\n\nCrémeux et souple, avec un goût de champignon et de noisette qui s'affirme avec l'affinage. Sortez-le du réfrigérateur une heure avant de le servir, et coupez-le dans la longueur. Bon avec une baguette et un verre de champagne ou un rouge léger. Vendu à la part de 250 g.",
     "price": "6.50",
     "category": 5,
     "language": "fr"
@@ -253,7 +253,7 @@
   "pk": 12,
   "fields": {
     "name": "Camembert de Normandie AOP",
-    "description": "Lait cru de vache de Normandie, moulé à la louche à la main. Un fromage entier de 250 g dans sa boîte en bois. Nous le vendons à point : souple au toucher au centre, avec un goût riche, légèrement fermier.",
+    "description": "Lait cru de vache de Normandie, moulé à la louche, à la main, en plusieurs passages, ce qui garde le caillé léger. Il s'affine au moins trois semaines et se couvre d'une fine croûte fleurie blanche. Un fromage entier de 250 g, d'environ 11 cm de diamètre, dans sa boîte en bois.\n\nNous le vendons à point : souple au toucher au centre, avec un goût riche, légèrement fermier, et une pointe de champignon. Gardez-le dans sa boîte, et sortez-le une heure avant de le manger. Coupez-le comme un gâteau, à partir du centre. Essayez-le avec un cidre brut de Normandie.",
     "price": "7.90",
     "category": 5,
     "language": "fr"
@@ -264,7 +264,7 @@
   "pk": 13,
   "fields": {
     "name": "Époisses AOP",
-    "description": "Lait pasteurisé de vache, de Bourgogne. Un fromage à croûte lavée : sa croûte orangée est lavée au marc de Bourgogne, une eau-de-vie de raisin, pendant l'affinage. Odeur forte, intérieur coulant et fondant. Un fromage entier de 250 g.",
+    "description": "Lait pasteurisé de vache, de Bourgogne, autour du village d'Époisses, en Côte-d'Or. Un fromage à croûte lavée : pendant au moins quatre semaines d'affinage, sa croûte est lavée à la main, d'abord à l'eau salée, puis avec de plus en plus de marc de Bourgogne, une eau-de-vie de raisin. Elle devient orangée et un peu collante.\n\nOdeur forte, mais un cœur fondant, coulant et légèrement sucré : bien fait, il se mange à la cuillère. Un fromage entier de 250 g dans sa boîte en bois. Gardez-le dans sa boîte, à l'écart des autres fromages, et servez-le avec un bourgogne rouge.",
     "price": "12.50",
     "category": 5,
     "language": "fr"
@@ -275,7 +275,7 @@
   "pk": 14,
   "fields": {
     "name": "Crottin de Chavignol AOP",
-    "description": "Lait cru de chèvre, des collines du Sancerrois dans la vallée de la Loire. Un petit fromage de 60 g, frais et citronné jeune, noiseté et friable une fois affiné. Vendu à la pièce.",
+    "description": "Lait cru de chèvre, du village de Chavignol et des collines du Sancerrois, dans la vallée de la Loire. Un petit fromage de 60 g à fine croûte naturelle, affiné au moins dix jours.\n\nJeune, il est blanc, frais et citronné ; après quelques semaines, sa croûte sèche et bleuit, et son cœur devient noiseté, friable et plus fort. Servez-le avec un sancerre, ou faites un crottin chaud : coupez-le en deux, posez-le sur une tranche de pain, passez-le quelques minutes sous le gril et servez-le sur une salade verte. Meilleur du printemps à l'automne. Vendu à la pièce.",
     "price": "3.20",
     "category": 6,
     "language": "fr"
@@ -286,7 +286,7 @@
   "pk": 15,
   "fields": {
     "name": "Sainte-Maure de Touraine AOP",
-    "description": "Lait cru de chèvre, de Touraine dans la vallée de la Loire. Une bûche de 250 g traversée en son centre par une paille de seigle, à la croûte cendrée. Dense et légèrement salée, avec une pointe de noisette.",
+    "description": "Lait cru de chèvre, de Touraine, dans la vallée de la Loire. Une bûche de 250 g traversée en son centre par une paille de seigle, qui tient le caillé fragile ; la paille est gravée du nom du fromage et de son producteur. Sa croûte est saupoudrée de cendre de charbon de bois salée, puis affinée au moins dix jours.\n\nDense et légèrement salée, avec une pointe de noisette qui s'affirme avec l'affinage. Retirez la paille, puis coupez la bûche en rondelles. Bonne avec un vouvray blanc ou un chinon rouge, tous deux de Touraine. Meilleure du printemps à l'automne.",
     "price": "9.80",
     "category": 6,
     "language": "fr"
@@ -297,7 +297,7 @@
   "pk": 16,
   "fields": {
     "name": "Comté AOP, 18 mois",
-    "description": "Lait cru de vache, du massif du Jura. Un fromage à pâte pressée cuite affiné 18 mois en cave : ferme, avec des cristaux croquants et un goût de noix grillées et de beurre noisette. Vendu en morceau de 250 g.",
+    "description": "Lait cru de vache, du massif du Jura, où les vaches montbéliardes pâturent des prairies ouvertes. Le lait part chaque jour à la fruitière, la fromagerie du village, où il est travaillé en cuves de cuivre en meules d'environ 40 kg. Le comté s'affine au moins quatre mois ; le nôtre passe 18 mois en cave.\n\nUn fromage à pâte pressée cuite : ferme, avec des cristaux croquants et un goût de noix grillées et de beurre noisette. Retirez la croûte. Servez-le en fines lamelles avec un vin jaune du Jura, ou râpez-le dans un gratin. Vendu en morceau de 250 g.",
     "price": "8.90",
     "category": 7,
     "language": "fr"
@@ -308,7 +308,7 @@
   "pk": 17,
   "fields": {
     "name": "Beaufort AOP",
-    "description": "Lait cru de vache, des Alpes de Savoie, issu du lait d'un seul troupeau. Un fromage à pâte pressée cuite, souple et fruité, aux notes de fleurs alpines. Vendu en morceau de 250 g.",
+    "description": "Lait cru de vache, des Alpes de Savoie. Le nôtre est un beaufort d'été, fabriqué de juin à octobre, quand les vaches tarines et abondances pâturent les alpages. Ses meules, d'environ 40 kg, ont un talon concave, formé par le cercle de bois qui les tient, et s'affinent au moins cinq mois.\n\nUn fromage à pâte pressée cuite, souple et fruité, aux notes de fleurs alpines, long en bouche. Retirez la croûte. Servez-le avec un vin blanc de Savoie, ou faites-le fondre dans une fondue. Vendu en morceau de 250 g.",
     "price": "9.50",
     "category": 7,
     "language": "fr"
@@ -319,7 +319,7 @@
   "pk": 18,
   "fields": {
     "name": "Mimolette, affinée 18 mois",
-    "description": "Lait pasteurisé de vache, de la région lilloise dans le nord de la France. Un fromage rond, orange vif à l'intérieur, affiné 18 mois : dur, sucré et caramélisé. Sa croûte rugueuse ne se mange pas. Vendu en morceau de 250 g.",
+    "description": "Lait pasteurisé de vache, de la région lilloise, dans le nord de la France. Ce n'est pas un fromage AOP. Un fromage rond, orange vif à l'intérieur : sa couleur vient du rocou, un colorant végétal naturel. Pendant l'affinage, de minuscules acariens, les cirons, creusent sa croûte et la font respirer, ce qui lui donne son aspect rugueux et grêlé.\n\nLa mimolette se vend jeune, à trois mois, jusqu'à extra-vieille, à 18 mois et plus. La nôtre est affinée 18 mois : dure, sucrée et caramélisée, avec une pointe de noisette. Sa croûte ne se mange pas. Servez-la en copeaux ou en petits dés, avec une bière du Nord. Vendue en morceau de 250 g.",
     "price": "7.20",
     "category": 7,
     "language": "fr"
@@ -330,7 +330,7 @@
   "pk": 19,
   "fields": {
     "name": "Roquefort AOP",
-    "description": "Lait cru de brebis, affiné dans les caves naturelles du Combalou, en Aveyron. Humide et crémeux, avec des veines vert-bleu, salé et piquant. Vendu en morceau de 200 g.",
+    "description": "Lait cru de brebis lacaune, affiné au moins 90 jours dans les caves naturelles du Combalou, à Roquefort-sur-Soulzon, en Aveyron. Des failles dans la roche, les fleurines, y font circuler un air frais et humide qui nourrit sa moisissure bleue, le Penicillium roqueforti.\n\nHumide et crémeux, avec des veines vert-bleu, salé et piquant. Il s'émiette : coupez-le au fil ou avec un couteau trempé dans l'eau chaude. Servez-le avec des noix, une poire ou un peu de miel, et un sauternes moelleux. Vendu en morceau de 200 g, dans sa feuille d'aluminium.",
     "price": "8.40",
     "category": 8,
     "language": "fr"
@@ -341,7 +341,7 @@
   "pk": 20,
   "fields": {
     "name": "Bleu d'Auvergne AOP",
-    "description": "Lait pasteurisé de vache, des volcans d'Auvergne. Un fromage bleu plus doux que le roquefort, onctueux et beurré. Un bon premier bleu. Vendu en morceau de 250 g.",
+    "description": "Lait pasteurisé de vache, des volcans d'Auvergne. Les jeunes fromages sont piqués à l'aiguille pour que l'air atteigne le cœur, où pousse la moisissure bleue ; ils s'affinent au moins quatre semaines en cave fraîche et humide.\n\nUn fromage bleu plus doux que le roquefort, onctueux et beurré, légèrement piquant. Un bon premier bleu. Il fond bien dans une sauce ou une quiche, et se marie avec un rouge d'Auvergne. Vendu en morceau de 250 g.",
     "price": "5.60",
     "category": 8,
     "language": "fr"
@@ -425,7 +425,7 @@
   "fields": {
     "page": 2,
     "title": "Do you ship outside France?",
-    "body": "Yes, to Belgium, Luxembourg, Germany and the Netherlands, in 48 to 72 hours, for €19.90. We do not ship outside the European Union."
+    "body": "Yes, to Belgium, Luxembourg, Germany and the Netherlands, in 48 to 72 hours, for €19.90, in the same insulated boxes and on the same shipping days. Free delivery above €60 applies to mainland France only. We do not ship outside the European Union."
   }
 },
 {
@@ -434,7 +434,7 @@
   "fields": {
     "page": 2,
     "title": "What if I am not at home?",
-    "body": "The carrier leaves the parcel at a nearby pick-up point. An unopened box keeps the cheese cool for 48 hours."
+    "body": "The carrier leaves the parcel at a nearby pick-up point and lets you know where. An unopened box keeps the cheese cool for 48 hours: collect it the same day or the next, and put the cheese in the fridge as soon as you are home."
   }
 },
 {
@@ -443,7 +443,7 @@
   "fields": {
     "page": 4,
     "title": "How should I store cheese?",
-    "body": "Wrap it in waxed or cheese paper, never in cling film, and keep it in the vegetable drawer of the fridge. Take it out one hour before eating: cheese tastes best at room temperature."
+    "body": "Wrap it in waxed or cheese paper, never in cling film, and keep it in the vegetable drawer of the fridge. Wrap each cheese on its own, and keep strong ones such as Époisses in a closed box. Eat soft and goat cheeses within a week; hard cheeses keep two to three weeks. Take it out one hour before eating: cheese tastes best at room temperature."
   }
 },
 {
@@ -452,7 +452,7 @@
   "fields": {
     "page": 4,
     "title": "Which cheeses can I eat while pregnant?",
-    "body": "French health guidance for pregnant women: avoid raw-milk cheeses, except hard cooked cheeses such as Comté and Beaufort; remove the rind of every cheese; avoid ready-grated cheese. Some health services also advise avoiding soft cheeses with a bloomy or washed rind, such as Brie, Camembert or Époisses, even when pasteurised. Each product says whether its milk is raw or pasteurised. Ask your doctor or midwife if in doubt."
+    "body": "French health guidance for pregnant women: avoid raw-milk cheeses, except hard cooked cheeses such as Comté and Beaufort; remove the rind of every cheese; avoid ready-grated cheese. Some health services also advise avoiding soft cheeses with a bloomy or washed rind, such as Brie, Camembert or Époisses, even when pasteurised. The risk is listeria, a bacterium that can live in cheese; cooking a cheese until it is piping hot all through, as in a gratin, kills it. Each product says whether its milk is raw or pasteurised. Ask your doctor or midwife if in doubt."
   }
 },
 {
@@ -461,7 +461,7 @@
   "fields": {
     "page": 4,
     "title": "Can I eat the rind?",
-    "body": "The rinds of Brie, Camembert and goat cheeses can be eaten. Those of Comté, Beaufort and Mimolette are too hard: cut them off."
+    "body": "The rinds of Brie, Camembert and goat cheeses can be eaten, and so can the ash of Sainte-Maure; the rind of Époisses too, if you like its strength. Those of Comté, Beaufort and Mimolette are too hard: cut them off. Roquefort and Bleu d'Auvergne have no real rind, only their foil."
   }
 },
 {
@@ -470,7 +470,7 @@
   "fields": {
     "page": 4,
     "title": "Can I freeze cheese?",
-    "body": "We do not advise it: freezing breaks the texture. Grated hard cheese freezes well for cooking."
+    "body": "We do not advise it: freezing breaks the texture, and the cheese loses its taste. Buy smaller pieces more often instead. Grated hard cheese, such as Comté, freezes well for cooking: use it straight from the freezer, within three months."
   }
 },
 {
@@ -479,7 +479,7 @@
   "fields": {
     "page": 6,
     "title": "Livrez-vous hors de France ?",
-    "body": "Oui, en Belgique, au Luxembourg, en Allemagne et aux Pays-Bas, en 48 à 72 heures, pour 19,90 €. Nous ne livrons pas en dehors de l'Union européenne."
+    "body": "Oui, en Belgique, au Luxembourg, en Allemagne et aux Pays-Bas, en 48 à 72 heures, pour 19,90 €, dans les mêmes boîtes isothermes et les mêmes jours d'expédition. La livraison gratuite au-delà de 60 € ne vaut que pour la France métropolitaine. Nous ne livrons pas en dehors de l'Union européenne."
   }
 },
 {
@@ -488,7 +488,7 @@
   "fields": {
     "page": 6,
     "title": "Que se passe-t-il si je ne suis pas chez moi ?",
-    "body": "Le transporteur dépose le colis dans un point relais proche. Une boîte non ouverte garde le fromage au frais pendant 48 heures."
+    "body": "Le transporteur dépose le colis dans un point relais proche et vous indique lequel. Une boîte non ouverte garde le fromage au frais pendant 48 heures : récupérez-la le jour même ou le lendemain, et mettez le fromage au réfrigérateur dès votre retour."
   }
 },
 {
@@ -497,7 +497,7 @@
   "fields": {
     "page": 8,
     "title": "Comment conserver le fromage ?",
-    "body": "Enveloppez-le dans du papier ciré ou du papier à fromage, jamais dans du film alimentaire, et gardez-le dans le bac à légumes du réfrigérateur. Sortez-le une heure avant de le manger : le fromage est meilleur à température ambiante."
+    "body": "Enveloppez-le dans du papier ciré ou du papier à fromage, jamais dans du film alimentaire, et gardez-le dans le bac à légumes du réfrigérateur. Emballez chaque fromage à part, et gardez les plus forts, comme l'époisses, dans une boîte fermée. Mangez les fromages à pâte molle et de chèvre dans la semaine ; les fromages à pâte dure se gardent deux à trois semaines. Sortez-le une heure avant de le manger : le fromage est meilleur à température ambiante."
   }
 },
 {
@@ -506,7 +506,7 @@
   "fields": {
     "page": 8,
     "title": "Quels fromages peut-on manger quand on est enceinte ?",
-    "body": "Recommandations sanitaires françaises pour les femmes enceintes : éviter les fromages au lait cru, sauf les fromages à pâte pressée cuite comme le comté et le beaufort ; retirer la croûte de tous les fromages ; éviter le fromage déjà râpé. Certains services de santé conseillent aussi d'éviter les fromages à pâte molle à croûte fleurie ou lavée, comme le brie, le camembert ou l'époisses, même pasteurisés. Chaque produit indique si son lait est cru ou pasteurisé. En cas de doute, demandez conseil à votre médecin ou à votre sage-femme."
+    "body": "Recommandations sanitaires françaises pour les femmes enceintes : éviter les fromages au lait cru, sauf les fromages à pâte pressée cuite comme le comté et le beaufort ; retirer la croûte de tous les fromages ; éviter le fromage déjà râpé. Certains services de santé conseillent aussi d'éviter les fromages à pâte molle à croûte fleurie ou lavée, comme le brie, le camembert ou l'époisses, même pasteurisés. Le risque est la listeria, une bactérie qui peut vivre dans le fromage ; un fromage cuit jusqu'à être brûlant à cœur, comme dans un gratin, n'en contient plus. Chaque produit indique si son lait est cru ou pasteurisé. En cas de doute, demandez conseil à votre médecin ou à votre sage-femme."
   }
 },
 {
@@ -515,7 +515,7 @@
   "fields": {
     "page": 8,
     "title": "Peut-on manger la croûte ?",
-    "body": "Les croûtes du brie, du camembert et des fromages de chèvre se mangent. Celles du comté, du beaufort et de la mimolette sont trop dures : retirez-les."
+    "body": "Les croûtes du brie, du camembert et des fromages de chèvre se mangent, la cendre de la sainte-maure aussi ; la croûte de l'époisses également, si vous aimez sa force. Celles du comté, du beaufort et de la mimolette sont trop dures : retirez-les. Le roquefort et le bleu d'Auvergne n'ont pas vraiment de croûte, seulement leur feuille d'aluminium."
   }
 },
 {
@@ -524,7 +524,7 @@
   "fields": {
     "page": 8,
     "title": "Peut-on congeler le fromage ?",
-    "body": "Nous ne le conseillons pas : la congélation abîme la texture. Le fromage à pâte dure râpé se congèle bien pour la cuisine."
+    "body": "Nous ne le conseillons pas : la congélation abîme la texture, et le fromage perd son goût. Achetez plutôt de plus petits morceaux, plus souvent. Le fromage à pâte dure râpé, comme le comté, se congèle bien pour la cuisine : utilisez-le directement sorti du congélateur, dans les trois mois."
   }
 },
 {
@@ -532,7 +532,7 @@
   "pk": 1,
   "fields": {
     "page": 1,
-    "body": "Fromagerie du Marché is a small cheese shop that sells French cheeses only. Most of them are AOP cheeses, bought directly from farms, cooperatives and cellars. We ripen the soft and goat cheeses ourselves, in our own cellar, until they are ready to eat."
+    "body": "Fromagerie du Marché is a small cheese shop that sells French cheeses only. Most of them are AOP cheeses, bought directly from farms, cooperatives and cellars: we know who made each cheese on the counter.\n\nWe ripen the soft and goat cheeses ourselves, in our own cellar, until they are ready to eat. The counter follows the seasons: goat cheeses from spring to autumn, summer Beaufort once it is old enough. Ask us for a taste before you choose."
   }
 },
 {
@@ -540,7 +540,7 @@
   "pk": 2,
   "fields": {
     "page": 1,
-    "body": "Opening hours: Tuesday to Saturday from 9 am to 7 pm, Sunday from 9 am to 1 pm. The shop is closed on Mondays."
+    "body": "Opening hours: Tuesday to Saturday from 9 am to 7 pm, Sunday from 9 am to 1 pm. The shop is closed on Mondays, and every summer from 4 to 18 August."
   }
 },
 {
@@ -548,7 +548,7 @@
   "pk": 3,
   "fields": {
     "page": 2,
-    "body": "We ship in insulated boxes with ice packs, from Monday to Wednesday only, so that no cheese spends a weekend in transit. Delivery in mainland France takes 24 to 48 hours; it costs €9.90, and is free for orders above €60."
+    "body": "We ship in insulated boxes with ice packs, from Monday to Wednesday only, so that no cheese spends a weekend in transit. An order placed from Thursday to Sunday leaves on the next Monday. Each cheese is wrapped in cheese paper, and the strong ones are packed apart.\n\nDelivery in mainland France takes 24 to 48 hours; it costs €9.90, and is free for orders above €60. When the box arrives, put the cheeses in the fridge, and take them out an hour before eating."
   }
 },
 {
@@ -556,7 +556,7 @@
   "pk": 4,
   "fields": {
     "page": 3,
-    "body": "We make cheese boards for weddings, birthdays and company events, for 10 to 200 guests, with bread and a choice of jams. Count 100 to 150 g of cheese per guest after a meal, and 200 to 250 g when the board is the main course. Order at least one week ahead."
+    "body": "We make cheese boards for weddings, birthdays and company events, for 10 to 200 guests, with bread and a choice of jams. Each board brings together four to six cheeses, from the mildest to the strongest: soft, goat, hard and blue. Each cheese is labelled with its name and whether its milk is raw or pasteurised.\n\nCount 100 to 150 g of cheese per guest after a meal, and 200 to 250 g when the board is the main course. Order at least one week ahead."
   }
 },
 {
@@ -564,7 +564,7 @@
   "pk": 5,
   "fields": {
     "page": 5,
-    "body": "La Fromagerie du Marché est une petite fromagerie qui ne vend que des fromages français. La plupart sont des fromages AOP, achetés directement auprès de fermes, de coopératives et de caves. Nous affinons nous-mêmes les fromages à pâte molle et les fromages de chèvre, dans notre propre cave, jusqu'à ce qu'ils soient prêts à être mangés."
+    "body": "La Fromagerie du Marché est une petite fromagerie qui ne vend que des fromages français. La plupart sont des fromages AOP, achetés directement auprès de fermes, de coopératives et de caves : nous savons qui a fait chaque fromage du comptoir.\n\nNous affinons nous-mêmes les fromages à pâte molle et les fromages de chèvre, dans notre propre cave, jusqu'à ce qu'ils soient prêts à être mangés. Le comptoir suit les saisons : les chèvres du printemps à l'automne, le beaufort d'été une fois assez affiné. Demandez-nous à goûter avant de choisir."
   }
 },
 {
@@ -572,7 +572,7 @@
   "pk": 6,
   "fields": {
     "page": 5,
-    "body": "Horaires d'ouverture : du mardi au samedi de 9 h à 19 h, le dimanche de 9 h à 13 h. La boutique est fermée le lundi."
+    "body": "Horaires d'ouverture : du mardi au samedi de 9 h à 19 h, le dimanche de 9 h à 13 h. La boutique est fermée le lundi, et chaque été du 4 au 18 août."
   }
 },
 {
@@ -580,7 +580,7 @@
   "pk": 7,
   "fields": {
     "page": 6,
-    "body": "Nous expédions dans des boîtes isothermes avec des blocs réfrigérants, du lundi au mercredi seulement, pour qu'aucun fromage ne passe un week-end en transit. La livraison en France métropolitaine prend 24 à 48 heures ; elle coûte 9,90 €, et elle est gratuite pour les commandes de plus de 60 €."
+    "body": "Nous expédions dans des boîtes isothermes avec des blocs réfrigérants, du lundi au mercredi seulement, pour qu'aucun fromage ne passe un week-end en transit. Une commande passée du jeudi au dimanche part le lundi suivant. Chaque fromage est emballé dans du papier à fromage, et les plus forts sont emballés à part.\n\nLa livraison en France métropolitaine prend 24 à 48 heures ; elle coûte 9,90 €, et elle est gratuite pour les commandes de plus de 60 €. À l'arrivée de la boîte, mettez les fromages au réfrigérateur, et sortez-les une heure avant de les manger."
   }
 },
 {
@@ -588,7 +588,7 @@
   "pk": 8,
   "fields": {
     "page": 7,
-    "body": "Nous préparons des plateaux de fromages pour les mariages, les anniversaires et les événements d'entreprise, de 10 à 200 convives, avec du pain et un choix de confitures. Comptez 100 à 150 g de fromage par convive après un repas, et 200 à 250 g quand le plateau tient lieu de plat principal. Commandez au moins une semaine à l'avance."
+    "body": "Nous préparons des plateaux de fromages pour les mariages, les anniversaires et les événements d'entreprise, de 10 à 200 convives, avec du pain et un choix de confitures. Chaque plateau réunit quatre à six fromages, du plus doux au plus fort : pâte molle, chèvre, pâte dure et bleu. Chaque fromage est étiqueté avec son nom et indique si son lait est cru ou pasteurisé.\n\nComptez 100 à 150 g de fromage par convive après un repas, et 200 à 250 g quand le plateau tient lieu de plat principal. Commandez au moins une semaine à l'avance."
   }
 }
 ]
