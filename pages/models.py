@@ -1,17 +1,24 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import Truncator
+from django.utils.translation import get_language, override
 
 
 class Page(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
+    language = models.CharField(max_length=8, default="en")
 
     def get_absolute_url(self) -> str:
-        return reverse("page_detail", kwargs={"slug": self.slug})
+        with override(self.language):
+            return reverse("page_detail", kwargs={"slug": self.slug})
 
     def __str__(self) -> str:
         return self.title
+
+
+def pages_in_active_language() -> models.QuerySet[Page]:
+    return Page.objects.filter(language=get_language())
 
 
 class AccordionItem(models.Model):

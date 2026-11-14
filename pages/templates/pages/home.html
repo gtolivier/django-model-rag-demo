@@ -1,10 +1,16 @@
 {% extends "pages/base.html" %}
+{% load i18n %}
 {% block content %}
-<h1>Welcome to the Fromagerie du Marché</h1>
-<p>A small, fictional French cheese shop: its cheeses, its pages and its
+<h1>{% translate "Welcome to the Fromagerie du Marché" %}</h1>
+<p>{% blocktranslate trimmed %}
+A small, fictional French cheese shop: its cheeses, its pages and its
 blog posts are plain Django models. django-model-rag turns them into
 documents, and django-minimal-rag indexes them so that questions about the
-shop can be answered from its own content.</p>
-<p>Browse the <a href="{% url 'product_list' %}">cheeses</a> or read the
-<a href="{% url 'article_list' %}">articles</a>.</p>
+shop can be answered from its own content.
+{% endblocktranslate %}</p>
+{% url 'product_list' as products_url %}{% url 'article_list' as articles_url %}
+<p>{% blocktranslate trimmed %}
+Browse the <a href="{{ products_url }}">cheeses</a> or read the
+<a href="{{ articles_url }}">articles</a>.
+{% endblocktranslate %}</p>
 {% endblock %}

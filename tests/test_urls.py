@@ -2,7 +2,8 @@ from decimal import Decimal
 
 import pytest
 from django.core.management import call_command
-from django.urls import Resolver404, resolve
+from django.urls import Resolver404, resolve, reverse
+from django.utils import translation
 
 from blog.models import Article
 from catalog.models import Category, Product
@@ -21,6 +22,13 @@ def _captured_values(url: str) -> list[str]:
     except Resolver404:
         pytest.fail(f"{url!r} resolves to no route")
     return [str(value) for value in (*match.args, *match.kwargs.values())]
+
+
+def _absolute_url_with_active_language(
+    language: str, instance: Article | Product | Page
+) -> str:
+    with translation.override(language):
+        return instance.get_absolute_url()
 
 
 @pytest.mark.django_db
@@ -63,3 +71,65 @@ def test_an_article_document_url_resolves_to_a_route_capturing_the_article(
 
     [article_document] = rag_store[f"blog.article:{article.pk}"]
     assert str(article.pk) in _captured_values(article_document.url)
+
+
+@pytest.mark.django_db
+def test_a_product_url_is_in_the_product_language_whatever_the_active_one() -> None:
+    category = Category.objects.create(name="Kitchen")
+    english = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=category,
+        language="en",
+    )
+    french = Product.objects.create(
+        name="Bouilloire",
+        description="Fait bouillir un litre d'eau en deux minutes.",
+        price=Decimal("31.40"),
+        category=category,
+        language="fr",
+    )
+
+    french_url = _absolute_url_with_active_language("en", french)
+    english_url = _absolute_url_with_active_language("fr", english)
+
+    assert french_url == f"/fr/products/{french.pk}/"
+    assert english_url == f"/products/{english.pk}/"
+
+
+@pytest.mark.django_db
+def test_an_article_url_is_in_the_article_language_whatever_the_active_one() -> None:
+    english = Article.objects.create(
+        title="Descaling a kettle",
+        body="A cup of vinegar, an hour, and a rinse.",
+        language="en",
+    )
+    french = Article.objects.create(
+        title="Détartrer une bouilloire",
+        body="Une tasse de vinaigre, une heure, et un rinçage.",
+        language="fr",
+    )
+
+    french_url = _absolute_url_with_active_language("en", french)
+    english_url = _absolute_url_with_active_language("fr", english)
+
+    assert french_url == f"/fr/blog/{french.pk}/"
+    assert english_url == f"/blog/{english.pk}/"
+
+
+@pytest.mark.django_db
+def test_a_page_url_is_in_the_page_language_whatever_the_active_one() -> None:
+    english = Page.objects.create(title="FAQ", slug="faq", language="en")
+    french = Page.objects.create(title="Questions", slug="questions", language="fr")
+
+    french_url = _absolute_url_with_active_language("en", french)
+    english_url = _absolute_url_with_active_language("fr", english)
+
+    assert french_url == f"/fr/pages/{french.slug}/"
+    assert english_url == f"/pages/{english.slug}/"
+
+
+def test_the_admin_index_stays_outside_the_language_prefix_in_french() -> None:
+    with translation.override("fr"):
+        assert reverse("admin:index") == "/admin/"

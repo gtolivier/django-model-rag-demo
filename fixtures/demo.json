@@ -4,7 +4,8 @@
   "pk": 1,
   "fields": {
     "title": "Spring goat cheeses are back",
-    "body": "Goat cheeses follow the seasons: goats give milk from early spring to autumn. The best ones come from April to June, when the herds graze fresh grass. Our Crottins de Chavignol and Sainte-Maure de Touraine are back on the counter."
+    "body": "Goat cheeses follow the seasons: goats give milk from early spring to autumn. The best ones come from April to June, when the herds graze fresh grass. Our Crottins de Chavignol and Sainte-Maure de Touraine are back on the counter.",
+    "language": "en"
   }
 },
 {
@@ -12,7 +13,8 @@
   "pk": 2,
   "fields": {
     "title": "Pairing French cheese and wine",
-    "body": "The simplest rule: pair a cheese with a wine from the same region. Crottin de Chavignol with a Sancerre, Comté with a vin jaune from the Jura, Époisses with a red Burgundy. Blue cheeses are the exception: Roquefort is best with a sweet Sauternes."
+    "body": "The simplest rule: pair a cheese with a wine from the same region. Crottin de Chavignol with a Sancerre, Comté with a vin jaune from the Jura, Époisses with a red Burgundy. Blue cheeses are the exception: Roquefort is best with a sweet Sauternes.",
+    "language": "en"
   }
 },
 {
@@ -20,7 +22,8 @@
   "pk": 3,
   "fields": {
     "title": "How to cut a cheese",
-    "body": "Everyone should get some rind and some heart. Cut a round cheese like a cake, from the centre. Cut a wedge of Brie along its length, never taking off its tip. Cut a log, such as Sainte-Maure, in rounds."
+    "body": "Everyone should get some rind and some heart. Cut a round cheese like a cake, from the centre. Cut a wedge of Brie along its length, never taking off its tip. Cut a log, such as Sainte-Maure, in rounds.",
+    "language": "en"
   }
 },
 {
@@ -28,7 +31,44 @@
   "pk": 4,
   "fields": {
     "title": "Summer closing",
-    "body": "The shop closes for its summer break from 4 to 18 August. Orders are shipped until Wednesday 29 July, and shipping starts again on Wednesday 19 August."
+    "body": "The shop closes for its summer break from 4 to 18 August. Orders are shipped until Wednesday 29 July, and shipping starts again on Wednesday 19 August.",
+    "language": "en"
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 5,
+  "fields": {
+    "title": "Les fromages de chèvre de printemps sont de retour",
+    "body": "Les fromages de chèvre suivent les saisons : les chèvres donnent du lait du début du printemps à l'automne. Les meilleurs arrivent d'avril à juin, quand les troupeaux broutent l'herbe fraîche. Nos Crottins de Chavignol et nos Sainte-Maure de Touraine sont de retour au comptoir.",
+    "language": "fr"
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 6,
+  "fields": {
+    "title": "Associer fromage et vin français",
+    "body": "La règle la plus simple : associer un fromage à un vin de la même région. Crottin de Chavignol avec un Sancerre, Comté avec un vin jaune du Jura, Époisses avec un bourgogne rouge. Les fromages bleus font exception : le roquefort se marie mieux avec un sauternes moelleux.",
+    "language": "fr"
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 7,
+  "fields": {
+    "title": "Comment couper un fromage",
+    "body": "Chacun doit avoir un peu de croûte et un peu de cœur. Coupez un fromage rond comme un gâteau, à partir du centre. Coupez une part de brie dans la longueur, sans jamais retirer sa pointe. Coupez une bûche, comme la sainte-maure, en rondelles.",
+    "language": "fr"
+  }
+},
+{
+  "model": "blog.article",
+  "pk": 8,
+  "fields": {
+    "title": "Fermeture estivale",
+    "body": "La boutique ferme pour ses vacances d'été du 4 au 18 août. Les commandes sont expédiées jusqu'au mercredi 29 juillet, et les expéditions reprennent le mercredi 19 août.",
+    "language": "fr"
   }
 },
 {
@@ -60,13 +100,42 @@
   }
 },
 {
+  "model": "catalog.category",
+  "pk": 5,
+  "fields": {
+    "name": "Fromages à pâte molle"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 6,
+  "fields": {
+    "name": "Fromages de chèvre"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 7,
+  "fields": {
+    "name": "Fromages à pâte dure"
+  }
+},
+{
+  "model": "catalog.category",
+  "pk": 8,
+  "fields": {
+    "name": "Fromages bleus"
+  }
+},
+{
   "model": "catalog.product",
   "pk": 1,
   "fields": {
     "name": "Brie de Meaux AOP",
     "description": "Raw cow's milk, from the Île-de-France region east of Paris. A wide, thin disc with a white bloomy rind, ripened at least four weeks: creamy, with a taste of mushrooms and hazelnut. Sold by the 250 g slice.",
     "price": "6.50",
-    "category": 1
+    "category": 1,
+    "language": "en"
   }
 },
 {
@@ -76,7 +145,8 @@
     "name": "Camembert de Normandie AOP",
     "description": "Raw cow's milk from Normandy, ladled into its moulds by hand. A whole 250 g cheese in its wooden box. We sell it ripe: soft to the touch at the centre, with a rich, slightly farmy taste.",
     "price": "7.90",
-    "category": 1
+    "category": 1,
+    "language": "en"
   }
 },
 {
@@ -86,7 +156,8 @@
     "name": "Époisses AOP",
     "description": "Pasteurised cow's milk, from Burgundy. A washed-rind cheese: its orange rind is washed with marc de Bourgogne, a grape brandy, while it ripens. Strong smell, runny and mellow inside. A whole 250 g cheese.",
     "price": "12.50",
-    "category": 1
+    "category": 1,
+    "language": "en"
   }
 },
 {
@@ -96,7 +167,8 @@
     "name": "Crottin de Chavignol AOP",
     "description": "Raw goat's milk, from the Sancerre hills in the Loire Valley. A small 60 g cheese, fresh and lemony when young, nutty and crumbly once ripened. Sold by the piece.",
     "price": "3.20",
-    "category": 2
+    "category": 2,
+    "language": "en"
   }
 },
 {
@@ -106,7 +178,8 @@
     "name": "Sainte-Maure de Touraine AOP",
     "description": "Raw goat's milk, from Touraine in the Loire Valley. A 250 g log with a rye straw through its centre and an ash-dusted rind. Dense and slightly salty, with a hint of hazelnut.",
     "price": "9.80",
-    "category": 2
+    "category": 2,
+    "language": "en"
   }
 },
 {
@@ -116,7 +189,8 @@
     "name": "Comté AOP, 18 months",
     "description": "Raw cow's milk, from the Jura mountains. A hard cooked cheese aged 18 months in cellars: firm, with crunchy crystals and a taste of roasted nuts and brown butter. Sold by the 250 g piece.",
     "price": "8.90",
-    "category": 3
+    "category": 3,
+    "language": "en"
   }
 },
 {
@@ -126,7 +200,8 @@
     "name": "Beaufort AOP",
     "description": "Raw cow's milk, from the Savoie Alps, made from the milk of a single herd. A hard cooked cheese, supple and fruity, with notes of alpine flowers. Sold by the 250 g piece.",
     "price": "9.50",
-    "category": 3
+    "category": 3,
+    "language": "en"
   }
 },
 {
@@ -136,7 +211,8 @@
     "name": "Mimolette, aged 18 months",
     "description": "Pasteurised cow's milk, from the Lille area in northern France. A round cheese, bright orange inside, aged 18 months: hard, sweet and caramel-like. Its rough rind is not eaten. Sold by the 250 g piece.",
     "price": "7.20",
-    "category": 3
+    "category": 3,
+    "language": "en"
   }
 },
 {
@@ -146,7 +222,8 @@
     "name": "Roquefort AOP",
     "description": "Raw ewe's milk, ripened in the natural caves of Mount Combalou, in Aveyron. Moist and creamy, with green-blue veins, salty and tangy. Sold by the 200 g piece.",
     "price": "8.40",
-    "category": 4
+    "category": 4,
+    "language": "en"
   }
 },
 {
@@ -156,7 +233,118 @@
     "name": "Bleu d'Auvergne AOP",
     "description": "Pasteurised cow's milk, from the Auvergne volcanoes. A blue cheese milder than Roquefort, soft and buttery. A good first blue. Sold by the 250 g piece.",
     "price": "5.60",
-    "category": 4
+    "category": 4,
+    "language": "en"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 11,
+  "fields": {
+    "name": "Brie de Meaux AOP",
+    "description": "Lait cru de vache, de la région Île-de-France, à l'est de Paris. Un disque large et fin à croûte fleurie blanche, affiné au moins quatre semaines : crémeux, avec un goût de champignon et de noisette. Vendu à la part de 250 g.",
+    "price": "6.50",
+    "category": 5,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 12,
+  "fields": {
+    "name": "Camembert de Normandie AOP",
+    "description": "Lait cru de vache de Normandie, moulé à la louche à la main. Un fromage entier de 250 g dans sa boîte en bois. Nous le vendons à point : souple au toucher au centre, avec un goût riche, légèrement fermier.",
+    "price": "7.90",
+    "category": 5,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 13,
+  "fields": {
+    "name": "Époisses AOP",
+    "description": "Lait pasteurisé de vache, de Bourgogne. Un fromage à croûte lavée : sa croûte orangée est lavée au marc de Bourgogne, une eau-de-vie de raisin, pendant l'affinage. Odeur forte, intérieur coulant et fondant. Un fromage entier de 250 g.",
+    "price": "12.50",
+    "category": 5,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 14,
+  "fields": {
+    "name": "Crottin de Chavignol AOP",
+    "description": "Lait cru de chèvre, des collines du Sancerrois dans la vallée de la Loire. Un petit fromage de 60 g, frais et citronné jeune, noiseté et friable une fois affiné. Vendu à la pièce.",
+    "price": "3.20",
+    "category": 6,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 15,
+  "fields": {
+    "name": "Sainte-Maure de Touraine AOP",
+    "description": "Lait cru de chèvre, de Touraine dans la vallée de la Loire. Une bûche de 250 g traversée en son centre par une paille de seigle, à la croûte cendrée. Dense et légèrement salée, avec une pointe de noisette.",
+    "price": "9.80",
+    "category": 6,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 16,
+  "fields": {
+    "name": "Comté AOP, 18 mois",
+    "description": "Lait cru de vache, du massif du Jura. Un fromage à pâte pressée cuite affiné 18 mois en cave : ferme, avec des cristaux croquants et un goût de noix grillées et de beurre noisette. Vendu en morceau de 250 g.",
+    "price": "8.90",
+    "category": 7,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 17,
+  "fields": {
+    "name": "Beaufort AOP",
+    "description": "Lait cru de vache, des Alpes de Savoie, issu du lait d'un seul troupeau. Un fromage à pâte pressée cuite, souple et fruité, aux notes de fleurs alpines. Vendu en morceau de 250 g.",
+    "price": "9.50",
+    "category": 7,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 18,
+  "fields": {
+    "name": "Mimolette, affinée 18 mois",
+    "description": "Lait pasteurisé de vache, de la région lilloise dans le nord de la France. Un fromage rond, orange vif à l'intérieur, affiné 18 mois : dur, sucré et caramélisé. Sa croûte rugueuse ne se mange pas. Vendu en morceau de 250 g.",
+    "price": "7.20",
+    "category": 7,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 19,
+  "fields": {
+    "name": "Roquefort AOP",
+    "description": "Lait cru de brebis, affiné dans les caves naturelles du Combalou, en Aveyron. Humide et crémeux, avec des veines vert-bleu, salé et piquant. Vendu en morceau de 200 g.",
+    "price": "8.40",
+    "category": 8,
+    "language": "fr"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 20,
+  "fields": {
+    "name": "Bleu d'Auvergne AOP",
+    "description": "Lait pasteurisé de vache, des volcans d'Auvergne. Un fromage bleu plus doux que le roquefort, onctueux et beurré. Un bon premier bleu. Vendu en morceau de 250 g.",
+    "price": "5.60",
+    "category": 8,
+    "language": "fr"
   }
 },
 {
@@ -164,7 +352,8 @@
   "pk": 1,
   "fields": {
     "title": "About us",
-    "slug": "about"
+    "slug": "about",
+    "language": "en"
   }
 },
 {
@@ -172,7 +361,8 @@
   "pk": 2,
   "fields": {
     "title": "Delivery",
-    "slug": "delivery"
+    "slug": "delivery",
+    "language": "en"
   }
 },
 {
@@ -180,7 +370,8 @@
   "pk": 3,
   "fields": {
     "title": "Cheese boards",
-    "slug": "cheese-boards"
+    "slug": "cheese-boards",
+    "language": "en"
   }
 },
 {
@@ -188,7 +379,44 @@
   "pk": 4,
   "fields": {
     "title": "Questions",
-    "slug": "faq"
+    "slug": "faq",
+    "language": "en"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 5,
+  "fields": {
+    "title": "À propos",
+    "slug": "a-propos",
+    "language": "fr"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 6,
+  "fields": {
+    "title": "Livraison",
+    "slug": "livraison",
+    "language": "fr"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 7,
+  "fields": {
+    "title": "Plateaux de fromages",
+    "slug": "plateaux-de-fromages",
+    "language": "fr"
+  }
+},
+{
+  "model": "pages.page",
+  "pk": 8,
+  "fields": {
+    "title": "Questions",
+    "slug": "questions",
+    "language": "fr"
   }
 },
 {
@@ -246,6 +474,60 @@
   }
 },
 {
+  "model": "pages.accordionitem",
+  "pk": 7,
+  "fields": {
+    "page": 6,
+    "title": "Livrez-vous hors de France ?",
+    "body": "Oui, en Belgique, au Luxembourg, en Allemagne et aux Pays-Bas, en 48 à 72 heures, pour 19,90 €. Nous ne livrons pas en dehors de l'Union européenne."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 8,
+  "fields": {
+    "page": 6,
+    "title": "Que se passe-t-il si je ne suis pas chez moi ?",
+    "body": "Le transporteur dépose le colis dans un point relais proche. Une boîte non ouverte garde le fromage au frais pendant 48 heures."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 9,
+  "fields": {
+    "page": 8,
+    "title": "Comment conserver le fromage ?",
+    "body": "Enveloppez-le dans du papier ciré ou du papier à fromage, jamais dans du film alimentaire, et gardez-le dans le bac à légumes du réfrigérateur. Sortez-le une heure avant de le manger : le fromage est meilleur à température ambiante."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 10,
+  "fields": {
+    "page": 8,
+    "title": "Quels fromages peut-on manger quand on est enceinte ?",
+    "body": "Recommandations sanitaires françaises pour les femmes enceintes : éviter les fromages au lait cru, sauf les fromages à pâte pressée cuite comme le comté et le beaufort ; retirer la croûte de tous les fromages ; éviter le fromage déjà râpé. Certains services de santé conseillent aussi d'éviter les fromages à pâte molle à croûte fleurie ou lavée, comme le brie, le camembert ou l'époisses, même pasteurisés. Chaque produit indique si son lait est cru ou pasteurisé. En cas de doute, demandez conseil à votre médecin ou à votre sage-femme."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 11,
+  "fields": {
+    "page": 8,
+    "title": "Peut-on manger la croûte ?",
+    "body": "Les croûtes du brie, du camembert et des fromages de chèvre se mangent. Celles du comté, du beaufort et de la mimolette sont trop dures : retirez-les."
+  }
+},
+{
+  "model": "pages.accordionitem",
+  "pk": 12,
+  "fields": {
+    "page": 8,
+    "title": "Peut-on congeler le fromage ?",
+    "body": "Nous ne le conseillons pas : la congélation abîme la texture. Le fromage à pâte dure râpé se congèle bien pour la cuisine."
+  }
+},
+{
   "model": "pages.textplugin",
   "pk": 1,
   "fields": {
@@ -275,6 +557,38 @@
   "fields": {
     "page": 3,
     "body": "We make cheese boards for weddings, birthdays and company events, for 10 to 200 guests, with bread and a choice of jams. Count 100 to 150 g of cheese per guest after a meal, and 200 to 250 g when the board is the main course. Order at least one week ahead."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 5,
+  "fields": {
+    "page": 5,
+    "body": "La Fromagerie du Marché est une petite fromagerie qui ne vend que des fromages français. La plupart sont des fromages AOP, achetés directement auprès de fermes, de coopératives et de caves. Nous affinons nous-mêmes les fromages à pâte molle et les fromages de chèvre, dans notre propre cave, jusqu'à ce qu'ils soient prêts à être mangés."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 6,
+  "fields": {
+    "page": 5,
+    "body": "Horaires d'ouverture : du mardi au samedi de 9 h à 19 h, le dimanche de 9 h à 13 h. La boutique est fermée le lundi."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 7,
+  "fields": {
+    "page": 6,
+    "body": "Nous expédions dans des boîtes isothermes avec des blocs réfrigérants, du lundi au mercredi seulement, pour qu'aucun fromage ne passe un week-end en transit. La livraison en France métropolitaine prend 24 à 48 heures ; elle coûte 9,90 €, et elle est gratuite pour les commandes de plus de 60 €."
+  }
+},
+{
+  "model": "pages.textplugin",
+  "pk": 8,
+  "fields": {
+    "page": 7,
+    "body": "Nous préparons des plateaux de fromages pour les mariages, les anniversaires et les événements d'entreprise, de 10 à 200 convives, avec du pain et un choix de confitures. Comptez 100 à 150 g de fromage par convive après un repas, et 200 à 250 g quand le plateau tient lieu de plat principal. Commandez au moins une semaine à l'avance."
   }
 }
 ]

@@ -111,6 +111,35 @@ def test_sync_titles_an_untitled_accordion_item_with_its_page_title_alone(
     assert document.title == "FAQ"
 
 
+@pytest.mark.django_db
+def test_sync_gives_a_page_block_document_its_page_language(
+    rag_store: DocumentStore,
+) -> None:
+    english = Page.objects.create(title="FAQ", slug="faq", language="en")
+    english_text = TextPlugin.objects.create(page=english, body="We make kettles.")
+    english_item = AccordionItem.objects.create(
+        page=english, title="Shipping", body="We ship within two days."
+    )
+    french = Page.objects.create(title="FAQ", slug="faq-fr", language="fr")
+    french_text = TextPlugin.objects.create(
+        page=french, body="Nous fabriquons des bouilloires."
+    )
+    french_item = AccordionItem.objects.create(
+        page=french, title="Livraison", body="Nous livrons en deux jours."
+    )
+
+    call_command("sync_model_rag")
+
+    [english_text_document] = rag_store[f"pages.textplugin:{english_text.pk}"]
+    [english_item_document] = rag_store[f"pages.accordionitem:{english_item.pk}"]
+    [french_text_document] = rag_store[f"pages.textplugin:{french_text.pk}"]
+    [french_item_document] = rag_store[f"pages.accordionitem:{french_item.pk}"]
+    assert english_text_document.language == "en"
+    assert english_item_document.language == "en"
+    assert french_text_document.language == "fr"
+    assert french_item_document.language == "fr"
+
+
 def _create_pages_with_blocks(*slugs: str) -> None:
     for slug in slugs:
         page = Page.objects.create(title=slug.title(), slug=slug)

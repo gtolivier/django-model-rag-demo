@@ -1,7 +1,8 @@
 {% extends "pages/base.html" %}
-{% block title %}Articles — {% endblock %}
+{% load i18n %}
+{% block title %}{% translate "Articles" %} — {% endblock %}
 {% block content %}
-<h1>Articles</h1>
+<h1>{% translate "Articles" %}</h1>
 <ul class="list">
 {% for article in articles %}
   <li><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></li>

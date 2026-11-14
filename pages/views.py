@@ -1,7 +1,7 @@
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
-from pages.models import Page
+from pages.models import pages_in_active_language
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -9,7 +9,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
-    page = get_object_or_404(Page, slug=slug)
+    page = get_object_or_404(pages_in_active_language(), slug=slug)
     return render(
         request,
         "pages/page_detail.html",

@@ -5,6 +5,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
+from django.utils.translation import override
 
 from blog.models import Article
 from catalog.models import Category, Product
@@ -172,6 +173,52 @@ def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
     )
 
 
+def _create_an_english_and_a_french_article() -> tuple[Article, Article]:
+    english = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language="en",
+    )
+    french = Article.objects.create(
+        title="Détartrer une bouilloire",
+        body="Remplissez-la de vinaigre blanc et laissez agir une nuit.",
+        language="fr",
+    )
+    return english, french
+
+
+@pytest.mark.django_db
+def test_article_list_shows_only_the_articles_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english, french = _create_an_english_and_a_french_article()
+
+    english_response = client.get("/blog/")
+    french_response = client.get("/fr/blog/")
+
+    assert english_response.status_code == 200
+    english_content = english_response.content.decode()
+    assert english.title in english_content
+    assert french.title not in english_content
+    assert french_response.status_code == 200
+    french_content = french_response.content.decode()
+    assert french.title in french_content
+    assert english.title not in french_content
+
+
+@pytest.mark.django_db
+def test_article_view_does_not_find_an_article_of_the_other_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english, french = _create_an_english_and_a_french_article()
+
+    french_under_root = client.get(f"/blog/{french.pk}/")
+    english_under_fr = client.get(f"/fr/blog/{english.pk}/")
+
+    assert french_under_root.status_code == 404
+    assert english_under_fr.status_code == 404
+
+
 @pytest.mark.django_db
 def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
     client: Client, rag_store: DocumentStore
@@ -192,6 +239,22 @@ def test_nav_lists_pages_in_creation_order_even_after_the_oldest_is_edited(
 
 
 @pytest.mark.django_db
+def test_nav_lists_only_the_pages_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english = Page.objects.create(title="Delivery", slug="delivery", language="en")
+    french = Page.objects.create(title="Livraison", slug="livraison", language="fr")
+
+    english_response = client.get("/")
+    french_response = client.get("/fr/")
+
+    assert english_response.status_code == 200
+    assert list(english_response.context["nav_pages"]) == [english]
+    assert french_response.status_code == 200
+    assert list(french_response.context["nav_pages"]) == [french]
+
+
+@pytest.mark.django_db
 def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
     client: Client, rag_store: DocumentStore
 ) -> None:
@@ -208,6 +271,19 @@ def test_home_page_links_to_the_product_list_the_article_list_and_every_page(
     assert f'href="{reverse("article_list")}"' in content
     for page in (about, faq):
         assert f'href="{page.get_absolute_url()}"' in content
+
+
+@pytest.mark.django_db
+def test_home_page_is_served_in_english_at_the_root_and_in_french_under_fr(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english_response = client.get("/")
+    french_response = client.get("/fr/")
+
+    assert english_response.status_code == 200
+    assert english_response.headers.get("Content-Language") == "en"
+    assert french_response.status_code == 200
+    assert french_response.headers.get("Content-Language") == "fr"
 
 
 @pytest.mark.django_db
@@ -249,6 +325,55 @@ def test_every_view_links_to_the_product_list_the_article_list_and_every_page(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(("language", "other_home"), [("en", "/fr/"), ("fr", "/")])
+@pytest.mark.parametrize(
+    "view",
+    [
+        "home",
+        "product_list",
+        "product_detail",
+        "page_detail",
+        "article_list",
+        "article_detail",
+    ],
+)
+def test_every_view_links_to_the_home_of_the_other_language(
+    client: Client,
+    rag_store: DocumentStore,
+    view: str,
+    language: str,
+    other_home: str,
+) -> None:
+    product = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Kitchen"),
+        language=language,
+    )
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language=language,
+    )
+    page = Page.objects.create(title="About us", slug="about", language=language)
+    with override(language):
+        urls = {
+            "home": reverse("home"),
+            "product_list": reverse("product_list"),
+            "product_detail": product.get_absolute_url(),
+            "page_detail": page.get_absolute_url(),
+            "article_list": reverse("article_list"),
+            "article_detail": article.get_absolute_url(),
+        }
+
+    response = client.get(urls[view])
+
+    assert response.status_code == 200
+    assert f'href="{other_home}"' in response.content.decode()
+
+
+@pytest.mark.django_db
 def test_product_list_shows_each_product_category_name_and_price(
     client: Client, rag_store: DocumentStore
 ) -> None:
@@ -273,6 +398,57 @@ def test_product_list_shows_each_product_category_name_and_price(
     assert "29.90" in content
     assert "Garden tools" in content
     assert "14.75" in content
+
+
+def _create_an_english_and_a_french_product() -> tuple[Product, Product]:
+    category = Category.objects.create(name="Kitchen")
+    english = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=category,
+        language="en",
+    )
+    french = Product.objects.create(
+        name="Bouilloire",
+        description="Fait bouillir un litre d'eau en deux minutes.",
+        price=Decimal("31.40"),
+        category=category,
+        language="fr",
+    )
+    return english, french
+
+
+@pytest.mark.django_db
+def test_product_list_shows_only_the_products_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english, french = _create_an_english_and_a_french_product()
+
+    english_response = client.get("/products/")
+    french_response = client.get("/fr/products/")
+
+    assert english_response.status_code == 200
+    english_content = english_response.content.decode()
+    assert english.name in english_content
+    assert french.name not in english_content
+    assert french_response.status_code == 200
+    french_content = french_response.content.decode()
+    assert french.name in french_content
+    assert english.name not in french_content
+
+
+@pytest.mark.django_db
+def test_product_view_does_not_find_a_product_of_the_other_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english, french = _create_an_english_and_a_french_product()
+
+    french_under_root = client.get(f"/products/{french.pk}/")
+    english_under_fr = client.get(f"/fr/products/{english.pk}/")
+
+    assert french_under_root.status_code == 404
+    assert english_under_fr.status_code == 404
 
 
 @pytest.mark.django_db
@@ -331,6 +507,20 @@ def test_page_view_shows_its_accordion_items_in_pk_order_whatever_the_insertion_
     _assert_in_order(
         response.content.decode(), [item.body for item in (earlier, later)]
     )
+
+
+@pytest.mark.django_db
+def test_page_view_does_not_find_a_page_of_the_other_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    Page.objects.create(title="Delivery", slug="delivery", language="en")
+    Page.objects.create(title="Livraison", slug="livraison", language="fr")
+
+    french_under_root = client.get("/pages/livraison/")
+    english_under_fr = client.get("/fr/pages/delivery/")
+
+    assert french_under_root.status_code == 404
+    assert english_under_fr.status_code == 404
 
 
 @pytest.mark.django_db
