@@ -31,7 +31,7 @@
   "pk": 4,
   "fields": {
     "title": "Summer closing",
-    "body": "The shop closes for its summer break from 4 to 18 August. It stays open until Sunday 2 August, at the usual hours, and opens again on Wednesday 19 August.\n\nOrders are shipped until Wednesday 29 July. Orders placed after that are shipped from Wednesday 19 August, when shipping starts again, in the order they arrived. Cheese boards for events during the break cannot be made: order them for before 2 August or after 19 August.",
+    "body": "The shop closes for its summer break from 4 to 18 August. It stays open until Sunday 2 August, at the usual hours, and opens again on Wednesday 19 August.\n\nOrders are shipped until Wednesday 29 July. Orders placed after that are shipped from Wednesday 19 August, when shipping starts again, in the order they arrived. Cheese boards for events during the break cannot be made: order them for 2 August at the latest, or from 19 August.",
     "language": "en"
   }
 },
@@ -58,7 +58,7 @@
   "pk": 7,
   "fields": {
     "title": "Comment couper un fromage",
-    "body": "Chacun doit avoir un peu de croûte et un peu de cœur : le goût change de l'extérieur d'un fromage à son centre, et une bonne coupe partage les deux.\n\nCoupez un fromage rond, comme le camembert, comme un gâteau, à partir du centre. Coupez une part de brie dans la longueur, sans jamais retirer sa pointe : la pointe est la partie la plus crémeuse, et la prendre laisse la croûte aux autres. Coupez une bûche, comme la sainte-maure, en rondelles, après avoir retiré sa paille.\n\nCoupez les fromages à pâte dure, comme le comté ou le beaufort, en fines lamelles, et retirez la croûte dans l'assiette. Les bleus s'émiettent : utilisez un fil, ou un couteau trempé dans l'eau chaude. Sur un plateau, donnez au bleu son propre couteau, pour que son goût ne passe pas aux autres.",
+    "body": "Chacun doit avoir un peu de croûte et un peu de cœur : le goût change de l'extérieur d'un fromage à son centre, et une bonne coupe partage les deux.\n\nUn fromage rond, comme le camembert, se coupe comme un gâteau, à partir du centre. Coupez une part de brie dans la longueur, sans jamais retirer sa pointe : la pointe est la partie la plus crémeuse, et la prendre laisse la croûte aux autres. Coupez une bûche, comme la sainte-maure, en rondelles, après avoir retiré sa paille.\n\nCoupez les fromages à pâte dure, comme le comté ou le beaufort, en fines lamelles, et retirez la croûte dans l'assiette. Les bleus s'émiettent : utilisez un fil, ou un couteau trempé dans l'eau chaude. Sur un plateau, donnez au bleu son propre couteau, pour que son goût ne passe pas aux autres.",
     "language": "fr"
   }
 },
@@ -67,7 +67,7 @@
   "pk": 8,
   "fields": {
     "title": "Fermeture estivale",
-    "body": "La boutique ferme pour ses vacances d'été du 4 au 18 août. Elle reste ouverte jusqu'au dimanche 2 août, aux horaires habituels, et rouvre le mercredi 19 août.\n\nLes commandes sont expédiées jusqu'au mercredi 29 juillet. Les commandes passées après cette date sont expédiées à partir du mercredi 19 août, quand les expéditions reprennent, dans leur ordre d'arrivée. Nous ne pouvons pas préparer de plateaux pour des événements pendant la fermeture : commandez-les pour avant le 2 août ou après le 19 août.",
+    "body": "La boutique ferme pour ses vacances d'été du 4 au 18 août. Elle reste ouverte jusqu'au dimanche 2 août, aux horaires habituels, et rouvre le mercredi 19 août.\n\nLes commandes sont expédiées jusqu'au mercredi 29 juillet. Les commandes passées après cette date sont expédiées à partir du mercredi 19 août, quand les expéditions reprennent, dans leur ordre d'arrivée. Nous ne pouvons pas préparer de plateaux pour des événements pendant la fermeture : commandez-les pour le 2 août au plus tard, ou à partir du 19 août.",
     "language": "fr"
   }
 },
@@ -132,7 +132,7 @@
   "pk": 1,
   "fields": {
     "name": "Brie de Meaux AOP",
-    "description": "Raw cow's milk, from Seine-et-Marne, in the Île-de-France region east of Paris. A wide, thin disc about 36 cm across and close to 3 kg, its curd scooped into the moulds with a perforated shovel, then salted by hand. It ripens at least four weeks and grows a white bloomy rind.\n\nCreamy and supple, with a taste of mushrooms and hazelnut that gets stronger as it ripens. Take it out of the fridge an hour before serving, and cut it along its length. Good with a baguette and a glass of Champagne or a light red. Sold by the 250 g slice.",
+    "description": "Raw cow's milk, from the Brie region, east of Paris. A wide, thin disc about 36 cm across and close to 3 kg, its curd scooped into the moulds with a perforated shovel, then salted by hand. It ripens at least four weeks and grows a white bloomy rind.\n\nCreamy and supple, with a taste of mushrooms and hazelnut that gets stronger as it ripens. Take it out of the fridge an hour before serving, and cut it along its length. Good with a baguette and a glass of Champagne or a light red. Sold by the 250 g slice.",
     "price": "6.50",
     "category": 1,
     "language": "en"
@@ -176,7 +176,7 @@
   "pk": 5,
   "fields": {
     "name": "Sainte-Maure de Touraine AOP",
-    "description": "Raw goat's milk, from Touraine in the Loire Valley. A 250 g log with a rye straw through its centre, which holds the soft curd together; the straw is engraved with the name of the cheese and of its maker. Its rind is dusted with salted charcoal ash, then ripened at least ten days.\n\nDense and slightly salty, with a hint of hazelnut that grows as it ripens. Pull out the straw, then cut the log in rounds. Good with a white Vouvray or a red Chinon, both from Touraine. Best from spring to autumn.",
+    "description": "Raw goat's milk, from Touraine in the Loire Valley. A 250 g log with a rye straw through its centre, which holds the soft curd together; the straw is engraved with the name of the cheese and of its maker. The log is dusted with salted charcoal ash, then ripened at least ten days.\n\nDense and slightly salty, with a hint of hazelnut that grows as it ripens. Pull out the straw, then cut the log in rounds. Good with a white Vouvray or a red Chinon, both from Touraine. Best from spring to autumn.",
     "price": "9.80",
     "category": 2,
     "language": "en"
@@ -242,7 +242,7 @@
   "pk": 11,
   "fields": {
     "name": "Brie de Meaux AOP",
-    "description": "Lait cru de vache, de Seine-et-Marne, en Île-de-France, à l'est de Paris. Un disque large et fin d'environ 36 cm de diamètre et près de 3 kg, dont le caillé est versé dans les moules à la pelle à brie, puis salé à la main. Il s'affine au moins quatre semaines et se couvre d'une croûte fleurie blanche.\n\nCrémeux et souple, avec un goût de champignon et de noisette qui s'affirme avec l'affinage. Sortez-le du réfrigérateur une heure avant de le servir, et coupez-le dans la longueur. Bon avec une baguette et un verre de champagne ou un rouge léger. Vendu à la part de 250 g.",
+    "description": "Lait cru de vache, de la Brie, à l'est de Paris. Un disque large et fin d'environ 36 cm de diamètre et près de 3 kg, dont le caillé est versé dans les moules à la pelle à brie, puis salé à la main. Il s'affine au moins quatre semaines et se couvre d'une croûte fleurie blanche.\n\nCrémeux et souple, avec un goût de champignon et de noisette qui s'affirme avec l'affinage. Sortez-le du réfrigérateur une heure avant de le servir, et coupez-le dans la longueur. Bon avec une baguette et un verre de champagne ou un rouge léger. Vendu à la part de 250 g.",
     "price": "6.50",
     "category": 5,
     "language": "fr"
@@ -286,7 +286,7 @@
   "pk": 15,
   "fields": {
     "name": "Sainte-Maure de Touraine AOP",
-    "description": "Lait cru de chèvre, de Touraine, dans la vallée de la Loire. Une bûche de 250 g traversée en son centre par une paille de seigle, qui tient le caillé fragile ; la paille est gravée du nom du fromage et de son producteur. Sa croûte est saupoudrée de cendre de charbon de bois salée, puis affinée au moins dix jours.\n\nDense et légèrement salée, avec une pointe de noisette qui s'affirme avec l'affinage. Retirez la paille, puis coupez la bûche en rondelles. Bonne avec un vouvray blanc ou un chinon rouge, tous deux de Touraine. Meilleure du printemps à l'automne.",
+    "description": "Lait cru de chèvre, de Touraine, dans la vallée de la Loire. Une bûche de 250 g traversée en son centre par une paille de seigle, qui tient le caillé fragile ; la paille est gravée du nom du fromage et de son producteur. La bûche est saupoudrée de cendre de charbon de bois salée, puis affinée au moins dix jours.\n\nDense et légèrement salée, avec une pointe de noisette qui s'affirme avec l'affinage. Retirez la paille, puis coupez la bûche en rondelles. Bonne avec un vouvray blanc ou un chinon rouge, tous deux de Touraine. Meilleure du printemps à l'automne.",
     "price": "9.80",
     "category": 6,
     "language": "fr"
@@ -330,7 +330,7 @@
   "pk": 19,
   "fields": {
     "name": "Roquefort AOP",
-    "description": "Lait cru de brebis lacaune, affiné dans les caves naturelles du Combalou, à Roquefort-sur-Soulzon, en Aveyron ; son affinage dure au moins 90 jours en tout. Des failles dans la roche, les fleurines, y font circuler un air frais et humide qui nourrit sa moisissure bleue, le Penicillium roqueforti.\n\nHumide et crémeux, avec des veines vert-bleu, salé et piquant. Il s'émiette : coupez-le au fil ou avec un couteau trempé dans l'eau chaude. Servez-le avec des noix, une poire ou un peu de miel, et un sauternes moelleux. Vendu en morceau de 200 g, dans sa feuille d'aluminium.",
+    "description": "Lait cru de brebis lacaune, affiné dans les caves naturelles du Combalou, à Roquefort-sur-Soulzon, en Aveyron, et vendu au plus tôt 90 jours après sa fabrication. Des failles dans la roche, les fleurines, y font circuler un air frais et humide qui nourrit sa moisissure bleue, le Penicillium roqueforti.\n\nHumide et crémeux, avec des veines vert-bleu, salé et piquant. Il s'émiette : coupez-le au fil ou avec un couteau trempé dans l'eau chaude. Servez-le avec des noix, une poire ou un peu de miel, et un sauternes moelleux. Vendu en morceau de 200 g, dans sa feuille d'aluminium.",
     "price": "8.40",
     "category": 8,
     "language": "fr"
@@ -425,7 +425,7 @@
   "fields": {
     "page": 2,
     "title": "Do you ship outside France?",
-    "body": "Yes, to Belgium, Luxembourg, Germany and the Netherlands, in 48 to 72 hours, for €19.90, in the same insulated boxes and on the same shipping days. Free delivery above €60 applies to mainland France only. We do not ship outside the European Union."
+    "body": "Yes, to Belgium, Luxembourg, Germany and the Netherlands, in 48 to 72 hours, for €19.90. Free delivery above €60 applies to mainland France only. We do not ship outside the European Union."
   }
 },
 {
@@ -443,7 +443,7 @@
   "fields": {
     "page": 4,
     "title": "How should I store cheese?",
-    "body": "Wrap it in waxed or cheese paper, never in cling film, and keep it in the vegetable drawer of the fridge. Wrap each cheese on its own, and keep strong ones such as Époisses in a closed box. Eat soft and goat cheeses within a week; hard cheeses keep two to three weeks. Take it out one hour before eating: cheese tastes best at room temperature."
+    "body": "Wrap it in waxed or cheese paper, never in cling film, and keep it in the vegetable drawer of the fridge. Wrap each cheese on its own, and keep strong ones such as Époisses in a closed box. Eat soft and goat cheeses within a week; hard cheeses keep two to three weeks. Take each cheese out one hour before eating: cheese tastes best at room temperature."
   }
 },
 {
@@ -461,7 +461,7 @@
   "fields": {
     "page": 4,
     "title": "Can I eat the rind?",
-    "body": "The rinds of Brie, Camembert and goat cheeses can be eaten, and so can the ash of Sainte-Maure; the rind of Époisses too, if you like its strength. Those of Comté, Beaufort and Mimolette are too hard: cut them off. Roquefort and Bleu d'Auvergne have no real rind, only their foil."
+    "body": "The rinds of Brie, Camembert and goat cheeses can be eaten, and so can the ash of Sainte-Maure; the rind of Époisses too, if you like its strength. Those of Comté, Beaufort and Mimolette are too hard: cut them off. Roquefort has no real rind, only its foil."
   }
 },
 {
@@ -479,7 +479,7 @@
   "fields": {
     "page": 6,
     "title": "Livrez-vous hors de France ?",
-    "body": "Oui, en Belgique, au Luxembourg, en Allemagne et aux Pays-Bas, en 48 à 72 heures, pour 19,90 €, dans les mêmes boîtes isothermes et les mêmes jours d'expédition. La livraison gratuite au-delà de 60 € ne vaut que pour la France métropolitaine. Nous ne livrons pas en dehors de l'Union européenne."
+    "body": "Oui, en Belgique, au Luxembourg, en Allemagne et aux Pays-Bas, en 48 à 72 heures, pour 19,90 €. La livraison gratuite au-delà de 60 € ne vaut que pour la France métropolitaine. Nous ne livrons pas en dehors de l'Union européenne."
   }
 },
 {
@@ -497,7 +497,7 @@
   "fields": {
     "page": 8,
     "title": "Comment conserver le fromage ?",
-    "body": "Enveloppez-le dans du papier ciré ou du papier à fromage, jamais dans du film alimentaire, et gardez-le dans le bac à légumes du réfrigérateur. Emballez chaque fromage à part, et gardez les plus forts, comme l'époisses, dans une boîte fermée. Mangez les fromages à pâte molle et de chèvre dans la semaine ; les fromages à pâte dure se gardent deux à trois semaines. Sortez-le une heure avant de le manger : le fromage est meilleur à température ambiante."
+    "body": "Enveloppez-le dans du papier ciré ou du papier à fromage, jamais dans du film alimentaire, et gardez-le dans le bac à légumes du réfrigérateur. Emballez chaque fromage à part, et gardez les plus forts, comme l'époisses, dans une boîte fermée. Mangez les fromages à pâte molle et de chèvre dans la semaine ; les fromages à pâte dure se gardent deux à trois semaines. Sortez chaque fromage une heure avant de le manger : le fromage est meilleur à température ambiante."
   }
 },
 {
@@ -515,7 +515,7 @@
   "fields": {
     "page": 8,
     "title": "Peut-on manger la croûte ?",
-    "body": "Les croûtes du brie, du camembert et des fromages de chèvre se mangent, la cendre de la sainte-maure aussi ; la croûte de l'époisses également, si vous aimez sa force. Celles du comté, du beaufort et de la mimolette sont trop dures : retirez-les. Le roquefort et le bleu d'Auvergne n'ont pas vraiment de croûte, seulement leur feuille d'aluminium."
+    "body": "Les croûtes du brie, du camembert et des fromages de chèvre se mangent, la cendre de la sainte-maure aussi ; la croûte de l'époisses également, si vous aimez sa force. Celles du comté, du beaufort et de la mimolette sont trop dures : retirez-les. Le roquefort n'a pas vraiment de croûte, seulement sa feuille d'aluminium."
   }
 },
 {
@@ -540,7 +540,7 @@
   "pk": 2,
   "fields": {
     "page": 1,
-    "body": "Opening hours: Tuesday to Saturday from 9 am to 7 pm, Sunday from 9 am to 1 pm. The shop is closed on Mondays, and every summer from 4 to 18 August."
+    "body": "Opening hours: Tuesday to Saturday from 9 am to 7 pm, Sunday from 9 am to 1 pm. The shop is closed on Mondays."
   }
 },
 {
@@ -556,7 +556,7 @@
   "pk": 4,
   "fields": {
     "page": 3,
-    "body": "We make cheese boards for weddings, birthdays and company events, for 10 to 200 guests, with bread and a choice of jams. Each board brings together four to six cheeses, from the mildest to the strongest: soft, goat, hard and blue. Each cheese is labelled with its name and whether its milk is raw or pasteurised.\n\nCount 100 to 150 g of cheese per guest after a meal, and 200 to 250 g when the board is the main course. Order at least one week ahead."
+    "body": "We make cheese boards for weddings, birthdays and company events, for 10 to 200 guests, with bread and a choice of jams. Each board brings together four to six cheeses, soft, goat, hard and blue, served from the mildest to the strongest. Each cheese is labelled with its name and whether its milk is raw or pasteurised.\n\nCount 100 to 150 g of cheese per guest after a meal, and 200 to 250 g when the board is the main course. Order at least one week ahead."
   }
 },
 {
@@ -572,7 +572,7 @@
   "pk": 6,
   "fields": {
     "page": 5,
-    "body": "Horaires d'ouverture : du mardi au samedi de 9 h à 19 h, le dimanche de 9 h à 13 h. La boutique est fermée le lundi, et chaque été du 4 au 18 août."
+    "body": "Horaires d'ouverture : du mardi au samedi de 9 h à 19 h, le dimanche de 9 h à 13 h. La boutique est fermée le lundi."
   }
 },
 {
@@ -588,7 +588,7 @@
   "pk": 8,
   "fields": {
     "page": 7,
-    "body": "Nous préparons des plateaux de fromages pour les mariages, les anniversaires et les événements d'entreprise, de 10 à 200 convives, avec du pain et un choix de confitures. Chaque plateau réunit quatre à six fromages, du plus doux au plus fort : pâte molle, chèvre, pâte dure et bleu. Chaque fromage est étiqueté avec son nom et indique si son lait est cru ou pasteurisé.\n\nComptez 100 à 150 g de fromage par convive après un repas, et 200 à 250 g quand le plateau tient lieu de plat principal. Commandez au moins une semaine à l'avance."
+    "body": "Nous préparons des plateaux de fromages pour les mariages, les anniversaires et les événements d'entreprise, de 10 à 200 convives, avec du pain et un choix de confitures. Chaque plateau réunit quatre à six fromages, pâte molle, chèvre, pâte dure et bleu, servis du plus doux au plus fort. Chaque fromage est étiqueté avec son nom et indique si son lait est cru ou pasteurisé.\n\nComptez 100 à 150 g de fromage par convive après un repas, et 200 à 250 g quand le plateau tient lieu de plat principal. Commandez au moins une semaine à l'avance."
   }
 }
 ]
