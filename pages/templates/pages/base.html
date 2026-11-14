@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="en">
+{% load i18n %}<!doctype html>
+{% get_current_language as LANGUAGE_CODE %}<html lang="{{ LANGUAGE_CODE }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -38,9 +38,9 @@
 {% block content %}{% endblock %}
 </main>
 <footer>
-  <p>A demo shop for
-    <a href="https://github.com/gtolivier/django-model-rag">django-model-rag</a> and
-    <a href="https://github.com/gtolivier/django-minimal-rag">django-minimal-rag</a>.</p>
+  <p>{% blocktranslate trimmed with model_rag='<a href="https://github.com/gtolivier/django-model-rag">django-model-rag</a>' minimal_rag='<a href="https://github.com/gtolivier/django-minimal-rag">django-minimal-rag</a>' %}
+    A demo shop for {{ model_rag }} and {{ minimal_rag }}.
+  {% endblocktranslate %}</p>
 </footer>
 </body>
 </html>
