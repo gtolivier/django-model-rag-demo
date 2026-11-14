@@ -28,6 +28,12 @@ django-model-rag is wired: the demo's models sync to documents.
 - `manage.py sync_model_rag` syncs everything.
 - `runserver` shows the shop: its home page, the cheeses by category, each
   page and the blog, as plain Django views and templates.
+- The shop is in English at `/` and in French under `/fr/`
+  (`i18n_patterns`), with a link to the other language on every page. Each
+  article, product and page is written in one language, its `language`
+  field: a view shows only those of the active language, and the documents
+  carry it. django-model-rag guesses the field by its name; page blocks read
+  their page's.
 
 django-minimal-rag is wired behind it: `MODEL_RAG_OUTPUT` is its `Indexer`,
 so the documents land in its chunk tables, in PostgreSQL with pgvector
@@ -77,7 +83,8 @@ rag.register(Article)
 ```
 
 The text fields are guessed: `title`, then `body`. The first one gives the
-document title; `title_field=` names another field. From there, the documents
+document title; `title_field=` names another field. The `language` field is
+guessed too, and gives the document's language. From there, the documents
 stay in sync as described in [Status](#status). `catalog` and `pages` show
 what goes beyond that: declared fields, `follow`, custom extractors, and
 keeping dependent documents up to date.
@@ -95,7 +102,7 @@ uv run pytest
 To ask questions, install [Ollama](https://ollama.com), start it, and pull
 the two models. `loaddata demo` fills the database with demo content: a
 French cheese shop, with its cheeses, its pages (delivery, cheese boards,
-questions) and a few blog posts. django-model-rag ignores the raw saves
+questions) and a few blog posts, in English and in French. django-model-rag ignores the raw saves
 `loaddata` makes, so `sync_model_rag` turns the content into documents
 afterwards. Load it into an empty database:
 
@@ -109,12 +116,13 @@ uv run python manage.py ask "Which cheeses can I eat while pregnant?"
 ```
 
 `uv run python manage.py runserver` then shows the shop at
-http://127.0.0.1:8000/.
+http://127.0.0.1:8000/, and in French at http://127.0.0.1:8000/fr/.
 
 Other questions the content answers: "What wine goes with Comté?", "Do you
 deliver to Belgium?", "How much cheese per guest for a wedding?", "Is the shop
-open in mid-August?". "What is the capital of Peru?" finds nothing close
-enough.
+open in mid-August?". They can be asked in French as well: "Quels fromages
+puis-je manger enceinte ?", "Livrez-vous en Belgique ?". "What is the capital
+of Peru?" finds nothing close enough.
 
 The fixture sets primary keys: loading it again overwrites the objects that
 hold them, and fails when another object already uses one of its slugs. Run
@@ -151,14 +159,18 @@ Known limits of `ask`, a demo command:
   slow first load of a model can exceed it.
 - "Nothing indexed is close enough to the question." is printed without
   calling the model, so it is in English whatever the language of the
-  question (when the model is called, it answers in the language of the
-  question). It is also what an embedding model with no chunks yet gets: the
+  question. It is also what an embedding model with no chunks yet gets: the
   two cases look the same.
+- When the model is called, it answers in the language of the question,
+  most of the time: given extracts in both languages, it sometimes answers a
+  French question in English.
 - An empty answer from the model (`null` content) prints as `None`.
-- The default `--max-distance` suits questions in the language of the
-  content, English. A question in another language lands farther from the
-  chunks that answer it: with `--limit 20`, "Quels fromages proposez-vous ?"
-  finds 2 extracts where "Which cheeses do you sell?" finds 19.
+- The retrieval does not filter by language: an English question and its
+  French counterpart often both get the English and the French extract of
+  the same content, which takes two of the `--limit` places.
+- The model may still answer from what it knows rather than from the
+  extracts, more often in French: "Vendez-vous du Gruyère ?" sometimes gets
+  a "yes", which the content does not say.
 - A question that asks for a whole list ("which cheeses do you sell?") gets
   at most `--limit` extracts, the nearest ones: similarity search does not
   enumerate a catalog. `--limit 20 --max-distance 0.6` lists the ten cheeses,
