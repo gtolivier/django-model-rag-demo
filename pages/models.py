@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.text import Truncator
-from django.utils.translation import override
+from django.utils.translation import get_language, override
 
 
 class Page(models.Model):
@@ -15,6 +15,10 @@ class Page(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+
+def pages_in_active_language() -> models.QuerySet[Page]:
+    return Page.objects.filter(language=get_language())
 
 
 class AccordionItem(models.Model):
