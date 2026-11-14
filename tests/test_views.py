@@ -173,10 +173,7 @@ def test_article_list_keeps_an_edited_older_article_after_the_newer_ones(
     )
 
 
-@pytest.mark.django_db
-def test_article_list_shows_only_the_articles_of_the_active_language(
-    client: Client, rag_store: DocumentStore
-) -> None:
+def _create_an_english_and_a_french_article() -> tuple[Article, Article]:
     english = Article.objects.create(
         title="Descaling a kettle",
         body="Fill it with white vinegar and leave it overnight.",
@@ -187,6 +184,14 @@ def test_article_list_shows_only_the_articles_of_the_active_language(
         body="Remplissez-la de vinaigre blanc et laissez agir une nuit.",
         language="fr",
     )
+    return english, french
+
+
+@pytest.mark.django_db
+def test_article_list_shows_only_the_articles_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english, french = _create_an_english_and_a_french_article()
 
     english_response = client.get("/blog/")
     french_response = client.get("/fr/blog/")
@@ -205,16 +210,7 @@ def test_article_list_shows_only_the_articles_of_the_active_language(
 def test_article_view_does_not_find_an_article_of_the_other_language(
     client: Client, rag_store: DocumentStore
 ) -> None:
-    english = Article.objects.create(
-        title="Descaling a kettle",
-        body="Fill it with white vinegar and leave it overnight.",
-        language="en",
-    )
-    french = Article.objects.create(
-        title="Détartrer une bouilloire",
-        body="Remplissez-la de vinaigre blanc et laissez agir une nuit.",
-        language="fr",
-    )
+    english, french = _create_an_english_and_a_french_article()
 
     french_under_root = client.get(f"/blog/{french.pk}/")
     english_under_fr = client.get(f"/fr/blog/{english.pk}/")
@@ -404,10 +400,7 @@ def test_product_list_shows_each_product_category_name_and_price(
     assert "14.75" in content
 
 
-@pytest.mark.django_db
-def test_product_list_shows_only_the_products_of_the_active_language(
-    client: Client, rag_store: DocumentStore
-) -> None:
+def _create_an_english_and_a_french_product() -> tuple[Product, Product]:
     category = Category.objects.create(name="Kitchen")
     english = Product.objects.create(
         name="Kettle",
@@ -423,6 +416,14 @@ def test_product_list_shows_only_the_products_of_the_active_language(
         category=category,
         language="fr",
     )
+    return english, french
+
+
+@pytest.mark.django_db
+def test_product_list_shows_only_the_products_of_the_active_language(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    english, french = _create_an_english_and_a_french_product()
 
     english_response = client.get("/products/")
     french_response = client.get("/fr/products/")
@@ -441,21 +442,7 @@ def test_product_list_shows_only_the_products_of_the_active_language(
 def test_product_view_does_not_find_a_product_of_the_other_language(
     client: Client, rag_store: DocumentStore
 ) -> None:
-    category = Category.objects.create(name="Kitchen")
-    english = Product.objects.create(
-        name="Kettle",
-        description="Boils a litre of water in two minutes.",
-        price=Decimal("29.90"),
-        category=category,
-        language="en",
-    )
-    french = Product.objects.create(
-        name="Bouilloire",
-        description="Fait bouillir un litre d'eau en deux minutes.",
-        price=Decimal("31.40"),
-        category=category,
-        language="fr",
-    )
+    english, french = _create_an_english_and_a_french_product()
 
     french_under_root = client.get(f"/products/{french.pk}/")
     english_under_fr = client.get(f"/fr/products/{english.pk}/")

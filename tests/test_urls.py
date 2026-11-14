@@ -24,6 +24,13 @@ def _captured_values(url: str) -> list[str]:
     return [str(value) for value in (*match.args, *match.kwargs.values())]
 
 
+def _absolute_url_with_active_language(
+    language: str, instance: Article | Product | Page
+) -> str:
+    with translation.override(language):
+        return instance.get_absolute_url()
+
+
 @pytest.mark.django_db
 def test_each_document_url_resolves_to_a_route_capturing_its_object(
     rag_store: DocumentStore,
@@ -84,10 +91,8 @@ def test_a_product_url_is_in_the_product_language_whatever_the_active_one() -> N
         language="fr",
     )
 
-    with translation.override("en"):
-        french_url = french.get_absolute_url()
-    with translation.override("fr"):
-        english_url = english.get_absolute_url()
+    french_url = _absolute_url_with_active_language("en", french)
+    english_url = _absolute_url_with_active_language("fr", english)
 
     assert french_url == f"/fr/products/{french.pk}/"
     assert english_url == f"/products/{english.pk}/"
@@ -106,10 +111,8 @@ def test_an_article_url_is_in_the_article_language_whatever_the_active_one() -> 
         language="fr",
     )
 
-    with translation.override("en"):
-        french_url = french.get_absolute_url()
-    with translation.override("fr"):
-        english_url = english.get_absolute_url()
+    french_url = _absolute_url_with_active_language("en", french)
+    english_url = _absolute_url_with_active_language("fr", english)
 
     assert french_url == f"/fr/blog/{french.pk}/"
     assert english_url == f"/blog/{english.pk}/"
@@ -120,10 +123,8 @@ def test_a_page_url_is_in_the_page_language_whatever_the_active_one() -> None:
     english = Page.objects.create(title="FAQ", slug="faq", language="en")
     french = Page.objects.create(title="Questions", slug="questions", language="fr")
 
-    with translation.override("en"):
-        french_url = french.get_absolute_url()
-    with translation.override("fr"):
-        english_url = english.get_absolute_url()
+    french_url = _absolute_url_with_active_language("en", french)
+    english_url = _absolute_url_with_active_language("fr", english)
 
     assert french_url == f"/fr/pages/{french.slug}/"
     assert english_url == f"/pages/{english.slug}/"
