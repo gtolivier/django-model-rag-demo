@@ -585,6 +585,91 @@ def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plai
     ] == []
 
 
+_VOID_ELEMENTS = frozenset(
+    {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta"}
+    | {"source", "track", "wbr"}
+)
+
+
+class _TextsByTestId(HTMLParser):
+    """Collect the text of each element with a given data-testid, in order."""
+
+    def __init__(self, test_id: str) -> None:
+        super().__init__()
+        self.texts: list[str] = []
+        self._test_id = test_id
+        self._depth = 0
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _VOID_ELEMENTS:
+            return
+        if self._depth:
+            self._depth += 1
+        elif dict(attrs).get("data-testid") == self._test_id:
+            self._depth = 1
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._depth:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in _VOID_ELEMENTS or not self._depth:
+            return
+        self._depth -= 1
+        if not self._depth:
+            self.texts.append(" ".join("".join(self._text).split()))
+
+
+def _texts_by_test_id(content: str, test_id: str) -> list[str]:
+    parser = _TextsByTestId(test_id)
+    parser.feed(content)
+    return parser.texts
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Answer.chunks are documented nearest first: the page keeps their order,
+    # which neither groups them by document nor sorts them by title or text.
+    retrieved = (
+        ("Toasting bagels", "Use the bagel setting for a soft top."),
+        ("Descaling a kettle", "Vinegar dissolves limescale overnight."),
+        ("Toasting bagels", "A bagel takes longer than a slice of bread."),
+    )
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(
+            text="Use the bagel setting, then descale with white vinegar.",
+            chunks=tuple(
+                RetrievedChunk(
+                    text=text,
+                    title=title,
+                    url=f"/blog/{len(title)}/",
+                    source_key=f"blog.article:{len(title)}",
+                    distance=0.1 * (rank + 1),
+                )
+                for rank, (title, text) in enumerate(retrieved)
+            ),
+        )
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    response = client.post(
+        "/chat/", {"question": "How do I toast bagels and descale?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    extracts = _texts_by_test_id(response.content.decode(), "extract")
+    assert [
+        (title in extract, text in extract)
+        for extract, (title, text) in zip(extracts, retrieved, strict=False)
+    ] == [(True, True)] * len(retrieved)
+    assert len(extracts) == len(retrieved)
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
