@@ -14,7 +14,7 @@
 {% if exchange.sources %}
 <ul class="sources">
 {% for source in exchange.sources %}
-<li><a href="{{ source.url }}">{{ source.title }}</a></li>
+<li>{% if source.url %}<a href="{{ source.url }}">{{ source.title }}</a>{% else %}{{ source.title }}{% endif %}</li>
 {% endfor %}
 </ul>
 {% endif %}
