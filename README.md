@@ -187,11 +187,18 @@ Known limits of `ask`, a demo command:
 
 The "Ask a question" page shares those limits, except that it shows "the
 assistant is unavailable" instead of a traceback when Ollama cannot be
-reached, and that its "nothing close enough" message follows the page's
-language. Also:
+reached, and that its "nothing close enough" message is in the language of
+the page the question was asked from. Also:
 
-- Posting an empty question shows the page with an error, without the
-  previous exchanges; they come back on the next visit of the page.
+- The English and the French page share the visit's exchanges, and those
+  two messages keep the language they were shown in.
+- Posting an empty question, or one made only of spaces, shows the page with
+  "Please type a question.", without the previous exchanges; they come back
+  on the next visit of the page.
+- When the server answers a question with an error, the script posts it
+  again without JavaScript: the visitor waits twice for the same error.
+- The session keeps every exchange of the visit, extracts included, and two
+  questions posted at the same time from two tabs can lose one of them.
 - A question waits for its whole answer, up to the 120-second timeout, with
   no progress shown beyond the button's "Looking for an answer…".
 
