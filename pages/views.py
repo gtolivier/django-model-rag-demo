@@ -7,11 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django_minimal_rag.answering import Answer, Citation, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
-from assistant.management.commands.ask import (
-    MAX_CHUNKS,
-    MAX_DISTANCE,
-    NOTHING_CLOSE_ENOUGH,
-)
+from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY = "exchanges"

@@ -1,12 +1,17 @@
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandParser
-from django.utils.translation import gettext_lazy as _
 from django_minimal_rag.answering import Citation, answer
 
-MAX_DISTANCE = 0.5
-MAX_CHUNKS = 5
-NOTHING_CLOSE_ENOUGH = _("Nothing indexed is close enough to the question.")
+from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
+
+__all__ = [
+    "MAX_CHUNKS",
+    "MAX_DISTANCE",
+    "NOTHING_CLOSE_ENOUGH",
+    "Command",
+    "source_line",
+]
 
 
 class Command(BaseCommand):

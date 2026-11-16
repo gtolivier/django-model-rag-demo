@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 18:24+0000\n"
+"POT-Creation-Date: 2026-11-16 18:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
 "1000000 == 0 ? 1 : 2;\n"
 
-#: assistant/management/commands/ask.py:9
+#: assistant/answering.py:5
 msgid "Nothing indexed is close enough to the question."
 msgstr "Rien d'indexé n'est assez proche de la question."
 
@@ -41,7 +41,7 @@ msgstr "Fromages"
 msgid "Our cheeses"
 msgstr "Nos fromages"
 
-#: pages/templates/pages/base.html:54
+#: pages/templates/pages/base.html:55
 #, python-format
 msgid "A demo shop for %(model_rag)s and %(minimal_rag)s."
 msgstr "Une boutique de démonstration pour %(model_rag)s et %(minimal_rag)s."
@@ -114,10 +114,10 @@ msgstr ""
 msgid "Products"
 msgstr "Produits"
 
-#: pages/views.py:18
+#: pages/views.py:14
 msgid "Please type a question."
 msgstr "Veuillez saisir une question."
 
-#: pages/views.py:19
+#: pages/views.py:15
 msgid "The assistant is unavailable right now. Try again later."
 msgstr "L'assistant est indisponible pour le moment. Réessayez plus tard."
