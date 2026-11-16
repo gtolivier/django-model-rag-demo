@@ -102,7 +102,7 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
     ]
 
 
-def test_ask_asks_as_an_anonymous_reader_within_distance_and_limit_defaults(
+def test_ask_asks_as_an_anonymous_reader_in_every_language_by_default(
     answer_calls: list[AnswerCall],
 ) -> None:
     call_command("ask", "How do I descale a kettle?", stdout=StringIO())
@@ -110,7 +110,12 @@ def test_ask_asks_as_an_anonymous_reader_within_distance_and_limit_defaults(
     assert answer_calls == [
         (
             "How do I descale a kettle?",
-            {"permissions": frozenset(), "max_distance": 0.5, "limit": 5},
+            {
+                "permissions": frozenset(),
+                "max_distance": 0.5,
+                "limit": 5,
+                "language": None,
+            },
         )
     ]
 
