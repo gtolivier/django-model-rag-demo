@@ -34,7 +34,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
-    exchange = _ask(question)
+    exchange = _ask(question, request.LANGUAGE_CODE)
     request.session[EXCHANGES_SESSION_KEY] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
@@ -46,11 +46,11 @@ def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
     return exchanges
 
 
-def _ask(question: str) -> dict[str, object]:
+def _ask(question: str, language: str) -> dict[str, object]:
     try:
         reply = answer(
             question,
-            language="en",
+            language=language,
             permissions=frozenset(),
             max_distance=MAX_DISTANCE,
             limit=MAX_CHUNKS,
