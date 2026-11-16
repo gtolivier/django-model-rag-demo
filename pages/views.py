@@ -1,5 +1,5 @@
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django_minimal_rag.answering import answer
 
 from assistant.management.commands.ask import MAX_CHUNKS, MAX_DISTANCE
@@ -23,6 +23,7 @@ def chat(request: HttpRequest) -> HttpResponse:
         )
         if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
+        return redirect(request.path)
     return render(request, "pages/chat.html")
 
 
