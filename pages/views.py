@@ -5,7 +5,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django_minimal_rag.answering import Citation, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
-from assistant.management.commands.ask import MAX_CHUNKS, MAX_DISTANCE
+from assistant.management.commands.ask import (
+    MAX_CHUNKS,
+    MAX_DISTANCE,
+    NOTHING_CLOSE_ENOUGH,
+)
 from pages.models import pages_in_active_language
 
 EXCHANGE_SESSION_KEY = "exchange"
@@ -30,7 +34,7 @@ def chat(request: HttpRequest) -> HttpResponse:
             return render(request, "pages/chat_exchange.html", {"question": question})
         request.session[EXCHANGE_SESSION_KEY] = {
             "question": question,
-            "text": reply.text if reply else "",
+            "text": reply.text if reply else NOTHING_CLOSE_ENOUGH,
             "sources": _sources(reply.citations) if reply else [],
             "extracts": _extracts(reply.chunks) if reply else [],
         }

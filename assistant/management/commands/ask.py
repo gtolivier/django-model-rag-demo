@@ -5,6 +5,7 @@ from django_minimal_rag.answering import Citation, answer
 
 MAX_DISTANCE = 0.5
 MAX_CHUNKS = 5
+NOTHING_CLOSE_ENOUGH = "Nothing indexed is close enough to the question."
 
 
 class Command(BaseCommand):
@@ -23,7 +24,7 @@ class Command(BaseCommand):
             limit=options["limit"],
         )
         if result is None:
-            self.stdout.write("Nothing indexed is close enough to the question.")
+            self.stdout.write(NOTHING_CLOSE_ENOUGH)
             return
         self.stdout.write(result.text)
         for citation in result.citations:
