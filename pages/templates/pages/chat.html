@@ -7,4 +7,10 @@
 <input type="text" name="question">
 <button type="submit">{% translate "Ask" %}</button>
 </form>
+{% if exchange %}
+<div class="exchange">
+<p class="question">{{ exchange.question }}</p>
+<p class="answer">{{ exchange.text }}</p>
+</div>
+{% endif %}
 {% endblock %}

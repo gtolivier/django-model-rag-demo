@@ -15,7 +15,7 @@ def chat(request: HttpRequest) -> HttpResponse:
         question = request.POST.get("question", "")
         if not question:
             return render(request, "pages/chat.html", status=400)
-        answer(
+        result = answer(
             question,
             permissions=frozenset(),
             max_distance=MAX_DISTANCE,
@@ -23,8 +23,14 @@ def chat(request: HttpRequest) -> HttpResponse:
         )
         if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
+        request.session["exchange"] = {
+            "question": question,
+            "text": result.text if result else "",
+        }
         return redirect(request.path)
-    return render(request, "pages/chat.html")
+    return render(
+        request, "pages/chat.html", {"exchange": request.session.pop("exchange", None)}
+    )
 
 
 def _is_fetch_request(request: HttpRequest) -> bool:
