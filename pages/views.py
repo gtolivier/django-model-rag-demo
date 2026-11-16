@@ -3,6 +3,7 @@ from collections.abc import Iterable
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django_minimal_rag.answering import Citation, answer
+from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.management.commands.ask import MAX_CHUNKS, MAX_DISTANCE
 from pages.models import pages_in_active_language
@@ -31,11 +32,7 @@ def chat(request: HttpRequest) -> HttpResponse:
             "question": question,
             "text": reply.text if reply else "",
             "sources": _sources(reply.citations) if reply else [],
-            "extracts": (
-                [{"title": c.title, "text": c.text} for c in reply.chunks]
-                if reply
-                else []
-            ),
+            "extracts": _extracts(reply.chunks) if reply else [],
         }
         return redirect(request.path)
     return render(
@@ -47,6 +44,10 @@ def chat(request: HttpRequest) -> HttpResponse:
 
 def _sources(citations: Iterable[Citation]) -> list[dict[str, str]]:
     return [{"title": citation.title, "url": citation.url} for citation in citations]
+
+
+def _extracts(chunks: Iterable[RetrievedChunk]) -> list[dict[str, str]]:
+    return [{"title": chunk.title, "text": chunk.text} for chunk in chunks]
 
 
 def _is_fetch_request(request: HttpRequest) -> bool:
