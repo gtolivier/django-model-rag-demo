@@ -1,0 +1,10 @@
+{% extends "pages/base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% translate "Ask a question" %}</h1>
+<form method="post">
+{% csrf_token %}
+<input type="text" name="question">
+<button type="submit">{% translate "Ask" %}</button>
+</form>
+{% endblock %}

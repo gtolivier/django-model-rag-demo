@@ -8,6 +8,10 @@ def home(request: HttpRequest) -> HttpResponse:
     return render(request, "pages/home.html")
 
 
+def chat(request: HttpRequest) -> HttpResponse:
+    return render(request, "pages/chat.html")
+
+
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
     page = get_object_or_404(pages_in_active_language(), slug=slug)
     return render(
