@@ -4,6 +4,7 @@ from decimal import Decimal
 from html.parser import HTMLParser
 from io import StringIO
 
+import httpx
 import pytest
 from django.core.management import call_command
 from django.test import Client
@@ -13,7 +14,11 @@ from django.utils.translation import gettext, override
 from django_minimal_rag.answering import Answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
-from assistant.management.commands.ask import MAX_CHUNKS, MAX_DISTANCE
+from assistant.management.commands.ask import (
+    MAX_CHUNKS,
+    MAX_DISTANCE,
+    NOTHING_CLOSE_ENOUGH,
+)
 from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
@@ -767,6 +772,47 @@ def test_chat_page_says_nothing_indexed_is_close_enough_in_french_under_fr(
     content = response.content.decode()
     assert escape(english_message) not in content
     assert escape(french_message) in content
+
+
+@pytest.mark.django_db
+def test_chat_page_says_the_assistant_is_unavailable_when_the_backend_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Each question meets a different httpx failure: the exchanges shown all
+    # say the same thing, which is neither the error's own detail nor the
+    # "nothing close enough" message, so the wording itself stays free.
+    request = httpx.Request("POST", "http://localhost:11434/api/chat")
+    failures: dict[str, httpx.HTTPError] = {
+        "How do I descale a kettle?": httpx.ConnectError(
+            "All connection attempts failed", request=request
+        ),
+        "Can a toaster take bagels?": httpx.HTTPStatusError(
+            "Server error '500 Internal Server Error'",
+            request=request,
+            response=httpx.Response(500, request=request),
+        ),
+        "When will my order arrive?": httpx.ReadTimeout("timed out", request=request),
+    }
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        raise failures[question]
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    client = Client(raise_request_exception=False)
+
+    posts = [client.post("/chat/", {"question": question}) for question in failures]
+    page = client.get("/chat/")
+
+    assert {post.status_code for post in posts} <= {302, 303}
+    assert page.status_code == 200
+    exchanges = page.context["exchanges"]
+    assert [exchange["question"] for exchange in exchanges] == list(failures)
+    shown = {exchange["text"] for exchange in exchanges}
+    assert len(shown) == 1
+    (unavailable,) = shown
+    assert unavailable
+    assert unavailable != str(NOTHING_CLOSE_ENOUGH)
+    assert escape(unavailable) in page.content.decode()
 
 
 @pytest.mark.django_db
