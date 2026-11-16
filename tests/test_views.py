@@ -402,6 +402,22 @@ def test_chat_page_rejects_an_empty_question_without_answering_or_keeping_it(
 
 
 @pytest.mark.django_db
+def test_chat_page_rejects_a_whitespace_only_question_as_an_empty_one(
+    client: Client, chat_questions: list[str]
+) -> None:
+    page_before = client.get("/chat/")
+
+    response = client.post("/chat/", {"question": " \t\n  "})
+
+    page_after = client.get("/chat/")
+    assert 400 <= response.status_code < 500
+    assert chat_questions == []
+    assert _without_csrf_tokens(page_after.content.decode()) == _without_csrf_tokens(
+        page_before.content.decode()
+    )
+
+
+@pytest.mark.django_db
 def test_chat_page_answers_a_question_as_an_anonymous_reader_with_ask_s_limits(
     client: Client,
     chat_questions: list[str],
