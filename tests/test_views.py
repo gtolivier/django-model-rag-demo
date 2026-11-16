@@ -479,6 +479,78 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     assert "Fill it with white vinegar and leave it overnight." in content
 
 
+class _Links(HTMLParser):
+    """Collect each link of a response as (target, text), in document order."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "a":
+            self._href = dict(attrs).get("href") or ""
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self._href is not None:
+            self.links.append((self._href, " ".join("".join(self._text).split())))
+            self._href = None
+
+
+def _links(content: str) -> list[tuple[str, str]]:
+    parser = _Links()
+    parser.feed(content)
+    return parser.links
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def chunk(title: str, url: str, source_key: str, distance: float) -> RetrievedChunk:
+        return RetrievedChunk(
+            text=f"An extract of {title}.",
+            title=title,
+            url=url,
+            source_key=source_key,
+            distance=distance,
+        )
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(
+            text="Use the bagel setting, then descale with white vinegar.",
+            chunks=(
+                chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.1),
+                chunk("Descaling a kettle", "/blog/1/", "blog.article:1", 0.2),
+                chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.3),
+            ),
+        )
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    response = client.post(
+        "/chat/", {"question": "How do I toast bagels and descale?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    source_urls = {"/blog/1/", "/blog/2/"}
+    source_links = [
+        (href, text)
+        for href, text in _links(response.content.decode())
+        if href in source_urls
+    ]
+    assert source_links == [
+        ("/blog/2/", "Toasting bagels"),
+        ("/blog/1/", "Descaling a kettle"),
+    ]
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
