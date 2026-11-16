@@ -2,7 +2,8 @@ from io import StringIO
 
 import pytest
 from django.core.management import call_command
-from django_minimal_rag.answering import Answer, Citation
+from django_minimal_rag.answering import Answer
+from django_minimal_rag.retrieval import RetrievedChunk
 
 ASK_ANSWER = "assistant.management.commands.ask.answer"
 
@@ -27,16 +28,20 @@ def test_ask_prints_the_answer_then_one_line_per_source_in_order(
     def fake_answer(question: str, **kwargs: object) -> Answer:
         return Answer(
             text="Fill it with vinegar, wait an hour, then rinse.",
-            citations=(
-                Citation(
+            chunks=(
+                RetrievedChunk(
+                    text="Vinegar dissolves limescale.",
                     title="Descaling a kettle",
                     url="/blog/descaling-a-kettle/",
                     source_key="blog.article:1",
+                    distance=0.1,
                 ),
-                Citation(
+                RetrievedChunk(
+                    text="Rinse the kettle after descaling.",
                     title="Kettle care",
                     url="/pages/kettle-care/",
                     source_key="pages.page:7",
+                    distance=0.2,
                 ),
             ),
         )
@@ -59,11 +64,13 @@ def test_ask_prints_a_source_without_url_as_its_title_alone(
     def fake_answer(question: str, **kwargs: object) -> Answer:
         return Answer(
             text="Fill it with vinegar, wait an hour, then rinse.",
-            citations=(
-                Citation(
+            chunks=(
+                RetrievedChunk(
+                    text="Vinegar dissolves limescale.",
                     title="Descaling notes",
                     url="",
                     source_key="pages.note:3",
+                    distance=0.1,
                 ),
             ),
         )
