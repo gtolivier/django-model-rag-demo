@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import override
 
+from assistant.management.commands.ask import MAX_CHUNKS, MAX_DISTANCE
 from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
@@ -333,16 +334,27 @@ CHAT_ANSWER = "pages.views.answer"
 
 
 @pytest.fixture
-def chat_questions(monkeypatch: pytest.MonkeyPatch) -> list[str]:
+def chat_answer_kwargs() -> list[dict[str, object]]:
+    """The keyword arguments of each call to the chat page's fake answer()."""
+    return []
+
+
+@pytest.fixture
+def chat_questions(
+    monkeypatch: pytest.MonkeyPatch, chat_answer_kwargs: list[dict[str, object]]
+) -> list[str]:
     """Replace the chat page's answer() with a fake that records each question.
 
-    The fake finds nothing. It is set even while pages.views does not import
-    answer() yet, so a test that expects no call can fail on its assertions.
+    The fake also records the keyword arguments of each call in
+    chat_answer_kwargs, and finds nothing. It is set even while pages.views
+    does not import answer() yet, so a test that expects no call can fail on
+    its assertions.
     """
     questions: list[str] = []
 
     def fake_answer(question: str, **kwargs: object) -> None:
         questions.append(question)
+        chat_answer_kwargs.append(kwargs)
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer, raising=False)
     return questions
@@ -371,6 +383,24 @@ def test_chat_page_rejects_an_empty_question_without_answering_or_keeping_it(
     assert _without_csrf_tokens(page_after.content.decode()) == _without_csrf_tokens(
         page_before.content.decode()
     )
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_a_question_as_an_anonymous_reader_with_ask_s_limits(
+    client: Client,
+    chat_questions: list[str],
+    chat_answer_kwargs: list[dict[str, object]],
+) -> None:
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    assert chat_questions == ["How do I descale a kettle?"]
+    assert chat_answer_kwargs == [
+        {
+            "permissions": frozenset(),
+            "max_distance": MAX_DISTANCE,
+            "limit": MAX_CHUNKS,
+        }
+    ]
 
 
 @pytest.mark.django_db
