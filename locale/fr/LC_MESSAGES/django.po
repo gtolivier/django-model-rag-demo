@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:12+0000\n"
+"POT-Creation-Date: 2026-11-16 17:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
 "1000000 == 0 ? 1 : 2;\n"
+
+#: assistant/management/commands/ask.py:9
+msgid "Nothing indexed is close enough to the question."
+msgstr "Rien d'indexé n'est assez proche de la question."
+
 #: blog/templates/blog/article_list.html:3
 #: blog/templates/blog/article_list.html:5 pages/templates/pages/nav.html:4
 msgid "Articles"
@@ -40,6 +45,14 @@ msgstr "Nos fromages"
 #, python-format
 msgid "A demo shop for %(model_rag)s and %(minimal_rag)s."
 msgstr "Une boutique de démonstration pour %(model_rag)s et %(minimal_rag)s."
+
+#: pages/templates/pages/chat.html:4
+msgid "Ask a question"
+msgstr ""
+
+#: pages/templates/pages/chat.html:8
+msgid "Ask"
+msgstr ""
 
 #: pages/templates/pages/home.html:4
 msgid "Welcome to the Fromagerie du Marché"
@@ -69,3 +82,7 @@ msgstr ""
 #: pages/templates/pages/nav.html:3
 msgid "Products"
 msgstr "Produits"
+
+#: pages/templates/pages/nav.html:5
+msgid "Chat"
+msgstr ""

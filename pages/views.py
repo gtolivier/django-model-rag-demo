@@ -34,7 +34,7 @@ def chat(request: HttpRequest) -> HttpResponse:
             return render(request, "pages/chat_exchange.html", {"question": question})
         request.session[EXCHANGE_SESSION_KEY] = {
             "question": question,
-            "text": reply.text if reply else NOTHING_CLOSE_ENOUGH,
+            "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
             "sources": _sources(reply.citations) if reply else [],
             "extracts": _extracts(reply.chunks) if reply else [],
         }

@@ -1,11 +1,12 @@
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandParser
+from django.utils.translation import gettext_lazy as _
 from django_minimal_rag.answering import Citation, answer
 
 MAX_DISTANCE = 0.5
 MAX_CHUNKS = 5
-NOTHING_CLOSE_ENOUGH = "Nothing indexed is close enough to the question."
+NOTHING_CLOSE_ENOUGH = _("Nothing indexed is close enough to the question.")
 
 
 class Command(BaseCommand):
@@ -24,7 +25,7 @@ class Command(BaseCommand):
             limit=options["limit"],
         )
         if result is None:
-            self.stdout.write(NOTHING_CLOSE_ENOUGH)
+            self.stdout.write(str(NOTHING_CLOSE_ENOUGH))
             return
         self.stdout.write(result.text)
         for citation in result.citations:
