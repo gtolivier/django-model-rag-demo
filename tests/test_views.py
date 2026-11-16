@@ -2,8 +2,10 @@ import re
 from collections.abc import Sequence
 from decimal import Decimal
 from html.parser import HTMLParser
+from io import StringIO
 
 import pytest
+from django.core.management import call_command
 from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
@@ -668,6 +670,27 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
         for extract, (title, text) in zip(extracts, retrieved, strict=False)
     ] == [(True, True)] * len(retrieved)
     assert len(extracts) == len(retrieved)
+
+
+@pytest.mark.django_db
+def test_chat_page_says_nothing_indexed_is_close_enough_after_a_plain_post(
+    client: Client, chat_questions: list[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The ask command's message when answer() finds nothing is the reference,
+    # so this test does not fix the wording itself.
+    monkeypatch.setattr(
+        "assistant.management.commands.ask.answer", lambda question, **kwargs: None
+    )
+    ask_output = StringIO()
+    call_command("ask", "How do I descale a kettle?", stdout=ask_output)
+    nothing_close_enough = ask_output.getvalue().strip()
+
+    response = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    assert escape(nothing_close_enough) in response.content.decode()
 
 
 @pytest.mark.django_db
