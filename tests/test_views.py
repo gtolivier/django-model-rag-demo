@@ -8,6 +8,8 @@ from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import override
+from django_minimal_rag.answering import Answer
+from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.management.commands.ask import MAX_CHUNKS, MAX_DISTANCE
 from blog.models import Article
@@ -445,6 +447,36 @@ def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
 
     assert response.status_code in (302, 303)
     assert response.headers["Location"] == chat_url
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(
+            text="Fill it with white vinegar and leave it overnight.",
+            chunks=(
+                RetrievedChunk(
+                    text="Vinegar dissolves limescale overnight.",
+                    title="Descaling a kettle",
+                    url="/blog/1/",
+                    source_key="blog.article:1",
+                    distance=0.1,
+                ),
+            ),
+        )
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    response = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "How do I descale a kettle?" in content
+    assert "Fill it with white vinegar and leave it overnight." in content
 
 
 @pytest.mark.django_db
