@@ -510,6 +510,27 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
     _assert_in_order(content, shown_in_order)
 
 
+@pytest.mark.django_db
+def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(text="Fill it with white vinegar overnight.", chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    first_visit = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    second_visit = Client().get("/chat/")
+
+    assert "How do I descale a kettle?" in first_visit.content.decode()
+    assert second_visit.status_code == 200
+    content = second_visit.content.decode()
+    assert "How do I descale a kettle?" not in content
+    assert "Fill it with white vinegar overnight." not in content
+
+
 class _Links(HTMLParser):
     """Collect each link of a response as (target, text), in document order."""
 
