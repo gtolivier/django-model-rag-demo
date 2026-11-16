@@ -5,14 +5,6 @@ from django_minimal_rag.answering import Citation, answer
 
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 
-__all__ = [
-    "MAX_CHUNKS",
-    "MAX_DISTANCE",
-    "NOTHING_CLOSE_ENOUGH",
-    "Command",
-    "source_line",
-]
-
 
 class Command(BaseCommand):
     help = "Answer a question from the indexed content."
