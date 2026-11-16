@@ -3,6 +3,7 @@ from collections.abc import Iterable
 import httpx
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django_minimal_rag.answering import Answer, Citation, answer
 from django_minimal_rag.retrieval import RetrievedChunk
@@ -34,7 +35,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
-    exchange = _ask(question, request.LANGUAGE_CODE)
+    exchange = _ask(question)
     request.session[EXCHANGES_SESSION_KEY] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
@@ -46,11 +47,11 @@ def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
     return exchanges
 
 
-def _ask(question: str, language: str) -> dict[str, object]:
+def _ask(question: str) -> dict[str, object]:
     try:
         reply = answer(
             question,
-            language=language,
+            language=get_language(),
             permissions=frozenset(),
             max_distance=MAX_DISTANCE,
             limit=MAX_CHUNKS,
