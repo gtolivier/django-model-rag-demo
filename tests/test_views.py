@@ -415,6 +415,84 @@ def test_every_view_links_to_the_home_of_the_other_language(
     assert f'href="{other_home}"' in response.content.decode()
 
 
+class _NavLinks(HTMLParser):
+    """Collect the targets of the links inside the page's <nav>."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.hrefs: list[str] = []
+        self._in_nav = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "nav":
+            self._in_nav = True
+        elif self._in_nav and tag == "a":
+            self.hrefs.append(dict(attrs).get("href") or "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "nav":
+            self._in_nav = False
+
+
+def _nav_links(content: str) -> list[str]:
+    parser = _NavLinks()
+    parser.feed(content)
+    return parser.hrefs
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("language", "chat_url"), [("en", "/chat/"), ("fr", "/fr/chat/")]
+)
+@pytest.mark.parametrize(
+    "view",
+    [
+        "home",
+        "chat",
+        "product_list",
+        "product_detail",
+        "page_detail",
+        "article_list",
+        "article_detail",
+    ],
+)
+def test_every_view_nav_links_to_the_chat_page_of_the_active_language(
+    client: Client,
+    rag_store: DocumentStore,
+    view: str,
+    language: str,
+    chat_url: str,
+) -> None:
+    product = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Kitchen"),
+        language=language,
+    )
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language=language,
+    )
+    page = Page.objects.create(title="About us", slug="about", language=language)
+    with override(language):
+        urls = {
+            "home": reverse("home"),
+            "chat": reverse("chat"),
+            "product_list": reverse("product_list"),
+            "product_detail": product.get_absolute_url(),
+            "page_detail": page.get_absolute_url(),
+            "article_list": reverse("article_list"),
+            "article_detail": article.get_absolute_url(),
+        }
+
+    response = client.get(urls[view])
+
+    assert response.status_code == 200
+    assert chat_url in _nav_links(response.content.decode())
+
+
 @pytest.mark.django_db
 def test_product_list_shows_each_product_category_name_and_price(
     client: Client, rag_store: DocumentStore
