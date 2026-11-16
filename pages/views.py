@@ -21,9 +21,13 @@ def chat(request: HttpRequest) -> HttpResponse:
             max_distance=MAX_DISTANCE,
             limit=MAX_CHUNKS,
         )
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
     return render(request, "pages/chat.html")
+
+
+def _is_fetch_request(request: HttpRequest) -> bool:
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
 
 def page_detail(request: HttpRequest, slug: str) -> HttpResponse:
