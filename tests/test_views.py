@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from decimal import Decimal
+from html.parser import HTMLParser
 
 import pytest
 from django.test import Client
@@ -284,6 +285,47 @@ def test_home_page_is_served_in_english_at_the_root_and_in_french_under_fr(
     assert english_response.headers.get("Content-Language") == "en"
     assert french_response.status_code == 200
     assert french_response.headers.get("Content-Language") == "fr"
+
+
+class _PostedFieldNames(HTMLParser):
+    """Collect the names of the fields inside the page's POST forms."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.names: set[str] = set()
+        self._in_post_form = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "form":
+            self._in_post_form = (attributes.get("method") or "").lower() == "post"
+        elif self._in_post_form and attributes.get("name"):
+            self.names.add(attributes["name"] or "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form":
+            self._in_post_form = False
+
+
+def _posted_field_names(content: str) -> set[str]:
+    parser = _PostedFieldNames()
+    parser.feed(content)
+    return parser.names
+
+
+@pytest.mark.django_db
+def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
+    client: Client,
+) -> None:
+    english_response = client.get("/chat/")
+    french_response = client.get("/fr/chat/")
+
+    assert english_response.status_code == 200
+    assert english_response.headers.get("Content-Language") == "en"
+    assert "question" in _posted_field_names(english_response.content.decode())
+    assert french_response.status_code == 200
+    assert french_response.headers.get("Content-Language") == "fr"
+    assert "question" in _posted_field_names(french_response.content.decode())
 
 
 @pytest.mark.django_db
