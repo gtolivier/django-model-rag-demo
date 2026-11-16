@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 18:13+0000\n"
+"POT-Creation-Date: 2026-11-16 18:24+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,7 +41,7 @@ msgstr "Fromages"
 msgid "Our cheeses"
 msgstr "Nos fromages"
 
-#: pages/templates/pages/base.html:53
+#: pages/templates/pages/base.html:54
 #, python-format
 msgid "A demo shop for %(model_rag)s and %(minimal_rag)s."
 msgstr "Une boutique de démonstration pour %(model_rag)s et %(minimal_rag)s."
@@ -61,15 +61,15 @@ msgstr ""
 "boutique. Chaque question reçoit une réponse à part : l'assistant ne voit "
 "pas les échanges précédents."
 
-#: pages/templates/pages/chat.html:18
+#: pages/templates/pages/chat.html:19
 msgid "Your question"
 msgstr "Votre question"
 
-#: pages/templates/pages/chat.html:20
+#: pages/templates/pages/chat.html:21
 msgid "Looking for an answer…"
 msgstr "Recherche d'une réponse…"
 
-#: pages/templates/pages/chat.html:20
+#: pages/templates/pages/chat.html:21
 msgid "Ask"
 msgstr "Demander"
 
@@ -115,5 +115,9 @@ msgid "Products"
 msgstr "Produits"
 
 #: pages/views.py:18
+msgid "Please type a question."
+msgstr "Veuillez saisir une question."
+
+#: pages/views.py:19
 msgid "The assistant is unavailable right now. Try again later."
 msgstr "L'assistant est indisponible pour le moment. Réessayez plus tard."
