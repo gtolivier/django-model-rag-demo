@@ -50,6 +50,7 @@ def _ask(question: str) -> dict[str, object]:
     try:
         reply = answer(
             question,
+            language="en",
             permissions=frozenset(),
             max_distance=MAX_DISTANCE,
             limit=MAX_CHUNKS,
