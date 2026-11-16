@@ -14,11 +14,7 @@ from django.utils.translation import gettext, override
 from django_minimal_rag.answering import Answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
-from assistant.management.commands.ask import (
-    MAX_CHUNKS,
-    MAX_DISTANCE,
-    NOTHING_CLOSE_ENOUGH,
-)
+from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
