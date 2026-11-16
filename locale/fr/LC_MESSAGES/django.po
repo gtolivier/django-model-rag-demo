@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 17:39+0000\n"
+"POT-Creation-Date: 2026-11-16 17:45+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -86,3 +86,7 @@ msgstr "Produits"
 #: pages/templates/pages/nav.html:5
 msgid "Chat"
 msgstr ""
+
+#: pages/views.py:18
+msgid "The assistant is unavailable right now. Try again later."
+msgstr "L'assistant est indisponible pour le moment. Réessayez plus tard."

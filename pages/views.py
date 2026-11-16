@@ -1,7 +1,9 @@
 from collections.abc import Iterable
 
+import httpx
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext_lazy as _
 from django_minimal_rag.answering import Answer, Citation, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
@@ -13,6 +15,7 @@ from assistant.management.commands.ask import (
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY = "exchanges"
+ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -24,12 +27,28 @@ def chat(request: HttpRequest) -> HttpResponse:
         question = request.POST.get("question", "")
         if not question:
             return render(request, "pages/chat.html", status=400)
-        reply = answer(
-            question,
-            permissions=frozenset(),
-            max_distance=MAX_DISTANCE,
-            limit=MAX_CHUNKS,
-        )
+        try:
+            reply = answer(
+                question,
+                permissions=frozenset(),
+                max_distance=MAX_DISTANCE,
+                limit=MAX_CHUNKS,
+            )
+        except httpx.HTTPError:
+            if _is_fetch_request(request):
+                return render(
+                    request, "pages/chat_exchange.html", {"question": question}
+                )
+            request.session[EXCHANGES_SESSION_KEY] = [
+                *request.session.get(EXCHANGES_SESSION_KEY, []),
+                {
+                    "question": question,
+                    "text": str(ASSISTANT_UNAVAILABLE),
+                    "sources": [],
+                    "extracts": [],
+                },
+            ]
+            return redirect(request.path)
         if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
         request.session[EXCHANGES_SESSION_KEY] = [
