@@ -552,6 +552,40 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
 
 
 @pytest.mark.django_db
+def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plain_post(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(
+            text="Orders arrive within two working days.",
+            chunks=(
+                RetrievedChunk(
+                    text="We ship every order within two working days.",
+                    title="Delivery terms",
+                    url="",
+                    source_key="pages.accordionitem:7",
+                    distance=0.1,
+                ),
+            ),
+        )
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    response = client.post(
+        "/chat/", {"question": "When will my order arrive?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Delivery terms" in content
+    assert [
+        (href, text)
+        for href, text in _links(content)
+        if href == "" or text == "Delivery terms"
+    ] == []
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
     ["product_list", "product_detail", "page_detail", "article_list", "article_detail"],
