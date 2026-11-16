@@ -437,6 +437,17 @@ def test_chat_page_answers_a_fetch_post_with_the_new_exchange_alone(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("chat_url", ["/chat/", "/fr/chat/"])
+def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
+    client: Client, chat_questions: list[str], chat_url: str
+) -> None:
+    response = client.post(chat_url, {"question": "How do I descale a kettle?"})
+
+    assert response.status_code in (302, 303)
+    assert response.headers["Location"] == chat_url
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
     ["product_list", "product_detail", "page_detail", "article_list", "article_detail"],
