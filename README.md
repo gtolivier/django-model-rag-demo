@@ -166,7 +166,7 @@ only reads the chunks the current model embedded.
 Known limits of `ask`, a demo command:
 
 - Errors end in a traceback: Ollama not running, a model not pulled,
-  `--limit 0`, a `--language` that is empty, holds a space or is `*`.
+  `--limit 0`, a `--language` that is empty, holds whitespace or is `*`.
 - Requests time out after 120 seconds, a setting no variable overrides; a
   slow first load of a model can exceed it.
 - "Nothing indexed is close enough to the question." is printed without
