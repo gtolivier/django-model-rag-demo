@@ -481,6 +481,35 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     assert "Fill it with white vinegar and leave it overnight." in content
 
 
+@pytest.mark.django_db
+def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alone(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+    }
+    questions: list[str] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        questions.append(question)
+        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"}, follow=True)
+    response = client.post(
+        "/chat/", {"question": "Can a toaster take bagels?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    assert questions == list(replies)
+    content = response.content.decode()
+    shown_in_order = [text for exchange in replies.items() for text in exchange]
+    assert [text in content for text in shown_in_order] == [True] * 4
+    _assert_in_order(content, shown_in_order)
+
+
 class _Links(HTMLParser):
     """Collect each link of a response as (target, text), in document order."""
 
