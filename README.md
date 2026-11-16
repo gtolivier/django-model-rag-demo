@@ -50,16 +50,16 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   and says so when nothing indexed is close enough to the question.
   `--max-distance` (default 0.5) and `--limit` (default 5) tune the
   retrieval. It searches every language unless `--language` names one, a
-  BCP 47 language range (`fr` also covers `fr-CA`); documents of unknown
-  language are kept either way.
+  BCP 47 language range: `fr` also covers `fr-CA`, but `en-CA` does not
+  cover `en`. Documents of unknown language are kept either way.
 - The shop's "Ask a question" page (`/chat/`, `/fr/chat/`) asks the same way
   `ask` does, with its default retrieval settings, in the language of the
   page: `/chat/` searches the English documents, `/fr/chat/` the French
-  ones. It shows each answer with its sources and the extracts it comes
-  from. The exchanges are kept for the visit (the session), oldest first.
-  Each question is answered on its own: the assistant does not see the
-  previous exchanges. The page works without JavaScript; with it, an answer
-  is added without reloading.
+  ones, both along with those of unknown language. It shows each answer
+  with its sources and the extracts it comes from. The exchanges are kept
+  for the visit (the session), oldest first. Each question is answered on
+  its own: the assistant does not see the previous exchanges. The page
+  works without JavaScript; with it, an answer is added without reloading.
 
 ## Minimal example
 
@@ -171,8 +171,9 @@ Known limits of `ask`, a demo command:
   slow first load of a model can exceed it.
 - "Nothing indexed is close enough to the question." is printed without
   calling the model, so it is in English whatever the language of the
-  question. It is also what an embedding model with no chunks yet gets: the
-  two cases look the same.
+  question. It is also what an embedding model with no chunks yet gets, and
+  a `--language` no document carries (`en-CA`: the demo's documents are
+  `en` or `fr`): the cases look the same.
 - When the model is called, it answers in the language of the question,
   most of the time: without `--language`, given extracts in both languages,
   it sometimes answers a French question in English.
@@ -191,8 +192,9 @@ Known limits of `ask`, a demo command:
 
 The "Ask a question" page shares those limits, except that it shows "the
 assistant is unavailable" instead of a traceback when Ollama cannot be
-reached, that it searches only the documents in the language of the page,
-and that its "nothing close enough" message is in that language too. Also:
+reached, that it searches only the documents in the language of the page
+(and those of unknown language), and that its "nothing close enough"
+message is in that language too. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
