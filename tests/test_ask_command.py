@@ -157,3 +157,19 @@ def test_ask_passes_the_language_option_to_answer(
     question, kwargs = answer_calls[0]
     assert question == "Comment détartrer une bouilloire ?"
     assert kwargs["language"] == "fr"
+
+
+def test_ask_passes_a_language_with_a_region_to_answer_as_typed(
+    answer_calls: list[AnswerCall],
+) -> None:
+    call_command(
+        "ask",
+        "How do I descale a kettle?",
+        "--language",
+        "en-CA",
+        stdout=StringIO(),
+    )
+
+    assert len(answer_calls) == 1
+    _, kwargs = answer_calls[0]
+    assert kwargs["language"] == "en-CA"
