@@ -1,15 +1,24 @@
+import re
 from collections.abc import Sequence
 from decimal import Decimal
+from html.parser import HTMLParser
+from io import StringIO
 
+import httpx
 import pytest
+from django.core.management import call_command
 from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
-from django.utils.translation import override
+from django.utils.translation import gettext, override
+from django_minimal_rag.answering import Answer
+from django_minimal_rag.retrieval import RetrievedChunk
 
+from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
+from pages.views import QUESTION_REQUIRED
 from tests.rag_output import DocumentStore
 
 
@@ -286,6 +295,564 @@ def test_home_page_is_served_in_english_at_the_root_and_in_french_under_fr(
     assert french_response.headers.get("Content-Language") == "fr"
 
 
+class _PostedFieldNames(HTMLParser):
+    """Collect the names of the fields inside the page's POST forms."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.names: set[str] = set()
+        self._in_post_form = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "form":
+            self._in_post_form = (attributes.get("method") or "").lower() == "post"
+        elif self._in_post_form and attributes.get("name"):
+            self.names.add(attributes["name"] or "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form":
+            self._in_post_form = False
+
+
+def _posted_field_names(content: str) -> set[str]:
+    parser = _PostedFieldNames()
+    parser.feed(content)
+    return parser.names
+
+
+@pytest.mark.django_db
+def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
+    client: Client,
+) -> None:
+    english_response = client.get("/chat/")
+    french_response = client.get("/fr/chat/")
+
+    assert english_response.status_code == 200
+    assert english_response.headers.get("Content-Language") == "en"
+    assert "question" in _posted_field_names(english_response.content.decode())
+    assert french_response.status_code == 200
+    assert french_response.headers.get("Content-Language") == "fr"
+    assert "question" in _posted_field_names(french_response.content.decode())
+
+
+CHAT_ANSWER = "pages.views.answer"
+
+
+@pytest.fixture
+def chat_answer_kwargs() -> list[dict[str, object]]:
+    """The keyword arguments of each call to the chat page's fake answer()."""
+    return []
+
+
+@pytest.fixture
+def chat_questions(
+    monkeypatch: pytest.MonkeyPatch, chat_answer_kwargs: list[dict[str, object]]
+) -> list[str]:
+    """Replace the chat page's answer() with a fake that records each question.
+
+    The fake also records the keyword arguments of each call in
+    chat_answer_kwargs, and finds nothing. It is set even while pages.views
+    does not import answer() yet, so a test that expects no call can fail on
+    its assertions.
+    """
+    questions: list[str] = []
+
+    def fake_answer(question: str, **kwargs: object) -> None:
+        questions.append(question)
+        chat_answer_kwargs.append(kwargs)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer, raising=False)
+    return questions
+
+
+def _answer_every_question_with(
+    monkeypatch: pytest.MonkeyPatch, answer: Answer
+) -> None:
+    """Replace the chat page's answer() with a fake that always returns answer."""
+    monkeypatch.setattr(CHAT_ANSWER, lambda question, **kwargs: answer)
+
+
+def _without_csrf_tokens(content: str) -> str:
+    """Blank the CSRF token values, which change with every rendering."""
+    return re.sub(
+        r'name="csrfmiddlewaretoken" value="[^"]*"',
+        'name="csrfmiddlewaretoken" value=""',
+        content,
+    )
+
+
+@pytest.mark.django_db
+def test_chat_page_rejects_an_empty_question_without_answering_or_keeping_it(
+    client: Client, chat_questions: list[str]
+) -> None:
+    page_before = client.get("/chat/")
+
+    response = client.post("/chat/", {"question": ""})
+
+    page_after = client.get("/chat/")
+    assert 400 <= response.status_code < 500
+    assert chat_questions == []
+    assert _without_csrf_tokens(page_after.content.decode()) == _without_csrf_tokens(
+        page_before.content.decode()
+    )
+
+
+@pytest.mark.django_db
+def test_chat_page_rejects_a_whitespace_only_question_as_an_empty_one(
+    client: Client, chat_questions: list[str]
+) -> None:
+    page_before = client.get("/chat/")
+
+    response = client.post("/chat/", {"question": " \t\n  "})
+
+    page_after = client.get("/chat/")
+    assert 400 <= response.status_code < 500
+    assert chat_questions == []
+    assert _without_csrf_tokens(page_after.content.decode()) == _without_csrf_tokens(
+        page_before.content.decode()
+    )
+
+
+@pytest.mark.django_db
+def test_chat_page_asks_for_a_question_when_an_empty_one_is_posted(
+    client: Client, chat_questions: list[str]
+) -> None:
+    # The message is the one the view defines, so this test does not fix the
+    # wording itself; the plain chat page must not show it.
+    question_required = escape(str(QUESTION_REQUIRED))
+    page = client.get("/chat/")
+
+    response = client.post("/chat/", {"question": ""})
+
+    assert question_required
+    assert question_required not in page.content.decode()
+    content = response.content.decode()
+    assert "question" in _posted_field_names(content)
+    assert question_required in content
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_a_question_as_an_anonymous_reader_with_ask_s_limits(
+    client: Client,
+    chat_questions: list[str],
+    chat_answer_kwargs: list[dict[str, object]],
+) -> None:
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    assert chat_questions == ["How do I descale a kettle?"]
+    assert chat_answer_kwargs == [
+        {
+            "permissions": frozenset(),
+            "max_distance": MAX_DISTANCE,
+            "limit": MAX_CHUNKS,
+        }
+    ]
+
+
+class _StartTags(HTMLParser):
+    """Collect the names of the elements a response opens."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.tags: set[str] = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.add(tag)
+
+
+def _start_tags(content: str) -> set[str]:
+    parser = _StartTags()
+    parser.feed(content)
+    return parser.tags
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_a_fetch_post_with_the_new_exchange_alone(
+    client: Client, chat_questions: list[str]
+) -> None:
+    response = client.post(
+        "/chat/",
+        {"question": "How do I descale a kettle?"},
+        headers={"X-Requested-With": "XMLHttpRequest"},
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert _start_tags(content).isdisjoint({"html", "body", "nav"})
+    assert "How do I descale a kettle?" in content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("chat_url", ["/chat/", "/fr/chat/"])
+def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
+    client: Client, chat_questions: list[str], chat_url: str
+) -> None:
+    response = client.post(chat_url, {"question": "How do I descale a kettle?"})
+
+    assert response.status_code in (302, 303)
+    assert response.headers["Location"] == chat_url
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar and leave it overnight.",
+            chunks=(
+                RetrievedChunk(
+                    text="Vinegar dissolves limescale overnight.",
+                    title="Descaling a kettle",
+                    url="/blog/1/",
+                    source_key="blog.article:1",
+                    distance=0.1,
+                ),
+            ),
+        ),
+    )
+
+    response = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "How do I descale a kettle?" in content
+    assert "Fill it with white vinegar and leave it overnight." in content
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alone(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+    }
+    questions: list[str] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        questions.append(question)
+        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"}, follow=True)
+    response = client.post(
+        "/chat/", {"question": "Can a toaster take bagels?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    assert questions == list(replies)
+    content = response.content.decode()
+    shown_in_order = [text for exchange in replies.items() for text in exchange]
+    assert [text in content for text in shown_in_order] == [True] * 4
+    _assert_in_order(content, shown_in_order)
+
+
+@pytest.mark.django_db
+def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _answer_every_question_with(
+        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+    )
+    first_visit = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    second_visit = Client().get("/chat/")
+
+    assert "How do I descale a kettle?" in first_visit.content.decode()
+    assert second_visit.status_code == 200
+    content = second_visit.content.decode()
+    assert "How do I descale a kettle?" not in content
+    assert "Fill it with white vinegar overnight." not in content
+
+
+class _Links(HTMLParser):
+    """Collect each link of a response as (target, text), in document order."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[tuple[str, str]] = []
+        self._href: str | None = None
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "a":
+            self._href = dict(attrs).get("href") or ""
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "a" and self._href is not None:
+            self.links.append((self._href, " ".join("".join(self._text).split())))
+            self._href = None
+
+
+def _links(content: str) -> list[tuple[str, str]]:
+    parser = _Links()
+    parser.feed(content)
+    return parser.links
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def chunk(title: str, url: str, source_key: str, distance: float) -> RetrievedChunk:
+        return RetrievedChunk(
+            text=f"An extract of {title}.",
+            title=title,
+            url=url,
+            source_key=source_key,
+            distance=distance,
+        )
+
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Use the bagel setting, then descale with white vinegar.",
+            chunks=(
+                chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.1),
+                chunk("Descaling a kettle", "/blog/1/", "blog.article:1", 0.2),
+                chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.3),
+            ),
+        ),
+    )
+
+    response = client.post(
+        "/chat/", {"question": "How do I toast bagels and descale?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    source_urls = {"/blog/1/", "/blog/2/"}
+    source_links = [
+        (href, text)
+        for href, text in _links(response.content.decode())
+        if href in source_urls
+    ]
+    assert source_links == [
+        ("/blog/2/", "Toasting bagels"),
+        ("/blog/1/", "Descaling a kettle"),
+    ]
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plain_post(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Orders arrive within two working days.",
+            chunks=(
+                RetrievedChunk(
+                    text="We ship every order within two working days.",
+                    title="Delivery terms",
+                    url="",
+                    source_key="pages.accordionitem:7",
+                    distance=0.1,
+                ),
+            ),
+        ),
+    )
+
+    response = client.post(
+        "/chat/", {"question": "When will my order arrive?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Delivery terms" in content
+    assert [
+        (href, text)
+        for href, text in _links(content)
+        if href == "" or text == "Delivery terms"
+    ] == []
+
+
+_VOID_ELEMENTS = frozenset(
+    {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta"}
+    | {"source", "track", "wbr"}
+)
+
+
+class _TextsByTestId(HTMLParser):
+    """Collect the text of each element with a given data-testid, in order."""
+
+    def __init__(self, test_id: str) -> None:
+        super().__init__()
+        self.texts: list[str] = []
+        self._test_id = test_id
+        self._depth = 0
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _VOID_ELEMENTS:
+            return
+        if self._depth:
+            self._depth += 1
+        elif dict(attrs).get("data-testid") == self._test_id:
+            self._depth = 1
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._depth:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in _VOID_ELEMENTS or not self._depth:
+            return
+        self._depth -= 1
+        if not self._depth:
+            self.texts.append(" ".join("".join(self._text).split()))
+
+
+def _texts_by_test_id(content: str, test_id: str) -> list[str]:
+    parser = _TextsByTestId(test_id)
+    parser.feed(content)
+    return parser.texts
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Answer.chunks are documented nearest first: the page keeps their order,
+    # which neither groups them by document nor sorts them by title or text.
+    retrieved = (
+        ("Toasting bagels", "Use the bagel setting for a soft top."),
+        ("Descaling a kettle", "Vinegar dissolves limescale overnight."),
+        ("Toasting bagels", "A bagel takes longer than a slice of bread."),
+    )
+
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Use the bagel setting, then descale with white vinegar.",
+            chunks=tuple(
+                RetrievedChunk(
+                    text=text,
+                    title=title,
+                    url=f"/blog/{len(title)}/",
+                    source_key=f"blog.article:{len(title)}",
+                    distance=0.1 * (rank + 1),
+                )
+                for rank, (title, text) in enumerate(retrieved)
+            ),
+        ),
+    )
+
+    response = client.post(
+        "/chat/", {"question": "How do I toast bagels and descale?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    extracts = _texts_by_test_id(response.content.decode(), "extract")
+    assert [
+        (title in extract, text in extract)
+        for extract, (title, text) in zip(extracts, retrieved, strict=False)
+    ] == [(True, True)] * len(retrieved)
+    assert len(extracts) == len(retrieved)
+
+
+ASK_ANSWER = "assistant.management.commands.ask.answer"
+
+
+def _ask_command_output_when_nothing_is_found(monkeypatch: pytest.MonkeyPatch) -> str:
+    """What the ask command prints when its answer() finds nothing."""
+    monkeypatch.setattr(ASK_ANSWER, lambda question, **kwargs: None)
+    ask_output = StringIO()
+    call_command("ask", "How do I descale a kettle?", stdout=ask_output)
+    return ask_output.getvalue().strip()
+
+
+@pytest.mark.django_db
+def test_chat_page_says_nothing_indexed_is_close_enough_after_a_plain_post(
+    client: Client, chat_questions: list[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The ask command's message when answer() finds nothing is the reference,
+    # so this test does not fix the wording itself.
+    nothing_close_enough = _ask_command_output_when_nothing_is_found(monkeypatch)
+
+    response = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    assert escape(nothing_close_enough) in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_chat_page_says_nothing_indexed_is_close_enough_in_french_under_fr(
+    client: Client, chat_questions: list[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The reference is the ask command's English message and its translation
+    # in the project's French catalog, so this test does not fix the wording.
+    with override("en"):
+        english_message = _ask_command_output_when_nothing_is_found(monkeypatch)
+    with override("fr"):
+        french_message = gettext(english_message)
+
+    response = client.post(
+        "/fr/chat/", {"question": "Comment détartrer une bouilloire ?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert escape(english_message) not in content
+    assert escape(french_message) in content
+
+
+@pytest.mark.django_db
+def test_chat_page_says_the_assistant_is_unavailable_when_the_backend_fails(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Each question meets a different httpx failure: the exchanges shown all
+    # say the same thing, which is neither the error's own detail nor the
+    # "nothing close enough" message, so the wording itself stays free.
+    request = httpx.Request("POST", "http://localhost:11434/api/chat")
+    failures: dict[str, httpx.HTTPError] = {
+        "How do I descale a kettle?": httpx.ConnectError(
+            "All connection attempts failed", request=request
+        ),
+        "Can a toaster take bagels?": httpx.HTTPStatusError(
+            "Server error '500 Internal Server Error'",
+            request=request,
+            response=httpx.Response(500, request=request),
+        ),
+        "When will my order arrive?": httpx.ReadTimeout("timed out", request=request),
+    }
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        raise failures[question]
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    client = Client(raise_request_exception=False)
+
+    posts = [client.post("/chat/", {"question": question}) for question in failures]
+    page = client.get("/chat/")
+
+    assert {post.status_code for post in posts} <= {302, 303}
+    assert page.status_code == 200
+    exchanges = page.context["exchanges"]
+    assert [exchange["question"] for exchange in exchanges] == list(failures)
+    shown = {exchange["text"] for exchange in exchanges}
+    assert len(shown) == 1
+    (unavailable,) = shown
+    assert unavailable
+    assert unavailable != str(NOTHING_CLOSE_ENOUGH)
+    assert escape(unavailable) in page.content.decode()
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
@@ -324,6 +891,33 @@ def test_every_view_links_to_the_product_list_the_article_list_and_every_page(
         assert f'href="{page.get_absolute_url()}"' in content
 
 
+def _create_content_and_get_every_view_url(language: str) -> dict[str, str]:
+    """Create one product, article and page in language; map each view to its URL."""
+    product = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Kitchen"),
+        language=language,
+    )
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language=language,
+    )
+    page = Page.objects.create(title="About us", slug="about", language=language)
+    with override(language):
+        return {
+            "home": reverse("home"),
+            "chat": reverse("chat"),
+            "product_list": reverse("product_list"),
+            "product_detail": product.get_absolute_url(),
+            "page_detail": page.get_absolute_url(),
+            "article_list": reverse("article_list"),
+            "article_detail": article.get_absolute_url(),
+        }
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(("language", "other_home"), [("en", "/fr/"), ("fr", "/")])
 @pytest.mark.parametrize(
@@ -344,33 +938,68 @@ def test_every_view_links_to_the_home_of_the_other_language(
     language: str,
     other_home: str,
 ) -> None:
-    product = Product.objects.create(
-        name="Kettle",
-        description="Boils a litre of water in two minutes.",
-        price=Decimal("29.90"),
-        category=Category.objects.create(name="Kitchen"),
-        language=language,
-    )
-    article = Article.objects.create(
-        title="Descaling a kettle",
-        body="Fill it with white vinegar and leave it overnight.",
-        language=language,
-    )
-    page = Page.objects.create(title="About us", slug="about", language=language)
-    with override(language):
-        urls = {
-            "home": reverse("home"),
-            "product_list": reverse("product_list"),
-            "product_detail": product.get_absolute_url(),
-            "page_detail": page.get_absolute_url(),
-            "article_list": reverse("article_list"),
-            "article_detail": article.get_absolute_url(),
-        }
+    urls = _create_content_and_get_every_view_url(language)
 
     response = client.get(urls[view])
 
     assert response.status_code == 200
     assert f'href="{other_home}"' in response.content.decode()
+
+
+class _NavLinks(HTMLParser):
+    """Collect the targets of the links inside the page's <nav>."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.hrefs: list[str] = []
+        self._in_nav = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "nav":
+            self._in_nav = True
+        elif self._in_nav and tag == "a":
+            self.hrefs.append(dict(attrs).get("href") or "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "nav":
+            self._in_nav = False
+
+
+def _nav_links(content: str) -> list[str]:
+    parser = _NavLinks()
+    parser.feed(content)
+    return parser.hrefs
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("language", "chat_url"), [("en", "/chat/"), ("fr", "/fr/chat/")]
+)
+@pytest.mark.parametrize(
+    "view",
+    [
+        "home",
+        "chat",
+        "product_list",
+        "product_detail",
+        "page_detail",
+        "article_list",
+        "article_detail",
+    ],
+)
+def test_every_view_nav_links_to_the_chat_page_of_the_active_language(
+    client: Client,
+    rag_store: DocumentStore,
+    view: str,
+    language: str,
+    chat_url: str,
+) -> None:
+    urls = _create_content_and_get_every_view_url(language)
+
+    response = client.get(urls[view])
+
+    assert response.status_code == 200
+    assert chat_url in _nav_links(response.content.decode())
 
 
 @pytest.mark.django_db

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 00:12+0000\n"
+"POT-Creation-Date: 2026-11-16 18:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % "
 "1000000 == 0 ? 1 : 2;\n"
+
+#: assistant/answering.py:5
+msgid "Nothing indexed is close enough to the question."
+msgstr "Rien d'indexé n'est assez proche de la question."
+
 #: blog/templates/blog/article_list.html:3
 #: blog/templates/blog/article_list.html:5 pages/templates/pages/nav.html:4
 msgid "Articles"
@@ -36,10 +41,49 @@ msgstr "Fromages"
 msgid "Our cheeses"
 msgstr "Nos fromages"
 
-#: pages/templates/pages/base.html:41
+#: pages/templates/pages/base.html:55
 #, python-format
 msgid "A demo shop for %(model_rag)s and %(minimal_rag)s."
 msgstr "Une boutique de démonstration pour %(model_rag)s et %(minimal_rag)s."
+
+#: pages/templates/pages/chat.html:3 pages/templates/pages/chat.html:5
+#: pages/templates/pages/nav.html:5
+msgid "Ask a question"
+msgstr "Poser une question"
+
+#: pages/templates/pages/chat.html:6
+msgid ""
+"The answers come from the shop's own pages, cheeses and articles. Each "
+"question is answered on its own: the assistant does not see the previous "
+"exchanges."
+msgstr ""
+"Les réponses viennent des pages, des fromages et des articles de la "
+"boutique. Chaque question reçoit une réponse à part : l'assistant ne voit "
+"pas les échanges précédents."
+
+#: pages/templates/pages/chat.html:19
+msgid "Your question"
+msgstr "Votre question"
+
+#: pages/templates/pages/chat.html:21
+msgid "Looking for an answer…"
+msgstr "Recherche d'une réponse…"
+
+#: pages/templates/pages/chat.html:21
+msgid "Ask"
+msgstr "Demander"
+
+#: pages/templates/pages/chat_exchange.html:5
+msgid "Sources"
+msgstr "Sources"
+
+#: pages/templates/pages/chat_exchange.html:14
+#, python-format
+msgid "%(counter)s extract the answer comes from"
+msgid_plural "%(counter)s extracts the answer comes from"
+msgstr[0] "%(counter)s extrait d'où vient la réponse"
+msgstr[1] "%(counter)s extraits d'où vient la réponse"
+msgstr[2] "%(counter)s extraits d'où vient la réponse"
 
 #: pages/templates/pages/home.html:4
 msgid "Welcome to the Fromagerie du Marché"
@@ -69,3 +113,11 @@ msgstr ""
 #: pages/templates/pages/nav.html:3
 msgid "Products"
 msgstr "Produits"
+
+#: pages/views.py:14
+msgid "Please type a question."
+msgstr "Veuillez saisir une question."
+
+#: pages/views.py:15
+msgid "The assistant is unavailable right now. Try again later."
+msgstr "L'assistant est indisponible pour le moment. Réessayez plus tard."

@@ -1,0 +1,52 @@
+{% extends "pages/base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Ask a question" %} · {% endblock %}
+{% block content %}
+<h1>{% translate "Ask a question" %}</h1>
+<p class="meta">{% blocktranslate trimmed %}
+  The answers come from the shop's own pages, cheeses and articles. Each
+  question is answered on its own: the assistant does not see the previous
+  exchanges.
+{% endblocktranslate %}</p>
+<div id="exchanges" class="exchanges">
+{% for exchange in exchanges %}
+{% include "pages/chat_exchange.html" %}
+{% endfor %}
+</div>
+<form method="post" id="chat-form" class="ask">
+{% csrf_token %}
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<label for="question">{% translate "Your question" %}</label>
+<input type="text" name="question" id="question" autocomplete="off">
+<button type="submit" data-waiting-label="{% translate "Looking for an answer…" %}">{% translate "Ask" %}</button>
+</form>
+<script>
+const form = document.getElementById("chat-form");
+const button = form.querySelector("button");
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = button.dataset.waitingLabel;
+  try {
+    const response = await fetch(form.action, {
+      method: "POST",
+      body: new FormData(form),
+      headers: { "X-Requested-With": "XMLHttpRequest" },
+    });
+    if (!response.ok) {
+      form.submit();
+      return;
+    }
+    const exchanges = document.getElementById("exchanges");
+    exchanges.insertAdjacentHTML("beforeend", await response.text());
+    exchanges.lastElementChild.scrollIntoView({ block: "nearest" });
+    form.reset();
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
+    form.question.focus();
+  }
+});
+</script>
+{% endblock %}

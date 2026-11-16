@@ -20,6 +20,7 @@ django-minimal-rag = { git = "https://github.com/gtolivier/django-minimal-rag", 
 dev = [
     "pytest>=9.1.1",
     "pytest-django>=4.14.0",
+    "pytest-playwright>=0.10.0",
     "ruff>=0.16.9",
 ]
 typecheck = [

@@ -5,7 +5,8 @@ Instructions for coding agents working in this repository. Read
 
 ## Commands
 
-- Install: `uv sync`
+- Install: `uv sync`, then `uv run playwright install chromium` (the browser
+  the pytest-playwright tests drive)
 - Database: `docker compose up -d --wait` (PostgreSQL with pgvector, port
   5434), needed by the tests and by every `manage.py` command that touches
   the database (`migrate`, `makemigrations`, `sync_model_rag`, `runserver`…)

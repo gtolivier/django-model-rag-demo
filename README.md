@@ -50,6 +50,12 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   and says so when nothing indexed is close enough to the question.
   `--max-distance` (default 0.5) and `--limit` (default 5) tune the
   retrieval.
+- The shop's "Ask a question" page (`/chat/`, `/fr/chat/`) asks the same way
+  `ask` does, with its default retrieval settings, and shows each answer
+  with its sources and the extracts it comes from. The exchanges are kept
+  for the visit (the session), oldest first. Each question is answered on
+  its own: the assistant does not see the previous exchanges. The page
+  works without JavaScript; with it, an answer is added without reloading.
 
 ## Minimal example
 
@@ -94,6 +100,7 @@ keeping dependent documents up to date.
 ```sh
 docker compose up -d --wait
 uv sync
+uv run playwright install chromium
 uv run python manage.py check
 uv run python manage.py migrate
 uv run pytest
@@ -116,7 +123,8 @@ uv run python manage.py ask "Which cheeses can I eat while pregnant?"
 ```
 
 `uv run python manage.py runserver` then shows the shop at
-http://127.0.0.1:8000/, and in French at http://127.0.0.1:8000/fr/.
+http://127.0.0.1:8000/, and in French at http://127.0.0.1:8000/fr/; its
+"Ask a question" page takes the same questions.
 
 Other questions the content answers: "What wine goes with Comté?", "Do you
 deliver to Belgium?", "How much cheese per guest for a wedding?", "Is the shop
@@ -176,6 +184,23 @@ Known limits of `ask`, a demo command:
   enumerate a catalog. `--limit 30 --max-distance 0.6` brings the ten cheeses
   into the extracts, slowly, and the model may still leave one out of its
   answer.
+
+The "Ask a question" page shares those limits, except that it shows "the
+assistant is unavailable" instead of a traceback when Ollama cannot be
+reached, and that its "nothing close enough" message is in the language of
+the page the question was asked from. Also:
+
+- The English and the French page share the visit's exchanges, and those
+  two messages keep the language they were shown in.
+- Posting an empty question, or one made only of spaces, shows the page with
+  "Please type a question.", without the previous exchanges; they come back
+  on the next visit of the page.
+- When the server answers a question with an error, the script posts it
+  again without JavaScript: the visitor waits twice for the same error.
+- The session keeps every exchange of the visit, extracts included, and two
+  questions posted at the same time from two tabs can lose one of them.
+- A question waits for its whole answer, up to the 120-second timeout, with
+  no progress shown beyond the button's "Looking for an answer…".
 
 The two packages are locked to specific commits in `uv.lock`. To move to
 their latest `main`:

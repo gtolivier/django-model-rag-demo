@@ -26,6 +26,20 @@
   .list { padding-left: 1.2rem; }
   details { margin: .5rem 0; padding: .5rem 1rem; background: var(--card); border: 1px solid var(--line); border-radius: .5rem; }
   summary { cursor: pointer; font-weight: bold; }
+  .exchanges { display: grid; gap: 1rem; margin: 1.5rem 0; }
+  .exchange .question { margin-top: 0; font-weight: bold; }
+  .exchange .answer p { margin: .5rem 0; }
+  .exchange .meta { margin: .75rem 0 .25rem; font-size: .9rem; }
+  .exchange .sources { margin: 0; padding-left: 1.2rem; }
+  .exchange .sources a { display: inline; margin: 0; font-weight: normal; }
+  .exchange details { margin-bottom: 0; background: var(--paper); font-size: .95rem; }
+  .exchange blockquote { margin: .75rem 0; padding-left: .75rem; border-left: 3px solid var(--line); }
+  .ask { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; font-family: system-ui, sans-serif; }
+  .ask label { flex-basis: 100%; font-weight: bold; }
+  .ask input { flex: 1 1 14rem; padding: .5rem .75rem; border: 1px solid var(--line); border-radius: .5rem; font: inherit; }
+  .ask button { padding: .5rem 1.25rem; border: 0; border-radius: .5rem; background: var(--accent); color: #fff; font: inherit; cursor: pointer; }
+  .ask .error { flex-basis: 100%; margin: 0; color: #a12a1a; font-weight: bold; }
+  .ask button:disabled { opacity: .7; cursor: progress; }
   footer { padding-top: 1rem; padding-bottom: 2rem; border-top: 1px solid var(--line); color: var(--muted); font-family: system-ui, sans-serif; font-size: .9rem; }
 </style>
 </head>
