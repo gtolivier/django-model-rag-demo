@@ -1,3 +1,4 @@
+import re
 from collections.abc import Sequence
 from decimal import Decimal
 from html.parser import HTMLParser
@@ -326,6 +327,50 @@ def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
     assert french_response.status_code == 200
     assert french_response.headers.get("Content-Language") == "fr"
     assert "question" in _posted_field_names(french_response.content.decode())
+
+
+CHAT_ANSWER = "pages.views.answer"
+
+
+@pytest.fixture
+def chat_questions(monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    """Replace the chat page's answer() with a fake that records each question.
+
+    The fake finds nothing. It is set even while pages.views does not import
+    answer() yet, so a test that expects no call can fail on its assertions.
+    """
+    questions: list[str] = []
+
+    def fake_answer(question: str, **kwargs: object) -> None:
+        questions.append(question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer, raising=False)
+    return questions
+
+
+def _without_csrf_tokens(content: str) -> str:
+    """Blank the CSRF token values, which change with every rendering."""
+    return re.sub(
+        r'name="csrfmiddlewaretoken" value="[^"]*"',
+        'name="csrfmiddlewaretoken" value=""',
+        content,
+    )
+
+
+@pytest.mark.django_db
+def test_chat_page_rejects_an_empty_question_without_answering_or_keeping_it(
+    client: Client, chat_questions: list[str]
+) -> None:
+    page_before = client.get("/chat/")
+
+    response = client.post("/chat/", {"question": ""})
+
+    page_after = client.get("/chat/")
+    assert 400 <= response.status_code < 500
+    assert chat_questions == []
+    assert _without_csrf_tokens(page_after.content.decode()) == _without_csrf_tokens(
+        page_before.content.decode()
+    )
 
 
 @pytest.mark.django_db
