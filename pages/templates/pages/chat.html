@@ -15,6 +15,7 @@
 </div>
 <form method="post" id="chat-form" class="ask">
 {% csrf_token %}
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 <label for="question">{% translate "Your question" %}</label>
 <input type="text" name="question" id="question" autocomplete="off">
 <button type="submit" data-waiting-label="{% translate "Looking for an answer…" %}">{% translate "Ask" %}</button>

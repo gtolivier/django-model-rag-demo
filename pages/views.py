@@ -15,6 +15,7 @@ from assistant.management.commands.ask import (
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY = "exchanges"
+QUESTION_REQUIRED = _("Please type a question.")
 ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
 
 
@@ -31,7 +32,12 @@ def chat(request: HttpRequest) -> HttpResponse:
 def _post_question(request: HttpRequest) -> HttpResponse:
     question = request.POST.get("question", "")
     if not question.strip():
-        return render(request, "pages/chat.html", status=400)
+        return render(
+            request,
+            "pages/chat.html",
+            {"error": QUESTION_REQUIRED},
+            status=400,
+        )
     exchange = _ask(question)
     request.session[EXCHANGES_SESSION_KEY] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
