@@ -369,6 +369,13 @@ def chat_questions(
     return questions
 
 
+def _answer_every_question_with(
+    monkeypatch: pytest.MonkeyPatch, answer: Answer
+) -> None:
+    """Replace the chat page's answer() with a fake that always returns answer."""
+    monkeypatch.setattr(CHAT_ANSWER, lambda question, **kwargs: answer)
+
+
 def _without_csrf_tokens(content: str) -> str:
     """Blank the CSRF token values, which change with every rendering."""
     return re.sub(
@@ -460,8 +467,9 @@ def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
             text="Fill it with white vinegar and leave it overnight.",
             chunks=(
                 RetrievedChunk(
@@ -472,9 +480,8 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
                     distance=0.1,
                 ),
             ),
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+        ),
+    )
 
     response = client.post(
         "/chat/", {"question": "How do I descale a kettle?"}, follow=True
@@ -519,10 +526,9 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text="Fill it with white vinegar overnight.", chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    _answer_every_question_with(
+        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+    )
     first_visit = client.post(
         "/chat/", {"question": "How do I descale a kettle?"}, follow=True
     )
@@ -579,17 +585,17 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
             distance=distance,
         )
 
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
             text="Use the bagel setting, then descale with white vinegar.",
             chunks=(
                 chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.1),
                 chunk("Descaling a kettle", "/blog/1/", "blog.article:1", 0.2),
                 chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.3),
             ),
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+        ),
+    )
 
     response = client.post(
         "/chat/", {"question": "How do I toast bagels and descale?"}, follow=True
@@ -612,8 +618,9 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
 def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
             text="Orders arrive within two working days.",
             chunks=(
                 RetrievedChunk(
@@ -624,9 +631,8 @@ def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plai
                     distance=0.1,
                 ),
             ),
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+        ),
+    )
 
     response = client.post(
         "/chat/", {"question": "When will my order arrive?"}, follow=True
@@ -697,8 +703,9 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
         ("Toasting bagels", "A bagel takes longer than a slice of bread."),
     )
 
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(
+    _answer_every_question_with(
+        monkeypatch,
+        Answer(
             text="Use the bagel setting, then descale with white vinegar.",
             chunks=tuple(
                 RetrievedChunk(
@@ -710,9 +717,8 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
                 )
                 for rank, (title, text) in enumerate(retrieved)
             ),
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+        ),
+    )
 
     response = client.post(
         "/chat/", {"question": "How do I toast bagels and descale?"}, follow=True
@@ -727,18 +733,24 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
     assert len(extracts) == len(retrieved)
 
 
+ASK_ANSWER = "assistant.management.commands.ask.answer"
+
+
+def _ask_command_output_when_nothing_is_found(monkeypatch: pytest.MonkeyPatch) -> str:
+    """What the ask command prints when its answer() finds nothing."""
+    monkeypatch.setattr(ASK_ANSWER, lambda question, **kwargs: None)
+    ask_output = StringIO()
+    call_command("ask", "How do I descale a kettle?", stdout=ask_output)
+    return ask_output.getvalue().strip()
+
+
 @pytest.mark.django_db
 def test_chat_page_says_nothing_indexed_is_close_enough_after_a_plain_post(
     client: Client, chat_questions: list[str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # The ask command's message when answer() finds nothing is the reference,
     # so this test does not fix the wording itself.
-    monkeypatch.setattr(
-        "assistant.management.commands.ask.answer", lambda question, **kwargs: None
-    )
-    ask_output = StringIO()
-    call_command("ask", "How do I descale a kettle?", stdout=ask_output)
-    nothing_close_enough = ask_output.getvalue().strip()
+    nothing_close_enough = _ask_command_output_when_nothing_is_found(monkeypatch)
 
     response = client.post(
         "/chat/", {"question": "How do I descale a kettle?"}, follow=True
@@ -754,13 +766,8 @@ def test_chat_page_says_nothing_indexed_is_close_enough_in_french_under_fr(
 ) -> None:
     # The reference is the ask command's English message and its translation
     # in the project's French catalog, so this test does not fix the wording.
-    monkeypatch.setattr(
-        "assistant.management.commands.ask.answer", lambda question, **kwargs: None
-    )
-    ask_output = StringIO()
     with override("en"):
-        call_command("ask", "How do I descale a kettle?", stdout=ask_output)
-    english_message = ask_output.getvalue().strip()
+        english_message = _ask_command_output_when_nothing_is_found(monkeypatch)
     with override("fr"):
         french_message = gettext(english_message)
 
@@ -853,6 +860,33 @@ def test_every_view_links_to_the_product_list_the_article_list_and_every_page(
         assert f'href="{page.get_absolute_url()}"' in content
 
 
+def _create_content_and_get_every_view_url(language: str) -> dict[str, str]:
+    """Create one product, article and page in language; map each view to its URL."""
+    product = Product.objects.create(
+        name="Kettle",
+        description="Boils a litre of water in two minutes.",
+        price=Decimal("29.90"),
+        category=Category.objects.create(name="Kitchen"),
+        language=language,
+    )
+    article = Article.objects.create(
+        title="Descaling a kettle",
+        body="Fill it with white vinegar and leave it overnight.",
+        language=language,
+    )
+    page = Page.objects.create(title="About us", slug="about", language=language)
+    with override(language):
+        return {
+            "home": reverse("home"),
+            "chat": reverse("chat"),
+            "product_list": reverse("product_list"),
+            "product_detail": product.get_absolute_url(),
+            "page_detail": page.get_absolute_url(),
+            "article_list": reverse("article_list"),
+            "article_detail": article.get_absolute_url(),
+        }
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(("language", "other_home"), [("en", "/fr/"), ("fr", "/")])
 @pytest.mark.parametrize(
@@ -873,28 +907,7 @@ def test_every_view_links_to_the_home_of_the_other_language(
     language: str,
     other_home: str,
 ) -> None:
-    product = Product.objects.create(
-        name="Kettle",
-        description="Boils a litre of water in two minutes.",
-        price=Decimal("29.90"),
-        category=Category.objects.create(name="Kitchen"),
-        language=language,
-    )
-    article = Article.objects.create(
-        title="Descaling a kettle",
-        body="Fill it with white vinegar and leave it overnight.",
-        language=language,
-    )
-    page = Page.objects.create(title="About us", slug="about", language=language)
-    with override(language):
-        urls = {
-            "home": reverse("home"),
-            "product_list": reverse("product_list"),
-            "product_detail": product.get_absolute_url(),
-            "page_detail": page.get_absolute_url(),
-            "article_list": reverse("article_list"),
-            "article_detail": article.get_absolute_url(),
-        }
+    urls = _create_content_and_get_every_view_url(language)
 
     response = client.get(urls[view])
 
@@ -950,29 +963,7 @@ def test_every_view_nav_links_to_the_chat_page_of_the_active_language(
     language: str,
     chat_url: str,
 ) -> None:
-    product = Product.objects.create(
-        name="Kettle",
-        description="Boils a litre of water in two minutes.",
-        price=Decimal("29.90"),
-        category=Category.objects.create(name="Kitchen"),
-        language=language,
-    )
-    article = Article.objects.create(
-        title="Descaling a kettle",
-        body="Fill it with white vinegar and leave it overnight.",
-        language=language,
-    )
-    page = Page.objects.create(title="About us", slug="about", language=language)
-    with override(language):
-        urls = {
-            "home": reverse("home"),
-            "chat": reverse("chat"),
-            "product_list": reverse("product_list"),
-            "product_detail": product.get_absolute_url(),
-            "page_detail": page.get_absolute_url(),
-            "article_list": reverse("article_list"),
-            "article_detail": article.get_absolute_url(),
-        }
+    urls = _create_content_and_get_every_view_url(language)
 
     response = client.get(urls[view])
 
