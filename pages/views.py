@@ -9,6 +9,8 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def chat(request: HttpRequest) -> HttpResponse:
+    if request.method == "POST":
+        return render(request, "pages/chat.html", status=400)
     return render(request, "pages/chat.html")
 
 
