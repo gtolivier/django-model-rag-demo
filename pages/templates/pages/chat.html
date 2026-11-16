@@ -7,7 +7,7 @@
 <input type="text" name="question">
 <button type="submit">{% translate "Ask" %}</button>
 </form>
-{% if exchange %}
+{% for exchange in exchanges %}
 <div class="exchange">
 <p class="question">{{ exchange.question }}</p>
 <p class="answer">{{ exchange.text }}</p>
@@ -22,5 +22,5 @@
 <blockquote data-testid="extract"><strong>{{ extract.title }}</strong> {{ extract.text }}</blockquote>
 {% endfor %}
 </div>
-{% endif %}
+{% endfor %}
 {% endblock %}

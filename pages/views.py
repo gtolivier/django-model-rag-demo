@@ -32,17 +32,20 @@ def chat(request: HttpRequest) -> HttpResponse:
         )
         if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
-        request.session[EXCHANGE_SESSION_KEY] = {
-            "question": question,
-            "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
-            "sources": _sources(reply.citations) if reply else [],
-            "extracts": _extracts(reply.chunks) if reply else [],
-        }
+        request.session[EXCHANGE_SESSION_KEY] = [
+            *request.session.get(EXCHANGE_SESSION_KEY, []),
+            {
+                "question": question,
+                "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
+                "sources": _sources(reply.citations) if reply else [],
+                "extracts": _extracts(reply.chunks) if reply else [],
+            },
+        ]
         return redirect(request.path)
     return render(
         request,
         "pages/chat.html",
-        {"exchange": request.session.pop(EXCHANGE_SESSION_KEY, None)},
+        {"exchanges": request.session.get(EXCHANGE_SESSION_KEY, [])},
     )
 
 
