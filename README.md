@@ -94,6 +94,7 @@ keeping dependent documents up to date.
 ```sh
 docker compose up -d --wait
 uv sync
+uv run playwright install chromium
 uv run python manage.py check
 uv run python manage.py migrate
 uv run pytest
