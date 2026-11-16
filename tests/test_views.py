@@ -9,7 +9,7 @@ from django.core.management import call_command
 from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
-from django.utils.translation import override
+from django.utils.translation import gettext, override
 from django_minimal_rag.answering import Answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
@@ -691,6 +691,32 @@ def test_chat_page_says_nothing_indexed_is_close_enough_after_a_plain_post(
 
     assert response.status_code == 200
     assert escape(nothing_close_enough) in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_chat_page_says_nothing_indexed_is_close_enough_in_french_under_fr(
+    client: Client, chat_questions: list[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The reference is the ask command's English message and its translation
+    # in the project's French catalog, so this test does not fix the wording.
+    monkeypatch.setattr(
+        "assistant.management.commands.ask.answer", lambda question, **kwargs: None
+    )
+    ask_output = StringIO()
+    with override("en"):
+        call_command("ask", "How do I descale a kettle?", stdout=ask_output)
+    english_message = ask_output.getvalue().strip()
+    with override("fr"):
+        french_message = gettext(english_message)
+
+    response = client.post(
+        "/fr/chat/", {"question": "Comment détartrer une bouilloire ?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert escape(english_message) not in content
+    assert escape(french_message) in content
 
 
 @pytest.mark.django_db
