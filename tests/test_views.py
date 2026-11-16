@@ -451,6 +451,18 @@ def test_chat_page_answers_in_english_as_an_anonymous_reader_with_ask_s_limits(
     ]
 
 
+@pytest.mark.django_db
+def test_chat_page_answers_in_french_under_fr(
+    client: Client,
+    chat_questions: list[str],
+    chat_answer_kwargs: list[dict[str, object]],
+) -> None:
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+
+    assert chat_questions == ["Comment détartrer une bouilloire ?"]
+    assert [kwargs["language"] for kwargs in chat_answer_kwargs] == ["fr"]
+
+
 class _StartTags(HTMLParser):
     """Collect the names of the elements a response opens."""
 
