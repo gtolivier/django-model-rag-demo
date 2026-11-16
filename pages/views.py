@@ -35,25 +35,14 @@ def chat(request: HttpRequest) -> HttpResponse:
                 limit=MAX_CHUNKS,
             )
         except httpx.HTTPError:
-            if _is_fetch_request(request):
-                return render(
-                    request, "pages/chat_exchange.html", {"question": question}
-                )
-            request.session[EXCHANGES_SESSION_KEY] = [
-                *request.session.get(EXCHANGES_SESSION_KEY, []),
-                {
-                    "question": question,
-                    "text": str(ASSISTANT_UNAVAILABLE),
-                    "sources": [],
-                    "extracts": [],
-                },
-            ]
-            return redirect(request.path)
+            exchange = _unavailable_exchange(question)
+        else:
+            exchange = _exchange(question, reply)
         if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
         request.session[EXCHANGES_SESSION_KEY] = [
             *request.session.get(EXCHANGES_SESSION_KEY, []),
-            _exchange(question, reply),
+            exchange,
         ]
         return redirect(request.path)
     return render(
@@ -69,6 +58,15 @@ def _exchange(question: str, reply: Answer | None) -> dict[str, object]:
         "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
         "sources": _sources(reply.citations) if reply else [],
         "extracts": _extracts(reply.chunks) if reply else [],
+    }
+
+
+def _unavailable_exchange(question: str) -> dict[str, object]:
+    return {
+        "question": question,
+        "text": str(ASSISTANT_UNAVAILABLE),
+        "sources": [],
+        "extracts": [],
     }
 
 
