@@ -11,6 +11,13 @@
 <div class="exchange">
 <p class="question">{{ exchange.question }}</p>
 <p class="answer">{{ exchange.text }}</p>
+{% if exchange.sources %}
+<ul class="sources">
+{% for source in exchange.sources %}
+<li><a href="{{ source.url }}">{{ source.title }}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
 </div>
 {% endif %}
 {% endblock %}
