@@ -24,50 +24,52 @@ def home(request: HttpRequest) -> HttpResponse:
 
 def chat(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        question = request.POST.get("question", "")
-        if not question:
-            return render(request, "pages/chat.html", status=400)
-        try:
-            reply = answer(
-                question,
-                permissions=frozenset(),
-                max_distance=MAX_DISTANCE,
-                limit=MAX_CHUNKS,
-            )
-        except httpx.HTTPError:
-            exchange = _unavailable_exchange(question)
-        else:
-            exchange = _exchange(question, reply)
-        request.session[EXCHANGES_SESSION_KEY] = [
-            *request.session.get(EXCHANGES_SESSION_KEY, []),
-            exchange,
-        ]
-        if _is_fetch_request(request):
-            return render(request, "pages/chat_exchange.html", {"exchange": exchange})
-        return redirect(request.path)
-    return render(
-        request,
-        "pages/chat.html",
-        {"exchanges": request.session.get(EXCHANGES_SESSION_KEY, [])},
-    )
+        return _post_question(request)
+    return render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
 
 
-def _exchange(question: str, reply: Answer | None) -> dict[str, object]:
+def _post_question(request: HttpRequest) -> HttpResponse:
+    question = request.POST.get("question", "")
+    if not question:
+        return render(request, "pages/chat.html", status=400)
+    exchange = _ask(question)
+    request.session[EXCHANGES_SESSION_KEY] = [*_exchanges(request), exchange]
+    if _is_fetch_request(request):
+        return render(request, "pages/chat_exchange.html", {"exchange": exchange})
+    return redirect(request.path)
+
+
+def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
+    exchanges: list[dict[str, object]] = request.session.get(EXCHANGES_SESSION_KEY, [])
+    return exchanges
+
+
+def _ask(question: str) -> dict[str, object]:
+    try:
+        reply = answer(
+            question,
+            permissions=frozenset(),
+            max_distance=MAX_DISTANCE,
+            limit=MAX_CHUNKS,
+        )
+    except httpx.HTTPError:
+        return _message_exchange(question, str(ASSISTANT_UNAVAILABLE))
+    if reply is None:
+        return _message_exchange(question, str(NOTHING_CLOSE_ENOUGH))
+    return _exchange(question, reply)
+
+
+def _exchange(question: str, reply: Answer) -> dict[str, object]:
     return {
         "question": question,
-        "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
-        "sources": _sources(reply.citations) if reply else [],
-        "extracts": _extracts(reply.chunks) if reply else [],
+        "text": reply.text,
+        "sources": _sources(reply.citations),
+        "extracts": _extracts(reply.chunks),
     }
 
 
-def _unavailable_exchange(question: str) -> dict[str, object]:
-    return {
-        "question": question,
-        "text": str(ASSISTANT_UNAVAILABLE),
-        "sources": [],
-        "extracts": [],
-    }
+def _message_exchange(question: str, message: str) -> dict[str, object]:
+    return {"question": question, "text": message, "sources": [], "extracts": []}
 
 
 def _sources(citations: Iterable[Citation]) -> list[dict[str, str]]:
