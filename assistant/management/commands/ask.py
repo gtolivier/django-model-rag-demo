@@ -20,6 +20,7 @@ class Command(BaseCommand):
             permissions=frozenset(),
             max_distance=options["max_distance"],
             limit=options["limit"],
+            language=None,
         )
         if result is None:
             self.stdout.write(str(NOTHING_CLOSE_ENOUGH))
