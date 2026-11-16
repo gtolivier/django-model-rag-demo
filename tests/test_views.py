@@ -403,6 +403,39 @@ def test_chat_page_answers_a_question_as_an_anonymous_reader_with_ask_s_limits(
     ]
 
 
+class _StartTags(HTMLParser):
+    """Collect the names of the elements a response opens."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.tags: set[str] = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.add(tag)
+
+
+def _start_tags(content: str) -> set[str]:
+    parser = _StartTags()
+    parser.feed(content)
+    return parser.tags
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_a_fetch_post_with_the_new_exchange_alone(
+    client: Client, chat_questions: list[str]
+) -> None:
+    response = client.post(
+        "/chat/",
+        {"question": "How do I descale a kettle?"},
+        headers={"X-Requested-With": "XMLHttpRequest"},
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert _start_tags(content).isdisjoint({"html", "body", "nav"})
+    assert "How do I descale a kettle?" in content
+
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     "view",
