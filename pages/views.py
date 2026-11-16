@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django_minimal_rag.answering import Citation, answer
+from django_minimal_rag.answering import Answer, Citation, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.management.commands.ask import (
@@ -12,7 +12,7 @@ from assistant.management.commands.ask import (
 )
 from pages.models import pages_in_active_language
 
-EXCHANGE_SESSION_KEY = "exchange"
+EXCHANGES_SESSION_KEY = "exchanges"
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -32,21 +32,25 @@ def chat(request: HttpRequest) -> HttpResponse:
         )
         if _is_fetch_request(request):
             return render(request, "pages/chat_exchange.html", {"question": question})
-        request.session[EXCHANGE_SESSION_KEY] = [
-            *request.session.get(EXCHANGE_SESSION_KEY, []),
-            {
-                "question": question,
-                "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
-                "sources": _sources(reply.citations) if reply else [],
-                "extracts": _extracts(reply.chunks) if reply else [],
-            },
+        request.session[EXCHANGES_SESSION_KEY] = [
+            *request.session.get(EXCHANGES_SESSION_KEY, []),
+            _exchange(question, reply),
         ]
         return redirect(request.path)
     return render(
         request,
         "pages/chat.html",
-        {"exchanges": request.session.get(EXCHANGE_SESSION_KEY, [])},
+        {"exchanges": request.session.get(EXCHANGES_SESSION_KEY, [])},
     )
+
+
+def _exchange(question: str, reply: Answer | None) -> dict[str, object]:
+    return {
+        "question": question,
+        "text": reply.text if reply else str(NOTHING_CLOSE_ENOUGH),
+        "sources": _sources(reply.citations) if reply else [],
+        "extracts": _extracts(reply.chunks) if reply else [],
+    }
 
 
 def _sources(citations: Iterable[Citation]) -> list[dict[str, str]]:
