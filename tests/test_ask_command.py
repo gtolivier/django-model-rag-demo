@@ -140,3 +140,20 @@ def test_ask_passes_the_max_distance_and_limit_options_to_answer(
     assert type(kwargs["max_distance"]) is float
     assert kwargs["limit"] == 3
     assert type(kwargs["limit"]) is int
+
+
+def test_ask_passes_the_language_option_to_answer(
+    answer_calls: list[AnswerCall],
+) -> None:
+    call_command(
+        "ask",
+        "Comment détartrer une bouilloire ?",
+        "--language",
+        "fr",
+        stdout=StringIO(),
+    )
+
+    assert len(answer_calls) == 1
+    question, kwargs = answer_calls[0]
+    assert question == "Comment détartrer une bouilloire ?"
+    assert kwargs["language"] == "fr"
