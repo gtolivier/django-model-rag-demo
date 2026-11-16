@@ -22,6 +22,7 @@ from assistant.management.commands.ask import (
 from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
+from pages.views import QUESTION_REQUIRED
 from tests.rag_output import DocumentStore
 
 
@@ -415,6 +416,24 @@ def test_chat_page_rejects_a_whitespace_only_question_as_an_empty_one(
     assert _without_csrf_tokens(page_after.content.decode()) == _without_csrf_tokens(
         page_before.content.decode()
     )
+
+
+@pytest.mark.django_db
+def test_chat_page_asks_for_a_question_when_an_empty_one_is_posted(
+    client: Client, chat_questions: list[str]
+) -> None:
+    # The message is the one the view defines, so this test does not fix the
+    # wording itself; the plain chat page must not show it.
+    question_required = escape(str(QUESTION_REQUIRED))
+    page = client.get("/chat/")
+
+    response = client.post("/chat/", {"question": ""})
+
+    assert question_required
+    assert question_required not in page.content.decode()
+    content = response.content.decode()
+    assert "question" in _posted_field_names(content)
+    assert question_required in content
 
 
 @pytest.mark.django_db
