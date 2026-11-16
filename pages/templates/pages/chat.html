@@ -18,6 +18,9 @@
 {% endfor %}
 </ul>
 {% endif %}
+{% for extract in exchange.extracts %}
+<blockquote data-testid="extract"><strong>{{ extract.title }}</strong> {{ extract.text }}</blockquote>
+{% endfor %}
 </div>
 {% endif %}
 {% endblock %}

@@ -31,6 +31,11 @@ def chat(request: HttpRequest) -> HttpResponse:
             "question": question,
             "text": reply.text if reply else "",
             "sources": _sources(reply.citations) if reply else [],
+            "extracts": (
+                [{"title": c.title, "text": c.text} for c in reply.chunks]
+                if reply
+                else []
+            ),
         }
         return redirect(request.path)
     return render(
