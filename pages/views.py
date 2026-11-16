@@ -38,12 +38,12 @@ def chat(request: HttpRequest) -> HttpResponse:
             exchange = _unavailable_exchange(question)
         else:
             exchange = _exchange(question, reply)
-        if _is_fetch_request(request):
-            return render(request, "pages/chat_exchange.html", {"exchange": exchange})
         request.session[EXCHANGES_SESSION_KEY] = [
             *request.session.get(EXCHANGES_SESSION_KEY, []),
             exchange,
         ]
+        if _is_fetch_request(request):
+            return render(request, "pages/chat_exchange.html", {"exchange": exchange})
         return redirect(request.path)
     return render(
         request,
