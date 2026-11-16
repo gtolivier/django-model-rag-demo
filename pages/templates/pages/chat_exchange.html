@@ -1,14 +1,24 @@
-<div class="exchange">
+{% load i18n %}<article class="card exchange">
 <p class="question">{{ exchange.question }}</p>
-<p class="answer">{{ exchange.text }}</p>
+<div class="answer">{{ exchange.text|linebreaks }}</div>
 {% if exchange.sources %}
+<p class="meta">{% translate "Sources" %}</p>
 <ul class="sources">
 {% for source in exchange.sources %}
 <li>{% if source.url %}<a href="{{ source.url }}">{{ source.title }}</a>{% else %}{{ source.title }}{% endif %}</li>
 {% endfor %}
 </ul>
 {% endif %}
+{% if exchange.extracts %}
+<details>
+<summary>{% blocktranslate count counter=exchange.extracts|length trimmed %}
+  {{ counter }} extract the answer comes from
+{% plural %}
+  {{ counter }} extracts the answer comes from
+{% endblocktranslate %}</summary>
 {% for extract in exchange.extracts %}
 <blockquote data-testid="extract"><strong>{{ extract.title }}</strong> {{ extract.text }}</blockquote>
 {% endfor %}
-</div>
+</details>
+{% endif %}
+</article>

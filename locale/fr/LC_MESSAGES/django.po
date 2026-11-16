@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-16 17:45+0000\n"
+"POT-Creation-Date: 2026-11-16 18:13+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,18 +41,49 @@ msgstr "Fromages"
 msgid "Our cheeses"
 msgstr "Nos fromages"
 
-#: pages/templates/pages/base.html:41
+#: pages/templates/pages/base.html:53
 #, python-format
 msgid "A demo shop for %(model_rag)s and %(minimal_rag)s."
 msgstr "Une boutique de démonstration pour %(model_rag)s et %(minimal_rag)s."
 
-#: pages/templates/pages/chat.html:4
+#: pages/templates/pages/chat.html:3 pages/templates/pages/chat.html:5
+#: pages/templates/pages/nav.html:5
 msgid "Ask a question"
-msgstr ""
+msgstr "Poser une question"
 
-#: pages/templates/pages/chat.html:8
-msgid "Ask"
+#: pages/templates/pages/chat.html:6
+msgid ""
+"The answers come from the shop's own pages, cheeses and articles. Each "
+"question is answered on its own: the assistant does not see the previous "
+"exchanges."
 msgstr ""
+"Les réponses viennent des pages, des fromages et des articles de la "
+"boutique. Chaque question reçoit une réponse à part : l'assistant ne voit "
+"pas les échanges précédents."
+
+#: pages/templates/pages/chat.html:18
+msgid "Your question"
+msgstr "Votre question"
+
+#: pages/templates/pages/chat.html:20
+msgid "Looking for an answer…"
+msgstr "Recherche d'une réponse…"
+
+#: pages/templates/pages/chat.html:20
+msgid "Ask"
+msgstr "Demander"
+
+#: pages/templates/pages/chat_exchange.html:5
+msgid "Sources"
+msgstr "Sources"
+
+#: pages/templates/pages/chat_exchange.html:14
+#, python-format
+msgid "%(counter)s extract the answer comes from"
+msgid_plural "%(counter)s extracts the answer comes from"
+msgstr[0] "%(counter)s extrait d'où vient la réponse"
+msgstr[1] "%(counter)s extraits d'où vient la réponse"
+msgstr[2] "%(counter)s extraits d'où vient la réponse"
 
 #: pages/templates/pages/home.html:4
 msgid "Welcome to the Fromagerie du Marché"
@@ -82,10 +113,6 @@ msgstr ""
 #: pages/templates/pages/nav.html:3
 msgid "Products"
 msgstr "Produits"
-
-#: pages/templates/pages/nav.html:5
-msgid "Chat"
-msgstr ""
 
 #: pages/views.py:18
 msgid "The assistant is unavailable right now. Try again later."
