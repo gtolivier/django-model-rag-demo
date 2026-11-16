@@ -2,25 +2,31 @@
 {% load i18n %}
 {% block content %}
 <h1>{% translate "Ask a question" %}</h1>
-<form method="post">
+<form method="post" id="chat-form">
 {% csrf_token %}
 <input type="text" name="question">
 <button type="submit">{% translate "Ask" %}</button>
 </form>
+<div id="exchanges">
 {% for exchange in exchanges %}
-<div class="exchange">
-<p class="question">{{ exchange.question }}</p>
-<p class="answer">{{ exchange.text }}</p>
-{% if exchange.sources %}
-<ul class="sources">
-{% for source in exchange.sources %}
-<li>{% if source.url %}<a href="{{ source.url }}">{{ source.title }}</a>{% else %}{{ source.title }}{% endif %}</li>
-{% endfor %}
-</ul>
-{% endif %}
-{% for extract in exchange.extracts %}
-<blockquote data-testid="extract"><strong>{{ extract.title }}</strong> {{ extract.text }}</blockquote>
+{% include "pages/chat_exchange.html" %}
 {% endfor %}
 </div>
-{% endfor %}
+<script>
+const form = document.getElementById("chat-form");
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const response = await fetch(form.action || window.location.href, {
+    method: "POST",
+    body: new FormData(form),
+    headers: { "X-Requested-With": "XMLHttpRequest" },
+  });
+  if (!response.ok) {
+    form.submit();
+    return;
+  }
+  document.getElementById("exchanges").insertAdjacentHTML("beforeend", await response.text());
+  form.reset();
+});
+</script>
 {% endblock %}

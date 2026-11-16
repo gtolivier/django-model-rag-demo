@@ -39,7 +39,7 @@ def chat(request: HttpRequest) -> HttpResponse:
         else:
             exchange = _exchange(question, reply)
         if _is_fetch_request(request):
-            return render(request, "pages/chat_exchange.html", {"question": question})
+            return render(request, "pages/chat_exchange.html", {"exchange": exchange})
         request.session[EXCHANGES_SESSION_KEY] = [
             *request.session.get(EXCHANGES_SESSION_KEY, []),
             exchange,
