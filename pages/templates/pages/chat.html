@@ -35,12 +35,15 @@ function setResetDisabled(isDisabled) {
   const resetButton = document.querySelector("form.reset button");
   if (resetButton) resetButton.disabled = isDisabled;
 }
+function setAnswering(isAnswering) {
+  button.disabled = isAnswering;
+  form.question.readOnly = isAnswering;
+  setResetDisabled(isAnswering);
+}
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const label = button.textContent;
-  button.disabled = true;
-  form.question.readOnly = true;
-  setResetDisabled(true);
+  setAnswering(true);
   button.textContent = button.dataset.waitingLabel;
   try {
     const response = await fetch(form.action, {
@@ -62,9 +65,7 @@ form.addEventListener("submit", async (event) => {
     exchanges.lastElementChild.scrollIntoView({ block: "nearest" });
     form.reset();
   } finally {
-    button.disabled = false;
-    form.question.readOnly = false;
-    setResetDisabled(false);
+    setAnswering(false);
     button.textContent = label;
     form.question.focus();
   }
