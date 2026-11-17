@@ -580,6 +580,25 @@ def test_chat_reset_keeps_a_staff_user_logged_in_to_the_admin(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("reset_url", "chat_url"),
+    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
+)
+def test_chat_reset_refuses_a_get_and_keeps_the_exchanges(
+    client: Client, monkeypatch: pytest.MonkeyPatch, reset_url: str, chat_url: str
+) -> None:
+    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
+    _answer_each_question_from(monkeypatch, {question: reply})
+    client.post(chat_url, {"question": question})
+
+    response = client.get(reset_url)
+
+    page = client.get(chat_url).content.decode()
+    assert response.status_code == 405
+    assert [question in page, reply in page] == [True, True]
+
+
+@pytest.mark.django_db
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
