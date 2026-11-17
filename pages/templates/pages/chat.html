@@ -34,6 +34,8 @@ form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const label = button.textContent;
   button.disabled = true;
+  const resetButton = document.querySelector("form.reset button");
+  if (resetButton) resetButton.disabled = true;
   button.textContent = button.dataset.waitingLabel;
   try {
     const response = await fetch(form.action, {
@@ -56,6 +58,8 @@ form.addEventListener("submit", async (event) => {
     form.reset();
   } finally {
     button.disabled = false;
+    const currentResetButton = document.querySelector("form.reset button");
+    if (currentResetButton) currentResetButton.disabled = false;
     button.textContent = label;
     form.question.focus();
   }
