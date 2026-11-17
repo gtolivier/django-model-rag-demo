@@ -196,9 +196,9 @@ Known limits of `ask`, a demo command:
 
 The "Ask a question" page shares those limits, except that it shows "the
 assistant is unavailable" instead of a traceback when Ollama cannot be
-reached, and that it searches only the documents in the language of the
-page (and those of unknown language), its "nothing close enough" message
-in that language too. Also:
+reached, and that it always uses the language of the page, where `ask`
+needs `--language`: it searches only the documents in that language (and
+those of unknown language), and says "nothing close enough" in it. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
