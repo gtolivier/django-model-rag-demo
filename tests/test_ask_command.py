@@ -143,6 +143,24 @@ def test_ask_says_nothing_is_close_enough_in_french_for_a_french_region(
     assert stdout.getvalue().splitlines() == [in_french]
 
 
+def test_ask_says_nothing_is_close_enough_in_english_for_an_untranslated_language(
+    answer_calls: list[AnswerCall],
+) -> None:
+    with translation.override("en"):
+        in_english = str(NOTHING_CLOSE_ENOUGH)
+    stdout = StringIO()
+
+    call_command(
+        "ask",
+        "Wie entkalke ich einen Wasserkocher?",
+        "--language",
+        "de",
+        stdout=stdout,
+    )
+
+    assert stdout.getvalue().splitlines() == [in_english]
+
+
 def test_ask_asks_as_an_anonymous_reader_in_every_language_by_default(
     answer_calls: list[AnswerCall],
 ) -> None:
