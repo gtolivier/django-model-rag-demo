@@ -40,6 +40,12 @@ function setAnswering(isAnswering) {
   form.question.readOnly = isAnswering;
   setResetDisabled(isAnswering);
 }
+function revealResetForm(exchanges) {
+  const resetTemplate = document.getElementById("reset-template");
+  if (!resetTemplate) return;
+  exchanges.after(resetTemplate.content);
+  resetTemplate.remove();
+}
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const label = button.textContent;
@@ -57,11 +63,7 @@ form.addEventListener("submit", async (event) => {
     }
     const exchanges = document.getElementById("exchanges");
     exchanges.insertAdjacentHTML("beforeend", await response.text());
-    const resetTemplate = document.getElementById("reset-template");
-    if (resetTemplate) {
-      exchanges.after(resetTemplate.content);
-      resetTemplate.remove();
-    }
+    revealResetForm(exchanges);
     exchanges.lastElementChild.scrollIntoView({ block: "nearest" });
     form.reset();
   } finally {
