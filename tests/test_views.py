@@ -322,6 +322,36 @@ def _posted_field_names(content: str) -> set[str]:
     return parser.names
 
 
+class _PostForms(HTMLParser):
+    """Collect each POST form of a page as (action, field names), in order."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.forms: list[tuple[str, set[str]]] = []
+        self._names: set[str] | None = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "form":
+            if (attributes.get("method") or "").lower() == "post":
+                self._names = set()
+                self.forms.append((attributes.get("action") or "", self._names))
+            else:
+                self._names = None
+        elif self._names is not None and attributes.get("name"):
+            self._names.add(attributes["name"] or "")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form":
+            self._names = None
+
+
+def _post_forms(content: str) -> list[tuple[str, set[str]]]:
+    parser = _PostForms()
+    parser.feed(content)
+    return parser.forms
+
+
 @pytest.mark.django_db
 def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
     client: Client,
@@ -618,6 +648,30 @@ def test_chat_reset_refuses_a_post_without_a_csrf_token_and_keeps_the_exchanges(
     page = client.get(chat_url).content.decode()
     assert response.status_code == 403
     assert [question in page, reply in page] == [True, True]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("reset_url", "chat_url"),
+    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
+)
+def test_chat_page_with_exchanges_holds_a_csrf_protected_post_form_to_its_reset(
+    client: Client, monkeypatch: pytest.MonkeyPatch, reset_url: str, chat_url: str
+) -> None:
+    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
+    _answer_each_question_from(monkeypatch, {question: reply})
+    client.post(chat_url, {"question": question})
+
+    response = client.get(chat_url)
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert question in content
+    assert [
+        "csrfmiddlewaretoken" in names
+        for action, names in _post_forms(content)
+        if action == reset_url
+    ] == [True]
 
 
 @pytest.mark.django_db
