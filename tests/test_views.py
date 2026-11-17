@@ -617,6 +617,37 @@ def test_chat_page_does_not_show_an_exchange_asked_in_french_on_the_english_page
     ] == [True, True, False, False]
 
 
+@pytest.mark.django_db
+def test_chat_page_does_not_show_an_exchange_asked_in_english_on_the_french_page(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+    }
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    response = client.get("/fr/chat/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert [
+        text in content
+        for text in (
+            "Comment détartrer une bouilloire ?",
+            "Remplissez-la de vinaigre blanc.",
+            "How do I descale a kettle?",
+            "Fill it with white vinegar overnight.",
+        )
+    ] == [True, True, False, False]
+
+
 class _Links(HTMLParser):
     """Collect each link of a response as (target, text), in document order."""
 
