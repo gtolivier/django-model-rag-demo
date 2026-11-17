@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from decimal import Decimal
 from html.parser import HTMLParser
 from io import StringIO
+from urllib.parse import urlsplit
 
 import httpx
 import pytest
@@ -754,13 +755,14 @@ _VOID_ELEMENTS = frozenset(
 )
 
 
-class _TextsByTestId(HTMLParser):
-    """Collect the text of each element with a given data-testid, in order."""
+class _TextsByAttribute(HTMLParser):
+    """Collect the text of each element with a given attribute value, in order."""
 
-    def __init__(self, test_id: str) -> None:
+    def __init__(self, attribute: str, value: str) -> None:
         super().__init__()
         self.texts: list[str] = []
-        self._test_id = test_id
+        self._attribute = attribute
+        self._value = value
         self._depth = 0
         self._text: list[str] = []
 
@@ -769,7 +771,7 @@ class _TextsByTestId(HTMLParser):
             return
         if self._depth:
             self._depth += 1
-        elif dict(attrs).get("data-testid") == self._test_id:
+        elif dict(attrs).get(self._attribute) == self._value:
             self._depth = 1
             self._text = []
 
@@ -785,10 +787,14 @@ class _TextsByTestId(HTMLParser):
             self.texts.append(" ".join("".join(self._text).split()))
 
 
-def _texts_by_test_id(content: str, test_id: str) -> list[str]:
-    parser = _TextsByTestId(test_id)
+def _texts_by_attribute(content: str, attribute: str, value: str) -> list[str]:
+    parser = _TextsByAttribute(attribute, value)
     parser.feed(content)
     return parser.texts
+
+
+def _texts_by_test_id(content: str, test_id: str) -> list[str]:
+    return _texts_by_attribute(content, "data-testid", test_id)
 
 
 @pytest.mark.django_db
@@ -1205,6 +1211,33 @@ def test_page_view_shows_its_accordion_items_in_pk_order_whatever_the_insertion_
     _assert_in_order(
         response.content.decode(), [item.body for item in (earlier, later)]
     )
+
+
+@pytest.mark.django_db
+def test_page_view_holds_each_accordion_item_under_its_document_url_fragment(
+    client: Client, rag_store: DocumentStore
+) -> None:
+    page = Page.objects.create(title="FAQ", slug="faq")
+    shipping = AccordionItem.objects.create(
+        page=page, title="Shipping", body="We ship within two days."
+    )
+    returns = AccordionItem.objects.create(
+        page=page, title="Returns", body="Returns are free for 30 days."
+    )
+    call_command("sync_model_rag")
+
+    response = client.get(page.get_absolute_url())
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    for item, other in ((shipping, returns), (returns, shipping)):
+        [document] = rag_store[f"pages.accordionitem:{item.pk}"]
+        fragment = urlsplit(document.url).fragment
+        needles = (item.title, item.body, other.body)
+        assert [
+            [needle in text for needle in needles]
+            for text in _texts_by_attribute(content, "id", fragment)
+        ] == [[True, True, False]]
 
 
 @pytest.mark.django_db
