@@ -1,6 +1,7 @@
 from typing import Any
 
 from django.core.management.base import BaseCommand, CommandParser
+from django.utils import translation
 from django_minimal_rag.answering import Citation, answer
 
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
@@ -24,7 +25,8 @@ class Command(BaseCommand):
             language=options["language"],
         )
         if result is None:
-            self.stdout.write(str(NOTHING_CLOSE_ENOUGH))
+            with translation.override(options["language"]):
+                self.stdout.write(str(NOTHING_CLOSE_ENOUGH))
             return
         self.stdout.write(result.text)
         for citation in result.citations:
