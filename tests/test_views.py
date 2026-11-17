@@ -373,6 +373,23 @@ def _answer_every_question_with(
     monkeypatch.setattr(CHAT_ANSWER, lambda question, **kwargs: answer)
 
 
+def _answer_each_question_from(
+    monkeypatch: pytest.MonkeyPatch, replies: dict[str, str]
+) -> list[str]:
+    """Replace the chat page's answer() with a fake that answers from replies.
+
+    The fake finds nothing, and returns a list of the questions it was asked.
+    """
+    questions: list[str] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        questions.append(question)
+        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    return questions
+
+
 def _without_csrf_tokens(content: str) -> str:
     """Blank the CSRF token values, which change with every rendering."""
     return re.sub(
@@ -545,13 +562,7 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
         "How do I descale a kettle?": "Fill it with white vinegar overnight.",
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
     }
-    questions: list[str] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        questions.append(question)
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    questions = _answer_each_question_from(monkeypatch, replies)
 
     client.post("/chat/", {"question": "How do I descale a kettle?"}, follow=True)
     response = client.post(
@@ -590,15 +601,13 @@ def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
 def test_chat_page_does_not_show_an_exchange_asked_in_french_on_the_english_page(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    replies = {
-        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
-        "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
-    }
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    _answer_each_question_from(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
+        },
+    )
 
     client.post("/chat/", {"question": "How do I descale a kettle?"})
     client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
@@ -621,15 +630,13 @@ def test_chat_page_does_not_show_an_exchange_asked_in_french_on_the_english_page
 def test_chat_page_does_not_show_an_exchange_asked_in_english_on_the_french_page(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    replies = {
-        "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
-        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
-    }
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    _answer_each_question_from(
+        monkeypatch,
+        {
+            "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        },
+    )
 
     client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
     client.post("/chat/", {"question": "How do I descale a kettle?"})
