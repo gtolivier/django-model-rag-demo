@@ -27,6 +27,7 @@ def chat(request: HttpRequest) -> HttpResponse:
 
 
 def chat_reset(request: HttpRequest) -> HttpResponse:
+    request.session.pop(_exchanges_session_key(), None)
     return redirect("chat")
 
 
