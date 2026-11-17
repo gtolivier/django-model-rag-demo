@@ -793,10 +793,6 @@ def _texts_by_attribute(content: str, attribute: str, value: str) -> list[str]:
     return parser.texts
 
 
-def _texts_by_test_id(content: str, test_id: str) -> list[str]:
-    return _texts_by_attribute(content, "data-testid", test_id)
-
-
 @pytest.mark.django_db
 def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
     client: Client, monkeypatch: pytest.MonkeyPatch
@@ -831,7 +827,7 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
     )
 
     assert response.status_code == 200
-    extracts = _texts_by_test_id(response.content.decode(), "extract")
+    extracts = _texts_by_attribute(response.content.decode(), "data-testid", "extract")
     assert [
         (title in extract, text in extract)
         for extract, (title, text) in zip(extracts, retrieved, strict=False)
