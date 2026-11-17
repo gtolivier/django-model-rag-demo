@@ -30,12 +30,16 @@
 <script>
 const form = document.getElementById("chat-form");
 const button = form.querySelector("button");
+function setResetDisabled(isDisabled) {
+  // Looked up on each call: the reset form is only added after the first answer.
+  const resetButton = document.querySelector("form.reset button");
+  if (resetButton) resetButton.disabled = isDisabled;
+}
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const label = button.textContent;
   button.disabled = true;
-  const resetButton = document.querySelector("form.reset button");
-  if (resetButton) resetButton.disabled = true;
+  setResetDisabled(true);
   button.textContent = button.dataset.waitingLabel;
   try {
     const response = await fetch(form.action, {
@@ -58,8 +62,7 @@ form.addEventListener("submit", async (event) => {
     form.reset();
   } finally {
     button.disabled = false;
-    const currentResetButton = document.querySelector("form.reset button");
-    if (currentResetButton) currentResetButton.disabled = false;
+    setResetDisabled(false);
     button.textContent = label;
     form.question.focus();
   }
