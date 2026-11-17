@@ -26,6 +26,10 @@ class AccordionItem(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField()
 
+    @property
+    def anchor_id(self) -> str:
+        return f"accordion-{self.pk}"
+
     def __str__(self) -> str:
         return self.title
 

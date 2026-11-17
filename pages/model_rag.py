@@ -33,7 +33,7 @@ class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
         if instance.title:
             title = f"{title} — {instance.title}"
         return self.build_block_document(
-            instance, text=text, title=title, anchor=f"#accordion-{instance.pk}"
+            instance, text=text, title=title, anchor=f"#{instance.anchor_id}"
         )
 
 
