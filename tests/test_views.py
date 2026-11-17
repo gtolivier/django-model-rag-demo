@@ -567,6 +567,19 @@ def test_chat_page_no_longer_shows_its_exchanges_after_a_reset(
 
 
 @pytest.mark.django_db
+def test_chat_reset_keeps_a_staff_user_logged_in_to_the_admin(
+    admin_client: Client,
+) -> None:
+    admin_before = admin_client.get(reverse("admin:index"))
+
+    admin_client.post(reverse("chat_reset"))
+
+    admin_after = admin_client.get(reverse("admin:index"))
+    assert admin_before.status_code == 200
+    assert admin_after.status_code == 200
+
+
+@pytest.mark.django_db
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
