@@ -1,3 +1,5 @@
+import threading
+
 import pytest
 from django_minimal_rag.answering import Answer
 from playwright.sync_api import Page, expect
@@ -94,6 +96,37 @@ def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloadi
     expect(page.get_by_text("How do I descale a kettle?")).to_have_count(0)
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_have_count(0)
     expect(reset_button).to_have_count(0)
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_allow_the_orm_beside_playwright")
+def test_chat_page_disables_the_reset_while_a_question_is_being_answered(
+    live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    second_answer_may_go = threading.Event()
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        if question == "Can a toaster take bagels?":
+            second_answer_may_go.wait(timeout=30)
+            return Answer(text="Yes, use the bagel setting.", chunks=())
+        return Answer(text="Fill it with white vinegar overnight.", chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    reset_button = page.locator(RESET_BUTTON)
+    page.goto(f"{live_server.url}/chat/")
+    _ask(page, "How do I descale a kettle?")
+    expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
+    expect(reset_button).to_be_enabled()
+
+    try:
+        _ask(page, "Can a toaster take bagels?")
+
+        expect(reset_button).to_be_disabled()
+    finally:
+        second_answer_may_go.set()
+
+    expect(page.get_by_text("Yes, use the bagel setting.")).to_be_visible()
+    expect(reset_button).to_be_enabled()
 
 
 @pytest.mark.django_db
