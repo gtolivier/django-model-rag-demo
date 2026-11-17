@@ -296,32 +296,6 @@ def test_home_page_is_served_in_english_at_the_root_and_in_french_under_fr(
     assert french_response.headers.get("Content-Language") == "fr"
 
 
-class _PostedFieldNames(HTMLParser):
-    """Collect the names of the fields inside the page's POST forms."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.names: set[str] = set()
-        self._in_post_form = False
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        attributes = dict(attrs)
-        if tag == "form":
-            self._in_post_form = (attributes.get("method") or "").lower() == "post"
-        elif self._in_post_form and attributes.get("name"):
-            self.names.add(attributes["name"] or "")
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag == "form":
-            self._in_post_form = False
-
-
-def _posted_field_names(content: str) -> set[str]:
-    parser = _PostedFieldNames()
-    parser.feed(content)
-    return parser.names
-
-
 class _PostForms(HTMLParser):
     """Collect each POST form of a page as (action, field names), in order."""
 
@@ -350,6 +324,11 @@ def _post_forms(content: str) -> list[tuple[str, set[str]]]:
     parser = _PostForms()
     parser.feed(content)
     return parser.forms
+
+
+def _posted_field_names(content: str) -> set[str]:
+    """The names of the fields inside the page's POST forms, whichever form."""
+    return {name for _, names in _post_forms(content) for name in names}
 
 
 @pytest.mark.django_db
@@ -555,11 +534,19 @@ def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
     assert response.headers["Location"] == chat_url
 
 
+RESET_AND_CHAT_URLS = [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")]
+
+
+@pytest.fixture
+def kettle_exchange(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
+    """Make the chat page's answer() reply to the kettle question; return both."""
+    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
+    _answer_each_question_from(monkeypatch, {question: reply})
+    return question, reply
+
+
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    ("reset_url", "chat_url"),
-    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
-)
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
 def test_chat_reset_redirects_to_the_chat_page_of_the_same_language(
     client: Client, reset_url: str, chat_url: str
 ) -> None:
@@ -610,15 +597,11 @@ def test_chat_reset_keeps_a_staff_user_logged_in_to_the_admin(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    ("reset_url", "chat_url"),
-    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
-)
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
 def test_chat_reset_refuses_a_get_and_keeps_the_exchanges(
-    client: Client, monkeypatch: pytest.MonkeyPatch, reset_url: str, chat_url: str
+    client: Client, kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
 ) -> None:
-    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
-    _answer_each_question_from(monkeypatch, {question: reply})
+    question, reply = kettle_exchange
     client.post(chat_url, {"question": question})
 
     response = client.get(reset_url)
@@ -629,15 +612,11 @@ def test_chat_reset_refuses_a_get_and_keeps_the_exchanges(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    ("reset_url", "chat_url"),
-    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
-)
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
 def test_chat_reset_refuses_a_post_without_a_csrf_token_and_keeps_the_exchanges(
-    monkeypatch: pytest.MonkeyPatch, reset_url: str, chat_url: str
+    kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
 ) -> None:
-    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
-    _answer_each_question_from(monkeypatch, {question: reply})
+    question, reply = kettle_exchange
     client = Client(enforce_csrf_checks=True)
     client.get(chat_url)
     csrf_token = client.cookies["csrftoken"].value
@@ -651,15 +630,11 @@ def test_chat_reset_refuses_a_post_without_a_csrf_token_and_keeps_the_exchanges(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    ("reset_url", "chat_url"),
-    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
-)
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
 def test_chat_page_with_exchanges_holds_a_csrf_protected_post_form_to_its_reset(
-    client: Client, monkeypatch: pytest.MonkeyPatch, reset_url: str, chat_url: str
+    client: Client, kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
 ) -> None:
-    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
-    _answer_each_question_from(monkeypatch, {question: reply})
+    question, _ = kettle_exchange
     client.post(chat_url, {"question": question})
 
     response = client.get(chat_url)

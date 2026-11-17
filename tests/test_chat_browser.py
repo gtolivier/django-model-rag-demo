@@ -4,6 +4,24 @@ from playwright.sync_api import Page, expect
 from pytest_django.live_server_helper import LiveServer
 
 CHAT_ANSWER = "pages.views.answer"
+QUESTION_FIELD = '[name="question"]'
+RESET_BUTTON = 'form[action$="/chat/reset/"] [type="submit"]'
+
+
+def _answer_every_question_with(monkeypatch: pytest.MonkeyPatch, text: str) -> None:
+    """Replace the chat page's answer() with a fake that always replies text."""
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(text=text, chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+
+def _ask(page: Page, question: str) -> None:
+    """Type question in the chat page's question field and submit it."""
+    question_field = page.locator(QUESTION_FIELD)
+    question_field.fill(question)
+    question_field.press("Enter")
 
 
 @pytest.mark.django_db
@@ -21,14 +39,11 @@ def test_chat_page_adds_a_submitted_exchange_below_the_previous_ones_without_rel
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer)
     page.goto(f"{live_server.url}/chat/")
-    question_field = page.locator('[name="question"]')
-    question_field.fill("How do I descale a kettle?")
-    question_field.press("Enter")
+    _ask(page, "How do I descale a kettle?")
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
     page.evaluate("window.chatPageMarker = 'still the same page'")
 
-    question_field.fill("Can a toaster take bagels?")
-    question_field.press("Enter")
+    _ask(page, "Can a toaster take bagels?")
 
     expect(page.get_by_text("Yes, use the bagel setting.")).to_be_visible()
     assert page.evaluate("window.chatPageMarker") == "still the same page"
@@ -44,15 +59,10 @@ def test_chat_page_adds_a_submitted_exchange_below_the_previous_ones_without_rel
 def test_chat_page_still_shows_an_exchange_asked_without_reloading_after_a_reload(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text="Fill it with white vinegar overnight.", chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    _answer_every_question_with(monkeypatch, "Fill it with white vinegar overnight.")
     page.goto(f"{live_server.url}/chat/")
     page.evaluate("window.chatPageMarker = 'still the same page'")
-    question_field = page.locator('[name="question"]')
-    question_field.fill("How do I descale a kettle?")
-    question_field.press("Enter")
+    _ask(page, "How do I descale a kettle?")
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
     assert page.evaluate("window.chatPageMarker") == "still the same page"
 
@@ -67,17 +77,12 @@ def test_chat_page_still_shows_an_exchange_asked_without_reloading_after_a_reloa
 def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloading(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text="Fill it with white vinegar overnight.", chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
-    reset_button = page.locator('form[action$="/chat/reset/"] [type="submit"]')
+    _answer_every_question_with(monkeypatch, "Fill it with white vinegar overnight.")
+    reset_button = page.locator(RESET_BUTTON)
     page.goto(f"{live_server.url}/chat/")
     expect(reset_button).to_have_count(0)
     page.evaluate("window.chatPageMarker = 'still the same page'")
-    question_field = page.locator('[name="question"]')
-    question_field.fill("How do I descale a kettle?")
-    question_field.press("Enter")
+    _ask(page, "How do I descale a kettle?")
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
 
     expect(reset_button).to_be_visible()
@@ -85,7 +90,7 @@ def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloadi
 
     reset_button.click()
 
-    expect(page.locator('[name="question"]')).to_be_visible()
+    expect(page.locator(QUESTION_FIELD)).to_be_visible()
     expect(page.get_by_text("How do I descale a kettle?")).to_have_count(0)
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_have_count(0)
     expect(reset_button).to_have_count(0)
@@ -97,23 +102,18 @@ def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloadi
 def test_chat_page_without_javascript_offers_a_reset_only_for_its_own_exchanges(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text="Remplissez-la de vinaigre blanc.", chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
-    reset_button = page.locator('form[action$="/chat/reset/"] [type="submit"]')
+    _answer_every_question_with(monkeypatch, "Remplissez-la de vinaigre blanc.")
+    reset_button = page.locator(RESET_BUTTON)
 
     page.goto(f"{live_server.url}/chat/")
-    expect(page.locator('[name="question"]')).to_be_visible()
+    expect(page.locator(QUESTION_FIELD)).to_be_visible()
     expect(reset_button).to_have_count(0)
 
     page.goto(f"{live_server.url}/fr/chat/")
-    question_field = page.locator('[name="question"]')
-    question_field.fill("Comment détartrer une bouilloire ?")
-    question_field.press("Enter")
+    _ask(page, "Comment détartrer une bouilloire ?")
     expect(page.get_by_text("Remplissez-la de vinaigre blanc.")).to_be_visible()
     expect(reset_button).to_be_visible()
 
     page.goto(f"{live_server.url}/chat/")
-    expect(page.locator('[name="question"]')).to_be_visible()
+    expect(page.locator(QUESTION_FIELD)).to_be_visible()
     expect(reset_button).to_have_count(0)
