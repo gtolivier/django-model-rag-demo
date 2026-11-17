@@ -110,8 +110,15 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
     ]
 
 
-def test_ask_says_nothing_is_close_enough_in_the_language_asked_for(
-    answer_calls: list[AnswerCall],
+@pytest.mark.parametrize(
+    "language",
+    [
+        pytest.param("fr", id="french"),
+        pytest.param("fr-CA", id="french-region"),
+    ],
+)
+def test_ask_says_nothing_is_close_enough_in_french_for_french_or_a_french_region(
+    answer_calls: list[AnswerCall], language: str
 ) -> None:
     in_french = nothing_close_enough_in("fr")
     assert in_french != str(NOTHING_CLOSE_ENOUGH)
@@ -121,25 +128,7 @@ def test_ask_says_nothing_is_close_enough_in_the_language_asked_for(
         "ask",
         "Comment détartrer une bouilloire ?",
         "--language",
-        "fr",
-        stdout=stdout,
-    )
-
-    assert stdout.getvalue().splitlines() == [in_french]
-
-
-def test_ask_says_nothing_is_close_enough_in_french_for_a_french_region(
-    answer_calls: list[AnswerCall],
-) -> None:
-    in_french = nothing_close_enough_in("fr")
-    assert in_french != str(NOTHING_CLOSE_ENOUGH)
-    stdout = StringIO()
-
-    call_command(
-        "ask",
-        "Comment détartrer une bouilloire ?",
-        "--language",
-        "fr-CA",
+        language,
         stdout=stdout,
     )
 
