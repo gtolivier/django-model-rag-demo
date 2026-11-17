@@ -9,9 +9,13 @@
 </details>
 {% endfor %}
 <script>
-const target = document.getElementById(location.hash.slice(1));
-if (target instanceof HTMLDetailsElement) {
-  target.open = true;
+function openFragmentTarget() {
+  const target = document.getElementById(location.hash.slice(1));
+  if (target instanceof HTMLDetailsElement) {
+    target.open = true;
+  }
 }
+openFragmentTarget();
+addEventListener("hashchange", openFragmentTarget);
 </script>
 {% endblock %}
