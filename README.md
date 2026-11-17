@@ -57,9 +57,11 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   page: `/chat/` searches the English documents, `/fr/chat/` the French
   ones, both along with those of unknown language. It shows each answer
   with its sources and the extracts it comes from. The exchanges are kept
-  for the visit (the session), oldest first. Each question is answered on
-  its own: the assistant does not see the previous exchanges. The page
-  works without JavaScript; with it, an answer is added without reloading.
+  for the visit (the session), oldest first, each page with its own: an
+  exchange asked on `/fr/chat/` does not show on `/chat/`. Each question is
+  answered on its own: the assistant does not see the previous exchanges. The
+  page works without JavaScript; with it, an answer is added without
+  reloading.
 
 ## Minimal example
 
@@ -198,8 +200,6 @@ message is in that language too. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
-- The English and the French page share the visit's exchanges, and those
-  two messages keep the language they were shown in.
 - Posting an empty question, or one made only of spaces, shows the page with
   "Please type a question.", without the previous exchanges; they come back
   on the next visit of the page.
