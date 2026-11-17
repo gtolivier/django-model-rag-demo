@@ -5,6 +5,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 from django_minimal_rag.answering import Answer, Citation, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
@@ -26,6 +27,7 @@ def chat(request: HttpRequest) -> HttpResponse:
     return render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
 
 
+@require_POST
 def chat_reset(request: HttpRequest) -> HttpResponse:
     request.session.pop(_exchanges_session_key(), None)
     return redirect("chat")
