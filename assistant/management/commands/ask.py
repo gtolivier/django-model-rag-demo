@@ -25,7 +25,8 @@ class Command(BaseCommand):
             language=options["language"],
         )
         if result is None:
-            with translation.override(options["language"]):
+            language = options["language"] or translation.get_language()
+            with translation.override(language):
                 self.stdout.write(str(NOTHING_CLOSE_ENOUGH))
             return
         self.stdout.write(result.text)
