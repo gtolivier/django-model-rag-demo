@@ -1,25 +1,9 @@
-from collections.abc import Iterator
-
 import pytest
 from django_minimal_rag.answering import Answer
 from playwright.sync_api import Page, expect
 from pytest_django.live_server_helper import LiveServer
 
 CHAT_ANSWER = "pages.views.answer"
-
-
-@pytest.fixture(scope="session")
-def _allow_the_orm_beside_playwright() -> Iterator[None]:
-    """Let Django's ORM run while Playwright's event loop is running.
-
-    Playwright's sync API keeps an event loop running in the test thread for
-    the whole session, and Django refuses ORM calls from such a thread: the
-    database setup and teardown of a live_server test would fail. Session
-    scoped, so it still holds when the test database is flushed.
-    """
-    with pytest.MonkeyPatch.context() as monkeypatch:
-        monkeypatch.setenv("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
-        yield
 
 
 @pytest.mark.django_db
