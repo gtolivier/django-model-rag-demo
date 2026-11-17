@@ -11,14 +11,13 @@ class PageBlockExtractor[M: AccordionItem | TextPlugin](BaseExtractor[M]):
         return queryset.select_related("page")
 
     def build_block_document(
-        self, instance: M, *, text: str, title: str
+        self, instance: M, *, text: str, title: str, url: str
     ) -> NormalizedDocument:
-        # a block has no view of its own: its document links to its page
         return self.build_document(
             instance,
             text=text,
             title=title,
-            url=instance.page.get_absolute_url(),
+            url=url,
             language=instance.page.language,
         )
 
@@ -32,7 +31,9 @@ class AccordionItemExtractor(PageBlockExtractor[AccordionItem]):
         title = instance.page.title
         if instance.title:
             title = f"{title} — {instance.title}"
-        return self.build_block_document(instance, text=text, title=title)
+        return self.build_block_document(
+            instance, text=text, title=title, url=instance.url
+        )
 
 
 @rag.register_extractor(TextPlugin, depends_on=["page"])
@@ -41,4 +42,10 @@ class TextPluginExtractor(PageBlockExtractor[TextPlugin]):
         text = instance.body.strip()
         if not text:
             return None
-        return self.build_block_document(instance, text=text, title=instance.page.title)
+        # a text block has no view of its own: its document links to its page
+        return self.build_block_document(
+            instance,
+            text=text,
+            title=instance.page.title,
+            url=instance.page.get_absolute_url(),
+        )

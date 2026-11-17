@@ -26,6 +26,15 @@ class AccordionItem(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField()
 
+    @property
+    def anchor_id(self) -> str:
+        return f"accordion-{self.pk}"
+
+    @property
+    def url(self) -> str:
+        # an item has no view of its own: it links to its place in its page
+        return f"{self.page.get_absolute_url()}#{self.anchor_id}"
+
     def __str__(self) -> str:
         return self.title
 

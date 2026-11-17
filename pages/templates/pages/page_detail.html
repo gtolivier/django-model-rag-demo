@@ -3,9 +3,19 @@
 {% block content %}
 <h1>{{ page.title }}</h1>
 {% for block in text_blocks %}{{ block.body|linebreaks }}
-{% endfor %}{% for item in accordion_items %}<details>
+{% endfor %}{% for item in accordion_items %}<details id="{{ item.anchor_id }}">
   <summary>{{ item.title }}</summary>
   {{ item.body|linebreaks }}
 </details>
 {% endfor %}
+<script>
+function openFragmentTarget() {
+  const target = document.getElementById(location.hash.slice(1));
+  if (target instanceof HTMLDetailsElement) {
+    target.open = true;
+  }
+}
+openFragmentTarget();
+addEventListener("hashchange", openFragmentTarget);
+</script>
 {% endblock %}

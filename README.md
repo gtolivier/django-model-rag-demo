@@ -17,7 +17,12 @@ django-model-rag is wired: the demo's models sync to documents.
 
 - `blog.Article` is the minimal example, below.
 - `catalog.Product` is registered with declared fields; `pages` blocks
-  (`TextPlugin`, `AccordionItem`) go through custom extractors.
+  (`TextPlugin`, `AccordionItem`) go through custom extractors. A block's
+  document links to its page; an accordion item's, to the item itself
+  (`/pages/faq/#accordion-3`), which the page opens when the URL names it,
+  on load or when the fragment changes (this takes JavaScript: without it,
+  the browser scrolls to the item, closed). Documents synced before the
+  item links existed keep the page's URL until `sync_model_rag` runs again.
 - Saving or deleting an instance updates its documents when the transaction
   commits. Editing a page or a category also updates the documents of its
   blocks or products, which declare what they read (`follow=["category"]`,

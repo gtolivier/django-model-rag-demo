@@ -27,7 +27,7 @@ def test_editing_a_page_updates_the_documents_of_its_blocks(
     assert text_document.title == "Help"
     assert text_document.url == "/pages/help/"
     assert accordion_document.title == "Help — Shipping"
-    assert accordion_document.url == "/pages/help/"
+    assert accordion_document.url == f"/pages/help/#accordion-{accordion_item.pk}"
 
 
 @pytest.mark.django_db
