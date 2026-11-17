@@ -26,6 +26,10 @@ def chat(request: HttpRequest) -> HttpResponse:
     return render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
 
 
+def chat_reset(request: HttpRequest) -> HttpResponse:
+    return redirect("chat")
+
+
 def _post_question(request: HttpRequest) -> HttpResponse:
     question = request.POST.get("question", "")
     if not question.strip():
