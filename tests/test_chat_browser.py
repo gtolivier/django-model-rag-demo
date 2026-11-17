@@ -158,6 +158,24 @@ def test_chat_page_makes_the_question_read_only_while_it_is_being_answered(
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_allow_the_orm_beside_playwright")
+def test_chat_page_reloads_when_it_is_restored_from_the_back_forward_cache(
+    live_server: LiveServer, page: Page
+) -> None:
+    page_marker = page.locator("body[data-chat-page-marker]")
+    page.goto(f"{live_server.url}/chat/")
+    page.evaluate("document.body.dataset.chatPageMarker = 'still the same page'")
+    expect(page_marker).to_have_count(1)
+
+    page.evaluate(
+        "window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }))"
+    )
+
+    expect(page_marker).to_have_count(0)
+    expect(page.locator(QUESTION_FIELD)).to_be_visible()
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_allow_the_orm_beside_playwright")
 @pytest.mark.browser_context_args(java_script_enabled=False)
 def test_chat_page_without_javascript_offers_a_reset_only_for_its_own_exchanges(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
