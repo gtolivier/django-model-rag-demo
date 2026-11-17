@@ -20,6 +20,11 @@ from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
 from pages.views import QUESTION_REQUIRED
+from tests.chat_answers import (
+    CHAT_ANSWER,
+    answer_each_question_from,
+    answer_every_question_with,
+)
 from tests.rag_output import DocumentStore
 
 
@@ -346,9 +351,6 @@ def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
     assert "question" in _posted_field_names(french_response.content.decode())
 
 
-CHAT_ANSWER = "pages.views.answer"
-
-
 @pytest.fixture
 def chat_answer_kwargs() -> list[dict[str, object]]:
     """The keyword arguments of each call to the chat page's fake answer()."""
@@ -373,30 +375,6 @@ def chat_questions(
         chat_answer_kwargs.append(kwargs)
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer, raising=False)
-    return questions
-
-
-def _answer_every_question_with(
-    monkeypatch: pytest.MonkeyPatch, answer: Answer
-) -> None:
-    """Replace the chat page's answer() with a fake that always returns answer."""
-    monkeypatch.setattr(CHAT_ANSWER, lambda question, **kwargs: answer)
-
-
-def _answer_each_question_from(
-    monkeypatch: pytest.MonkeyPatch, replies: dict[str, str]
-) -> list[str]:
-    """Replace the chat page's answer() with a fake that answers from replies.
-
-    The fake finds nothing, and returns a list of the questions it was asked.
-    """
-    questions: list[str] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        questions.append(question)
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
     return questions
 
 
@@ -557,7 +535,7 @@ RESET_AND_CHAT_URLS = [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat
 def kettle_exchange(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
     """Make the chat page's answer() reply to the kettle question; return both."""
     question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
-    _answer_each_question_from(monkeypatch, {question: reply})
+    answer_each_question_from(monkeypatch, {question: reply})
     return question, reply
 
 
@@ -580,7 +558,7 @@ def test_chat_page_no_longer_shows_its_exchanges_after_a_reset(
         "How do I descale a kettle?": "Fill it with white vinegar overnight.",
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
     }
-    _answer_each_question_from(monkeypatch, replies)
+    answer_each_question_from(monkeypatch, replies)
     client.post("/chat/", {"question": "How do I descale a kettle?"})
     before_reset = client.post(
         "/chat/", {"question": "Can a toaster take bagels?"}, follow=True
@@ -684,7 +662,7 @@ def test_chat_page_with_exchanges_holds_a_csrf_protected_post_form_to_its_reset(
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Fill it with white vinegar and leave it overnight.",
@@ -718,7 +696,7 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
         "How do I descale a kettle?": "Fill it with white vinegar overnight.",
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
     }
-    questions = _answer_each_question_from(monkeypatch, replies)
+    questions = answer_each_question_from(monkeypatch, replies)
 
     client.post("/chat/", {"question": "How do I descale a kettle?"}, follow=True)
     response = client.post(
@@ -737,7 +715,7 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
     )
     first_visit = client.post(
@@ -783,7 +761,7 @@ def test_chat_page_does_not_show_an_exchange_asked_in_the_other_language(
 ) -> None:
     question, reply = exchange
     other_question, other_reply = other_exchange
-    _answer_each_question_from(
+    answer_each_question_from(
         monkeypatch, {question: reply, other_question: other_reply}
     )
 
@@ -831,9 +809,7 @@ def test_chat_reset_keeps_the_exchanges_of_the_other_language(
 ) -> None:
     question, reply = exchange
     kept_question, kept_reply = kept_exchange
-    _answer_each_question_from(
-        monkeypatch, {question: reply, kept_question: kept_reply}
-    )
+    answer_each_question_from(monkeypatch, {question: reply, kept_question: kept_reply})
     client.post(reset_chat_url, {"question": question})
     client.post(kept_chat_url, {"question": kept_question})
 
@@ -888,7 +864,7 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
             distance=distance,
         )
 
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Use the bagel setting, then descale with white vinegar.",
@@ -921,7 +897,7 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
 def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Orders arrive within two working days.",
@@ -1007,7 +983,7 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
         ("Toasting bagels", "A bagel takes longer than a slice of bread."),
     )
 
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Use the bagel setting, then descale with white vinegar.",

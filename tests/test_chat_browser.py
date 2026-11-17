@@ -5,18 +5,14 @@ from django_minimal_rag.answering import Answer
 from playwright.sync_api import Page, expect
 from pytest_django.live_server_helper import LiveServer
 
-CHAT_ANSWER = "pages.views.answer"
+from tests.chat_answers import (
+    CHAT_ANSWER,
+    answer_each_question_from,
+    answer_every_question_with,
+)
+
 QUESTION_FIELD = '[name="question"]'
 RESET_BUTTON = 'form[action$="/chat/reset/"] [type="submit"]'
-
-
-def _answer_every_question_with(monkeypatch: pytest.MonkeyPatch, text: str) -> None:
-    """Replace the chat page's answer() with a fake that always replies text."""
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text=text, chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
 
 
 def _ask(page: Page, question: str) -> None:
@@ -35,11 +31,7 @@ def test_chat_page_adds_a_submitted_exchange_below_the_previous_ones_without_rel
         "How do I descale a kettle?": "Fill it with white vinegar overnight.",
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
     }
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    answer_each_question_from(monkeypatch, replies)
     page.goto(f"{live_server.url}/chat/")
     _ask(page, "How do I descale a kettle?")
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
@@ -61,7 +53,9 @@ def test_chat_page_adds_a_submitted_exchange_below_the_previous_ones_without_rel
 def test_chat_page_still_shows_an_exchange_asked_without_reloading_after_a_reload(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(monkeypatch, "Fill it with white vinegar overnight.")
+    answer_every_question_with(
+        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+    )
     page.goto(f"{live_server.url}/chat/")
     page.evaluate("window.chatPageMarker = 'still the same page'")
     _ask(page, "How do I descale a kettle?")
@@ -79,7 +73,9 @@ def test_chat_page_still_shows_an_exchange_asked_without_reloading_after_a_reloa
 def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloading(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(monkeypatch, "Fill it with white vinegar overnight.")
+    answer_every_question_with(
+        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+    )
     reset_button = page.locator(RESET_BUTTON)
     page.goto(f"{live_server.url}/chat/")
     expect(reset_button).to_have_count(0)
@@ -166,7 +162,9 @@ def test_chat_page_makes_the_question_read_only_while_it_is_being_answered(
 def test_chat_page_without_javascript_offers_a_reset_only_for_its_own_exchanges(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(monkeypatch, "Remplissez-la de vinaigre blanc.")
+    answer_every_question_with(
+        monkeypatch, Answer(text="Remplissez-la de vinaigre blanc.", chunks=())
+    )
     reset_button = page.locator(RESET_BUTTON)
 
     page.goto(f"{live_server.url}/chat/")
