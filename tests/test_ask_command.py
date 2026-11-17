@@ -163,6 +163,19 @@ def test_ask_says_nothing_is_close_enough_in_english_for_an_untranslated_languag
     assert stdout.getvalue().splitlines() == [in_english]
 
 
+def test_ask_says_nothing_is_close_enough_in_the_active_language_by_default(
+    answer_calls: list[AnswerCall],
+) -> None:
+    in_french = nothing_close_enough_in("fr")
+    assert in_french != str(NOTHING_CLOSE_ENOUGH)
+    stdout = StringIO()
+
+    with translation.override("fr"):
+        call_command("ask", "Comment détartrer une bouilloire ?", stdout=stdout)
+
+    assert stdout.getvalue().splitlines() == [in_french]
+
+
 def test_ask_asks_as_an_anonymous_reader_in_every_language_by_default(
     answer_calls: list[AnswerCall],
 ) -> None:
