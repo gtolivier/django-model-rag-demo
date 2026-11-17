@@ -597,6 +597,21 @@ def test_chat_reset_keeps_a_staff_user_logged_in_to_the_admin(
 
 
 @pytest.mark.django_db
+def test_chat_reset_of_a_session_with_exchanges_keeps_a_staff_user_logged_in(
+    admin_client: Client, kettle_exchange: tuple[str, str]
+) -> None:
+    question, reply = kettle_exchange
+    admin_client.post(reverse("chat"), {"question": question})
+    chat_before = admin_client.get(reverse("chat")).content.decode()
+
+    admin_client.post(reverse("chat_reset"))
+
+    admin_after = admin_client.get(reverse("admin:index"))
+    assert [question in chat_before, reply in chat_before] == [True, True]
+    assert admin_after.status_code == 200
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
 def test_chat_reset_refuses_a_get_and_keeps_the_exchanges(
     client: Client, kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
