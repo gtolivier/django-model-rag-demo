@@ -599,6 +599,28 @@ def test_chat_reset_refuses_a_get_and_keeps_the_exchanges(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("reset_url", "chat_url"),
+    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
+)
+def test_chat_reset_refuses_a_post_without_a_csrf_token_and_keeps_the_exchanges(
+    monkeypatch: pytest.MonkeyPatch, reset_url: str, chat_url: str
+) -> None:
+    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
+    _answer_each_question_from(monkeypatch, {question: reply})
+    client = Client(enforce_csrf_checks=True)
+    client.get(chat_url)
+    csrf_token = client.cookies["csrftoken"].value
+    client.post(chat_url, {"question": question, "csrfmiddlewaretoken": csrf_token})
+
+    response = client.post(reset_url)
+
+    page = client.get(chat_url).content.decode()
+    assert response.status_code == 403
+    assert [question in page, reply in page] == [True, True]
+
+
+@pytest.mark.django_db
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
