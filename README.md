@@ -49,9 +49,13 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   "title — URL" per line. It reads as an anonymous reader (no permissions),
   and says so when nothing indexed is close enough to the question.
   `--max-distance` (default 0.5) and `--limit` (default 5) tune the
-  retrieval.
+  retrieval. It searches every language unless `--language` names one, a
+  BCP 47 language range: `fr` also covers `fr-CA`, but `en-CA` does not
+  cover `en`. Documents of unknown language are kept either way.
 - The shop's "Ask a question" page (`/chat/`, `/fr/chat/`) asks the same way
-  `ask` does, with its default retrieval settings, and shows each answer
+  `ask` does, with its default retrieval settings, in the language of the
+  page: `/chat/` searches the English documents, `/fr/chat/` the French
+  ones, both along with those of unknown language. It shows each answer
   with its sources and the extracts it comes from. The exchanges are kept
   for the visit (the session), oldest first. Each question is answered on
   its own: the assistant does not see the previous exchanges. The page
@@ -162,20 +166,21 @@ only reads the chunks the current model embedded.
 Known limits of `ask`, a demo command:
 
 - Errors end in a traceback: Ollama not running, a model not pulled,
-  `--limit 0`.
+  `--limit 0`, a `--language` that is empty, holds whitespace or is `*`.
 - Requests time out after 120 seconds, a setting no variable overrides; a
   slow first load of a model can exceed it.
 - "Nothing indexed is close enough to the question." is printed without
   calling the model, so it is in English whatever the language of the
-  question. It is also what an embedding model with no chunks yet gets: the
-  two cases look the same.
+  question. It is also what an embedding model with no chunks yet gets, and
+  a `--language` no document carries (`en-CA`: the demo's documents are
+  `en` or `fr`): the cases look the same.
 - When the model is called, it answers in the language of the question,
-  most of the time: given extracts in both languages, it sometimes answers a
-  French question in English.
+  most of the time: without `--language`, given extracts in both languages,
+  it sometimes answers a French question in English.
 - An empty answer from the model (`null` content) prints as `None`.
-- The retrieval does not filter by language: an English question and its
-  French counterpart often both get the English and the French extract of
-  the same content, which takes two of the `--limit` places.
+- Without `--language`, an English question and its French counterpart
+  often both get the English and the French extract of the same content,
+  which takes two of the `--limit` places.
 - The model may still answer from what it knows rather than from the
   extracts, more often in French: "Vendez-vous du Gruyère ?" sometimes gets
   a "yes", which the content does not say.
@@ -187,9 +192,12 @@ Known limits of `ask`, a demo command:
 
 The "Ask a question" page shares those limits, except that it shows "the
 assistant is unavailable" instead of a traceback when Ollama cannot be
-reached, and that its "nothing close enough" message is in the language of
-the page the question was asked from. Also:
+reached, that it searches only the documents in the language of the page
+(and those of unknown language), and that its "nothing close enough"
+message is in that language too. Also:
 
+- The page's language wins over the question's: a French question asked
+  from `/chat/` gets English extracts.
 - The English and the French page share the visit's exchanges, and those
   two messages keep the language they were shown in.
 - Posting an empty question, or one made only of spaces, shows the page with

@@ -13,6 +13,7 @@ class Command(BaseCommand):
         parser.add_argument("question")
         parser.add_argument("--max-distance", type=float, default=MAX_DISTANCE)
         parser.add_argument("--limit", type=int, default=MAX_CHUNKS)
+        parser.add_argument("--language", default=None)
 
     def handle(self, *args: Any, **options: Any) -> None:
         result = answer(
@@ -20,6 +21,7 @@ class Command(BaseCommand):
             permissions=frozenset(),
             max_distance=options["max_distance"],
             limit=options["limit"],
+            language=options["language"],
         )
         if result is None:
             self.stdout.write(str(NOTHING_CLOSE_ENOUGH))

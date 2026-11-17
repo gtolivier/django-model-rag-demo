@@ -433,7 +433,7 @@ def test_chat_page_asks_for_a_question_when_an_empty_one_is_posted(
 
 
 @pytest.mark.django_db
-def test_chat_page_answers_a_question_as_an_anonymous_reader_with_ask_s_limits(
+def test_chat_page_answers_in_english_as_an_anonymous_reader_with_ask_s_limits(
     client: Client,
     chat_questions: list[str],
     chat_answer_kwargs: list[dict[str, object]],
@@ -443,11 +443,24 @@ def test_chat_page_answers_a_question_as_an_anonymous_reader_with_ask_s_limits(
     assert chat_questions == ["How do I descale a kettle?"]
     assert chat_answer_kwargs == [
         {
+            "language": "en",
             "permissions": frozenset(),
             "max_distance": MAX_DISTANCE,
             "limit": MAX_CHUNKS,
         }
     ]
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_in_french_under_fr(
+    client: Client,
+    chat_questions: list[str],
+    chat_answer_kwargs: list[dict[str, object]],
+) -> None:
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+
+    assert chat_questions == ["Comment détartrer une bouilloire ?"]
+    assert [kwargs["language"] for kwargs in chat_answer_kwargs] == ["fr"]
 
 
 class _StartTags(HTMLParser):

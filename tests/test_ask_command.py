@@ -102,7 +102,7 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
     ]
 
 
-def test_ask_asks_as_an_anonymous_reader_within_distance_and_limit_defaults(
+def test_ask_asks_as_an_anonymous_reader_in_every_language_by_default(
     answer_calls: list[AnswerCall],
 ) -> None:
     call_command("ask", "How do I descale a kettle?", stdout=StringIO())
@@ -110,7 +110,12 @@ def test_ask_asks_as_an_anonymous_reader_within_distance_and_limit_defaults(
     assert answer_calls == [
         (
             "How do I descale a kettle?",
-            {"permissions": frozenset(), "max_distance": 0.5, "limit": 5},
+            {
+                "permissions": frozenset(),
+                "max_distance": 0.5,
+                "limit": 5,
+                "language": None,
+            },
         )
     ]
 
@@ -135,3 +140,36 @@ def test_ask_passes_the_max_distance_and_limit_options_to_answer(
     assert type(kwargs["max_distance"]) is float
     assert kwargs["limit"] == 3
     assert type(kwargs["limit"]) is int
+
+
+def test_ask_passes_the_language_option_to_answer(
+    answer_calls: list[AnswerCall],
+) -> None:
+    call_command(
+        "ask",
+        "Comment détartrer une bouilloire ?",
+        "--language",
+        "fr",
+        stdout=StringIO(),
+    )
+
+    assert len(answer_calls) == 1
+    question, kwargs = answer_calls[0]
+    assert question == "Comment détartrer une bouilloire ?"
+    assert kwargs["language"] == "fr"
+
+
+def test_ask_passes_a_language_with_a_region_to_answer_as_typed(
+    answer_calls: list[AnswerCall],
+) -> None:
+    call_command(
+        "ask",
+        "How do I descale a kettle?",
+        "--language",
+        "en-CA",
+        stdout=StringIO(),
+    )
+
+    assert len(answer_calls) == 1
+    _, kwargs = answer_calls[0]
+    assert kwargs["language"] == "en-CA"
