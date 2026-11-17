@@ -2,8 +2,11 @@ from io import StringIO
 
 import pytest
 from django.core.management import call_command
+from django.utils import translation
 from django_minimal_rag.answering import Answer
 from django_minimal_rag.retrieval import RetrievedChunk
+
+from assistant.answering import NOTHING_CLOSE_ENOUGH
 
 ASK_ANSWER = "assistant.management.commands.ask.answer"
 
@@ -20,6 +23,11 @@ def answer_calls(monkeypatch: pytest.MonkeyPatch) -> list[AnswerCall]:
 
     monkeypatch.setattr(ASK_ANSWER, fake_answer)
     return calls
+
+
+def nothing_close_enough_in(language: str) -> str:
+    with translation.override(language):
+        return str(NOTHING_CLOSE_ENOUGH)
 
 
 def test_ask_prints_the_answer_then_one_line_per_source_in_order(
@@ -100,6 +108,61 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
     assert stdout.getvalue().splitlines() == [
         "Nothing indexed is close enough to the question.",
     ]
+
+
+@pytest.mark.parametrize(
+    "language",
+    [
+        pytest.param("fr", id="french"),
+        pytest.param("fr-CA", id="french-region"),
+    ],
+)
+def test_ask_says_nothing_is_close_enough_in_french_for_french_or_a_french_region(
+    answer_calls: list[AnswerCall], language: str
+) -> None:
+    in_french = nothing_close_enough_in("fr")
+    assert in_french != str(NOTHING_CLOSE_ENOUGH)
+    stdout = StringIO()
+
+    call_command(
+        "ask",
+        "Comment détartrer une bouilloire ?",
+        "--language",
+        language,
+        stdout=stdout,
+    )
+
+    assert stdout.getvalue().splitlines() == [in_french]
+
+
+def test_ask_says_nothing_is_close_enough_in_english_for_an_untranslated_language(
+    answer_calls: list[AnswerCall],
+) -> None:
+    in_english = nothing_close_enough_in("en")
+    stdout = StringIO()
+
+    call_command(
+        "ask",
+        "Wie entkalke ich einen Wasserkocher?",
+        "--language",
+        "de",
+        stdout=stdout,
+    )
+
+    assert stdout.getvalue().splitlines() == [in_english]
+
+
+def test_ask_says_nothing_is_close_enough_in_the_active_language_by_default(
+    answer_calls: list[AnswerCall],
+) -> None:
+    in_french = nothing_close_enough_in("fr")
+    assert in_french != str(NOTHING_CLOSE_ENOUGH)
+    stdout = StringIO()
+
+    with translation.override("fr"):
+        call_command("ask", "Comment détartrer une bouilloire ?", stdout=stdout)
+
+    assert stdout.getvalue().splitlines() == [in_french]
 
 
 def test_ask_asks_as_an_anonymous_reader_in_every_language_by_default(
