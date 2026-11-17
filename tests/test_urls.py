@@ -1,4 +1,5 @@
 from decimal import Decimal
+from urllib.parse import urlsplit
 
 import pytest
 from django.core.management import call_command
@@ -12,13 +13,15 @@ from tests.rag_output import DocumentStore
 
 
 def _captured_values(url: str) -> list[str]:
-    """Resolve ``url`` and give what its route captured, as strings.
+    """Resolve the path of ``url`` and give what its route captured, as strings.
 
-    A url no route matches (an empty one included) fails the test,
-    naming that url.
+    Only the path is resolved — the part a browser sends to the server —
+    so a fragment such as ``#accordion-3`` does not keep ``url`` from
+    matching its route. A url whose path no route matches (an empty one
+    included) fails the test, naming the full url.
     """
     try:
-        match = resolve(url)
+        match = resolve(urlsplit(url).path)
     except Resolver404:
         pytest.fail(f"{url!r} resolves to no route")
     return [str(value) for value in (*match.args, *match.kwargs.values())]
