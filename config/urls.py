@@ -21,7 +21,7 @@ from django.urls import URLPattern, URLResolver, path
 
 from blog.views import article_detail, article_list
 from catalog.views import product_detail, product_list
-from pages.views import chat, home, page_detail
+from pages.views import chat, chat_reset, home, page_detail
 
 urlpatterns: list[URLPattern | URLResolver] = [
     path("admin/", admin.site.urls),
@@ -30,6 +30,7 @@ urlpatterns: list[URLPattern | URLResolver] = [
 urlpatterns += i18n_patterns(
     path("", home, name="home"),
     path("chat/", chat, name="chat"),
+    path("chat/reset/", chat_reset, name="chat_reset"),
     path("pages/<slug:slug>/", page_detail, name="page_detail"),
     path("blog/", article_list, name="article_list"),
     path("blog/<int:pk>/", article_detail, name="article_detail"),

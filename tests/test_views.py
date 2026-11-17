@@ -20,6 +20,11 @@ from blog.models import Article
 from catalog.models import Category, Product
 from pages.models import AccordionItem, Page, TextPlugin
 from pages.views import QUESTION_REQUIRED
+from tests.chat_answers import (
+    CHAT_ANSWER,
+    answer_each_question_from,
+    answer_every_question_with,
+)
 from tests.rag_output import DocumentStore
 
 
@@ -296,30 +301,39 @@ def test_home_page_is_served_in_english_at_the_root_and_in_french_under_fr(
     assert french_response.headers.get("Content-Language") == "fr"
 
 
-class _PostedFieldNames(HTMLParser):
-    """Collect the names of the fields inside the page's POST forms."""
+class _PostForms(HTMLParser):
+    """Collect each POST form of a page as (action, field names), in order."""
 
     def __init__(self) -> None:
         super().__init__()
-        self.names: set[str] = set()
-        self._in_post_form = False
+        self.forms: list[tuple[str, set[str]]] = []
+        self._names: set[str] | None = None
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         attributes = dict(attrs)
         if tag == "form":
-            self._in_post_form = (attributes.get("method") or "").lower() == "post"
-        elif self._in_post_form and attributes.get("name"):
-            self.names.add(attributes["name"] or "")
+            if (attributes.get("method") or "").lower() == "post":
+                self._names = set()
+                self.forms.append((attributes.get("action") or "", self._names))
+            else:
+                self._names = None
+        elif self._names is not None and attributes.get("name"):
+            self._names.add(attributes["name"] or "")
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "form":
-            self._in_post_form = False
+            self._names = None
+
+
+def _post_forms(content: str) -> list[tuple[str, set[str]]]:
+    parser = _PostForms()
+    parser.feed(content)
+    return parser.forms
 
 
 def _posted_field_names(content: str) -> set[str]:
-    parser = _PostedFieldNames()
-    parser.feed(content)
-    return parser.names
+    """The names of the fields inside the page's POST forms, whichever form."""
+    return {name for _, names in _post_forms(content) for name in names}
 
 
 @pytest.mark.django_db
@@ -335,9 +349,6 @@ def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
     assert french_response.status_code == 200
     assert french_response.headers.get("Content-Language") == "fr"
     assert "question" in _posted_field_names(french_response.content.decode())
-
-
-CHAT_ANSWER = "pages.views.answer"
 
 
 @pytest.fixture
@@ -364,30 +375,6 @@ def chat_questions(
         chat_answer_kwargs.append(kwargs)
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer, raising=False)
-    return questions
-
-
-def _answer_every_question_with(
-    monkeypatch: pytest.MonkeyPatch, answer: Answer
-) -> None:
-    """Replace the chat page's answer() with a fake that always returns answer."""
-    monkeypatch.setattr(CHAT_ANSWER, lambda question, **kwargs: answer)
-
-
-def _answer_each_question_from(
-    monkeypatch: pytest.MonkeyPatch, replies: dict[str, str]
-) -> list[str]:
-    """Replace the chat page's answer() with a fake that answers from replies.
-
-    The fake finds nothing, and returns a list of the questions it was asked.
-    """
-    questions: list[str] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        questions.append(question)
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
     return questions
 
 
@@ -526,10 +513,156 @@ def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize("chat_url", ["/chat/", "/fr/chat/"])
+def test_chat_page_forbids_caches_from_storing_it(
+    client: Client, chat_url: str
+) -> None:
+    # A stored copy would let the back button show exchanges cleared by a reset.
+    response = client.get(chat_url)
+
+    assert response.status_code == 200
+    directives = {
+        directive.strip().lower()
+        for directive in response.headers.get("Cache-Control", "").split(",")
+    }
+    assert "no-store" in directives
+
+
+RESET_AND_CHAT_URLS = [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")]
+
+
+@pytest.fixture
+def kettle_exchange(monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
+    """Make the chat page's answer() reply to the kettle question; return both."""
+    question, reply = "How do I descale a kettle?", "Fill it with white vinegar."
+    answer_each_question_from(monkeypatch, {question: reply})
+    return question, reply
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
+def test_chat_reset_redirects_to_the_chat_page_of_the_same_language(
+    client: Client, reset_url: str, chat_url: str
+) -> None:
+    response = client.post(reset_url)
+
+    assert response.status_code in (302, 303)
+    assert response.headers["Location"] == chat_url
+
+
+@pytest.mark.django_db
+def test_chat_page_no_longer_shows_its_exchanges_after_a_reset(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+    }
+    answer_each_question_from(monkeypatch, replies)
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    before_reset = client.post(
+        "/chat/", {"question": "Can a toaster take bagels?"}, follow=True
+    )
+
+    client.post("/chat/reset/")
+
+    after_reset = client.get("/chat/")
+    exchanged_texts = [text for exchange in replies.items() for text in exchange]
+    assert [text in before_reset.content.decode() for text in exchanged_texts] == [
+        True
+    ] * 4
+    assert after_reset.status_code == 200
+    assert [text in after_reset.content.decode() for text in exchanged_texts] == [
+        False
+    ] * 4
+
+
+@pytest.mark.django_db
+def test_chat_reset_keeps_a_staff_user_logged_in_to_the_admin(
+    admin_client: Client,
+) -> None:
+    admin_before = admin_client.get(reverse("admin:index"))
+
+    admin_client.post(reverse("chat_reset"))
+
+    admin_after = admin_client.get(reverse("admin:index"))
+    assert admin_before.status_code == 200
+    assert admin_after.status_code == 200
+
+
+@pytest.mark.django_db
+def test_chat_reset_of_a_session_with_exchanges_keeps_a_staff_user_logged_in(
+    admin_client: Client, kettle_exchange: tuple[str, str]
+) -> None:
+    question, reply = kettle_exchange
+    admin_client.post(reverse("chat"), {"question": question})
+    chat_before = admin_client.get(reverse("chat")).content.decode()
+
+    admin_client.post(reverse("chat_reset"))
+
+    admin_after = admin_client.get(reverse("admin:index"))
+    assert [question in chat_before, reply in chat_before] == [True, True]
+    assert admin_after.status_code == 200
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
+def test_chat_reset_refuses_a_get_and_keeps_the_exchanges(
+    client: Client, kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
+) -> None:
+    question, reply = kettle_exchange
+    client.post(chat_url, {"question": question})
+
+    response = client.get(reset_url)
+
+    page = client.get(chat_url).content.decode()
+    assert response.status_code == 405
+    assert [question in page, reply in page] == [True, True]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
+def test_chat_reset_refuses_a_post_without_a_csrf_token_and_keeps_the_exchanges(
+    kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
+) -> None:
+    question, reply = kettle_exchange
+    client = Client(enforce_csrf_checks=True)
+    client.get(chat_url)
+    csrf_token = client.cookies["csrftoken"].value
+    client.post(chat_url, {"question": question, "csrfmiddlewaretoken": csrf_token})
+
+    response = client.post(reset_url)
+
+    page = client.get(chat_url).content.decode()
+    assert response.status_code == 403
+    assert [question in page, reply in page] == [True, True]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(("reset_url", "chat_url"), RESET_AND_CHAT_URLS)
+def test_chat_page_with_exchanges_holds_a_csrf_protected_post_form_to_its_reset(
+    client: Client, kettle_exchange: tuple[str, str], reset_url: str, chat_url: str
+) -> None:
+    question, _ = kettle_exchange
+    client.post(chat_url, {"question": question})
+
+    response = client.get(chat_url)
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert question in content
+    assert [
+        "csrfmiddlewaretoken" in names
+        for action, names in _post_forms(content)
+        if action == reset_url
+    ] == [True]
+
+
+@pytest.mark.django_db
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Fill it with white vinegar and leave it overnight.",
@@ -563,7 +696,7 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
         "How do I descale a kettle?": "Fill it with white vinegar overnight.",
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
     }
-    questions = _answer_each_question_from(monkeypatch, replies)
+    questions = answer_each_question_from(monkeypatch, replies)
 
     client.post("/chat/", {"question": "How do I descale a kettle?"}, follow=True)
     response = client.post(
@@ -582,7 +715,7 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
     )
     first_visit = client.post(
@@ -628,7 +761,7 @@ def test_chat_page_does_not_show_an_exchange_asked_in_the_other_language(
 ) -> None:
     question, reply = exchange
     other_question, other_reply = other_exchange
-    _answer_each_question_from(
+    answer_each_question_from(
         monkeypatch, {question: reply, other_question: other_reply}
     )
 
@@ -641,6 +774,51 @@ def test_chat_page_does_not_show_an_exchange_asked_in_the_other_language(
     assert [
         text in content for text in (question, reply, other_question, other_reply)
     ] == [True, True, False, False]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("reset_url", "reset_chat_url", "exchange", "kept_chat_url", "kept_exchange"),
+    [
+        pytest.param(
+            "/fr/chat/reset/",
+            "/fr/chat/",
+            ("Comment détartrer une bouilloire ?", "Remplissez-la de vinaigre blanc."),
+            "/chat/",
+            ("How do I descale a kettle?", "Fill it with white vinegar overnight."),
+            id="french-reset-keeps-english-exchanges",
+        ),
+        pytest.param(
+            "/chat/reset/",
+            "/chat/",
+            ("How do I descale a kettle?", "Fill it with white vinegar overnight."),
+            "/fr/chat/",
+            ("Comment détartrer une bouilloire ?", "Remplissez-la de vinaigre blanc."),
+            id="english-reset-keeps-french-exchanges",
+        ),
+    ],
+)
+def test_chat_reset_keeps_the_exchanges_of_the_other_language(
+    client: Client,
+    monkeypatch: pytest.MonkeyPatch,
+    reset_url: str,
+    reset_chat_url: str,
+    exchange: tuple[str, str],
+    kept_chat_url: str,
+    kept_exchange: tuple[str, str],
+) -> None:
+    question, reply = exchange
+    kept_question, kept_reply = kept_exchange
+    answer_each_question_from(monkeypatch, {question: reply, kept_question: kept_reply})
+    client.post(reset_chat_url, {"question": question})
+    client.post(kept_chat_url, {"question": kept_question})
+
+    client.post(reset_url)
+
+    reset_page = client.get(reset_chat_url).content.decode()
+    kept_page = client.get(kept_chat_url).content.decode()
+    assert [question in reset_page, reply in reset_page] == [False, False]
+    assert [kept_question in kept_page, kept_reply in kept_page] == [True, True]
 
 
 class _Links(HTMLParser):
@@ -686,7 +864,7 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
             distance=distance,
         )
 
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Use the bagel setting, then descale with white vinegar.",
@@ -719,7 +897,7 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
 def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Orders arrive within two working days.",
@@ -805,7 +983,7 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
         ("Toasting bagels", "A bagel takes longer than a slice of bread."),
     )
 
-    _answer_every_question_with(
+    answer_every_question_with(
         monkeypatch,
         Answer(
             text="Use the bagel setting, then descale with white vinegar.",

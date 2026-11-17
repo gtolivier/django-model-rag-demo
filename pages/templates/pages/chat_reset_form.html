@@ -1,0 +1,4 @@
+{% load i18n %}<form method="post" action="{% url 'chat_reset' %}" class="reset">
+{% csrf_token %}
+<button type="submit">{% translate "Clear the conversation" %}</button>
+</form>

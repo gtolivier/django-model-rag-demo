@@ -13,6 +13,13 @@
 {% include "pages/chat_exchange.html" %}
 {% endfor %}
 </div>
+{% if exchanges %}
+{% include "pages/chat_reset_form.html" %}
+{% else %}
+<template id="reset-template">
+{% include "pages/chat_reset_form.html" %}
+</template>
+{% endif %}
 <form method="post" id="chat-form" class="ask">
 {% csrf_token %}
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
@@ -21,12 +28,31 @@
 <button type="submit" data-waiting-label="{% translate "Looking for an answer…" %}">{% translate "Ask" %}</button>
 </form>
 <script>
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) location.reload();
+});
 const form = document.getElementById("chat-form");
 const button = form.querySelector("button");
+function setResetDisabled(isDisabled) {
+  // Looked up on each call: the reset form is only added after the first answer.
+  const resetButton = document.querySelector("form.reset button");
+  if (resetButton) resetButton.disabled = isDisabled;
+}
+function setAnswering(isAnswering) {
+  button.disabled = isAnswering;
+  form.question.readOnly = isAnswering;
+  setResetDisabled(isAnswering);
+}
+function revealResetForm(exchanges) {
+  const resetTemplate = document.getElementById("reset-template");
+  if (!resetTemplate) return;
+  exchanges.after(resetTemplate.content);
+  resetTemplate.remove();
+}
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const label = button.textContent;
-  button.disabled = true;
+  setAnswering(true);
   button.textContent = button.dataset.waitingLabel;
   try {
     const response = await fetch(form.action, {
@@ -40,10 +66,11 @@ form.addEventListener("submit", async (event) => {
     }
     const exchanges = document.getElementById("exchanges");
     exchanges.insertAdjacentHTML("beforeend", await response.text());
+    revealResetForm(exchanges);
     exchanges.lastElementChild.scrollIntoView({ block: "nearest" });
     form.reset();
   } finally {
-    button.disabled = false;
+    setAnswering(false);
     button.textContent = label;
     form.question.focus();
   }

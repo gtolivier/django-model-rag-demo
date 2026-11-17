@@ -65,9 +65,11 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   with its sources and the extracts it comes from. The exchanges are kept
   for the visit (the session), oldest first, each page with its own: an
   exchange asked on `/fr/chat/` does not show on `/chat/`. Each question is
-  answered on its own: the assistant does not see the previous exchanges. The
-  page works without JavaScript; with it, an answer is added without
-  reloading.
+  answered on its own: the assistant does not see the previous exchanges.
+  Once a page has exchanges, a "Clear the conversation" button removes them,
+  and only them: the other page's exchanges and the rest of the session
+  stay. The page works without JavaScript; with it, an answer is added
+  without reloading.
 
 ## Minimal example
 
