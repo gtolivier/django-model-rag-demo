@@ -13,6 +13,12 @@
 {% include "pages/chat_exchange.html" %}
 {% endfor %}
 </div>
+{% if exchanges %}
+<form method="post" action="{% url 'chat_reset' %}" class="reset">
+{% csrf_token %}
+<button type="submit">{% translate "Start over" %}</button>
+</form>
+{% endif %}
 <form method="post" id="chat-form" class="ask">
 {% csrf_token %}
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
