@@ -14,16 +14,10 @@
 {% endfor %}
 </div>
 {% if exchanges %}
-<form method="post" action="{% url 'chat_reset' %}" class="reset">
-{% csrf_token %}
-<button type="submit">{% translate "Start over" %}</button>
-</form>
+{% include "pages/chat_reset_form.html" %}
 {% else %}
 <template id="reset-template">
-<form method="post" action="{% url 'chat_reset' %}" class="reset">
-{% csrf_token %}
-<button type="submit">{% translate "Start over" %}</button>
-</form>
+{% include "pages/chat_reset_form.html" %}
 </template>
 {% endif %}
 <form method="post" id="chat-form" class="ask">
