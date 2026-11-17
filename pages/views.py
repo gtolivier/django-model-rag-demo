@@ -36,14 +36,18 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             status=400,
         )
     exchange = _ask(question)
-    request.session[EXCHANGES_SESSION_KEY] = [*_exchanges(request), exchange]
+    request.session[_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
     return redirect(request.path)
 
 
+def _session_key() -> str:
+    return f"{EXCHANGES_SESSION_KEY}_{get_language()}"
+
+
 def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
-    exchanges: list[dict[str, object]] = request.session.get(EXCHANGES_SESSION_KEY, [])
+    exchanges: list[dict[str, object]] = request.session.get(_session_key(), [])
     return exchanges
 
 
