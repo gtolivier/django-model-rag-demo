@@ -373,6 +373,23 @@ def _answer_every_question_with(
     monkeypatch.setattr(CHAT_ANSWER, lambda question, **kwargs: answer)
 
 
+def _answer_each_question_from(
+    monkeypatch: pytest.MonkeyPatch, replies: dict[str, str]
+) -> list[str]:
+    """Replace the chat page's answer() with a fake that answers from replies.
+
+    The fake finds nothing, and returns a list of the questions it was asked.
+    """
+    questions: list[str] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        questions.append(question)
+        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    return questions
+
+
 def _without_csrf_tokens(content: str) -> str:
     """Blank the CSRF token values, which change with every rendering."""
     return re.sub(
@@ -545,13 +562,7 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
         "How do I descale a kettle?": "Fill it with white vinegar overnight.",
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
     }
-    questions: list[str] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        questions.append(question)
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    questions = _answer_each_question_from(monkeypatch, replies)
 
     client.post("/chat/", {"question": "How do I descale a kettle?"}, follow=True)
     response = client.post(
@@ -584,6 +595,51 @@ def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     content = second_visit.content.decode()
     assert "How do I descale a kettle?" not in content
     assert "Fill it with white vinegar overnight." not in content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("chat_url", "exchange", "other_chat_url", "other_exchange"),
+    [
+        pytest.param(
+            "/chat/",
+            ("How do I descale a kettle?", "Fill it with white vinegar overnight."),
+            "/fr/chat/",
+            ("Comment détartrer une bouilloire ?", "Remplissez-la de vinaigre blanc."),
+            id="french-exchange-on-english-page",
+        ),
+        pytest.param(
+            "/fr/chat/",
+            ("Comment détartrer une bouilloire ?", "Remplissez-la de vinaigre blanc."),
+            "/chat/",
+            ("How do I descale a kettle?", "Fill it with white vinegar overnight."),
+            id="english-exchange-on-french-page",
+        ),
+    ],
+)
+def test_chat_page_does_not_show_an_exchange_asked_in_the_other_language(
+    client: Client,
+    monkeypatch: pytest.MonkeyPatch,
+    chat_url: str,
+    exchange: tuple[str, str],
+    other_chat_url: str,
+    other_exchange: tuple[str, str],
+) -> None:
+    question, reply = exchange
+    other_question, other_reply = other_exchange
+    _answer_each_question_from(
+        monkeypatch, {question: reply, other_question: other_reply}
+    )
+
+    client.post(chat_url, {"question": question})
+    client.post(other_chat_url, {"question": other_question})
+    response = client.get(chat_url)
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert [
+        text in content for text in (question, reply, other_question, other_reply)
+    ] == [True, True, False, False]
 
 
 class _Links(HTMLParser):
