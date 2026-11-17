@@ -540,6 +540,33 @@ def test_chat_reset_redirects_to_the_chat_page_of_the_same_language(
 
 
 @pytest.mark.django_db
+def test_chat_page_no_longer_shows_its_exchanges_after_a_reset(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+    }
+    _answer_each_question_from(monkeypatch, replies)
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    before_reset = client.post(
+        "/chat/", {"question": "Can a toaster take bagels?"}, follow=True
+    )
+
+    client.post("/chat/reset/")
+
+    after_reset = client.get("/chat/")
+    exchanged_texts = [text for exchange in replies.items() for text in exchange]
+    assert [text in before_reset.content.decode() for text in exchanged_texts] == [
+        True
+    ] * 4
+    assert after_reset.status_code == 200
+    assert [text in after_reset.content.decode() for text in exchanged_texts] == [
+        False
+    ] * 4
+
+
+@pytest.mark.django_db
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
