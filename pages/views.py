@@ -3,6 +3,7 @@ from collections.abc import Iterable
 import httpx
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.cache import add_never_cache_headers
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
@@ -24,7 +25,9 @@ def home(request: HttpRequest) -> HttpResponse:
 def chat(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         return _post_question(request)
-    return render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
+    response = render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
+    add_never_cache_headers(response)
+    return response
 
 
 @require_POST
