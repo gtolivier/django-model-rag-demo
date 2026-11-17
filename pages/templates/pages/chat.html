@@ -18,6 +18,13 @@
 {% csrf_token %}
 <button type="submit">{% translate "Start over" %}</button>
 </form>
+{% else %}
+<template id="reset-template">
+<form method="post" action="{% url 'chat_reset' %}" class="reset">
+{% csrf_token %}
+<button type="submit">{% translate "Start over" %}</button>
+</form>
+</template>
 {% endif %}
 <form method="post" id="chat-form" class="ask">
 {% csrf_token %}
@@ -46,6 +53,11 @@ form.addEventListener("submit", async (event) => {
     }
     const exchanges = document.getElementById("exchanges");
     exchanges.insertAdjacentHTML("beforeend", await response.text());
+    const resetTemplate = document.getElementById("reset-template");
+    if (resetTemplate) {
+      exchanges.after(resetTemplate.content);
+      resetTemplate.remove();
+    }
     exchanges.lastElementChild.scrollIntoView({ block: "nearest" });
     form.reset();
   } finally {
