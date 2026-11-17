@@ -526,6 +526,20 @@ def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("reset_url", "chat_url"),
+    [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")],
+)
+def test_chat_reset_redirects_to_the_chat_page_of_the_same_language(
+    client: Client, reset_url: str, chat_url: str
+) -> None:
+    response = client.post(reset_url)
+
+    assert response.status_code in (302, 303)
+    assert response.headers["Location"] == chat_url
+
+
+@pytest.mark.django_db
 def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
