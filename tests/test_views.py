@@ -586,6 +586,37 @@ def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     assert "Fill it with white vinegar overnight." not in content
 
 
+@pytest.mark.django_db
+def test_chat_page_does_not_show_an_exchange_asked_in_french_on_the_english_page(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
+    }
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert [
+        text in content
+        for text in (
+            "How do I descale a kettle?",
+            "Fill it with white vinegar overnight.",
+            "Comment détartrer une bouilloire ?",
+            "Remplissez-la de vinaigre blanc.",
+        )
+    ] == [True, True, False, False]
+
+
 class _Links(HTMLParser):
     """Collect each link of a response as (target, text), in document order."""
 
