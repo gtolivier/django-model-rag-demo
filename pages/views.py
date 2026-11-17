@@ -11,7 +11,7 @@ from django_minimal_rag.retrieval import RetrievedChunk
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from pages.models import pages_in_active_language
 
-EXCHANGES_SESSION_KEY = "exchanges"
+EXCHANGES_SESSION_KEY_PREFIX = "exchanges"
 QUESTION_REQUIRED = _("Please type a question.")
 ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
 
@@ -36,18 +36,20 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             status=400,
         )
     exchange = _ask(question)
-    request.session[_session_key()] = [*_exchanges(request), exchange]
+    request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
     return redirect(request.path)
 
 
-def _session_key() -> str:
-    return f"{EXCHANGES_SESSION_KEY}_{get_language()}"
+def _exchanges_session_key() -> str:
+    return f"{EXCHANGES_SESSION_KEY_PREFIX}_{get_language()}"
 
 
 def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
-    exchanges: list[dict[str, object]] = request.session.get(_session_key(), [])
+    exchanges: list[dict[str, object]] = request.session.get(
+        _exchanges_session_key(), []
+    )
     return exchanges
 
 
