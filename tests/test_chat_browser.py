@@ -64,6 +64,35 @@ def test_chat_page_still_shows_an_exchange_asked_without_reloading_after_a_reloa
 
 @pytest.mark.django_db
 @pytest.mark.usefixtures("_allow_the_orm_beside_playwright")
+def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloading(
+    live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        return Answer(text="Fill it with white vinegar overnight.", chunks=())
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    reset_button = page.locator('form[action$="/chat/reset/"] [type="submit"]')
+    page.goto(f"{live_server.url}/chat/")
+    expect(reset_button).to_have_count(0)
+    page.evaluate("window.chatPageMarker = 'still the same page'")
+    question_field = page.locator('[name="question"]')
+    question_field.fill("How do I descale a kettle?")
+    question_field.press("Enter")
+    expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
+
+    expect(reset_button).to_be_visible()
+    assert page.evaluate("window.chatPageMarker") == "still the same page"
+
+    reset_button.click()
+
+    expect(page.locator('[name="question"]')).to_be_visible()
+    expect(page.get_by_text("How do I descale a kettle?")).to_have_count(0)
+    expect(page.get_by_text("Fill it with white vinegar overnight.")).to_have_count(0)
+    expect(reset_button).to_have_count(0)
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_allow_the_orm_beside_playwright")
 @pytest.mark.browser_context_args(java_script_enabled=False)
 def test_chat_page_without_javascript_offers_a_reset_only_for_its_own_exchanges(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
