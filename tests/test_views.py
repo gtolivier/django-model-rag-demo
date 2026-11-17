@@ -697,6 +697,53 @@ def test_chat_page_does_not_show_an_exchange_asked_in_the_other_language(
     ] == [True, True, False, False]
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("reset_url", "reset_chat_url", "exchange", "kept_chat_url", "kept_exchange"),
+    [
+        pytest.param(
+            "/fr/chat/reset/",
+            "/fr/chat/",
+            ("Comment détartrer une bouilloire ?", "Remplissez-la de vinaigre blanc."),
+            "/chat/",
+            ("How do I descale a kettle?", "Fill it with white vinegar overnight."),
+            id="french-reset-keeps-english-exchanges",
+        ),
+        pytest.param(
+            "/chat/reset/",
+            "/chat/",
+            ("How do I descale a kettle?", "Fill it with white vinegar overnight."),
+            "/fr/chat/",
+            ("Comment détartrer une bouilloire ?", "Remplissez-la de vinaigre blanc."),
+            id="english-reset-keeps-french-exchanges",
+        ),
+    ],
+)
+def test_chat_reset_keeps_the_exchanges_of_the_other_language(
+    client: Client,
+    monkeypatch: pytest.MonkeyPatch,
+    reset_url: str,
+    reset_chat_url: str,
+    exchange: tuple[str, str],
+    kept_chat_url: str,
+    kept_exchange: tuple[str, str],
+) -> None:
+    question, reply = exchange
+    kept_question, kept_reply = kept_exchange
+    _answer_each_question_from(
+        monkeypatch, {question: reply, kept_question: kept_reply}
+    )
+    client.post(reset_chat_url, {"question": question})
+    client.post(kept_chat_url, {"question": kept_question})
+
+    client.post(reset_url)
+
+    reset_page = client.get(reset_chat_url).content.decode()
+    kept_page = client.get(kept_chat_url).content.decode()
+    assert [question in reset_page, reply in reset_page] == [False, False]
+    assert [kept_question in kept_page, kept_reply in kept_page] == [True, True]
+
+
 class _Links(HTMLParser):
     """Collect each link of a response as (target, text), in document order."""
 
