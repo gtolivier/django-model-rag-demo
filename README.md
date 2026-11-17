@@ -47,7 +47,8 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   Ollama, nor fails when it is down. `manage.py embed_pending` embeds them.
 - `manage.py ask "question"` prints the answer, then its sources, one
   "title — URL" per line. It reads as an anonymous reader (no permissions),
-  and says so when nothing indexed is close enough to the question.
+  and says so when nothing indexed is close enough to the question: in
+  French with `--language fr` (or `fr-CA`…), in English otherwise.
   `--max-distance` (default 0.5) and `--limit` (default 5) tune the
   retrieval. It searches every language unless `--language` names one, a
   BCP 47 language range: `fr` also covers `fr-CA`, but `en-CA` does not
@@ -172,8 +173,9 @@ Known limits of `ask`, a demo command:
 - Requests time out after 120 seconds, a setting no variable overrides; a
   slow first load of a model can exceed it.
 - "Nothing indexed is close enough to the question." is printed without
-  calling the model, so it is in English whatever the language of the
-  question. It is also what an embedding model with no chunks yet gets, and
+  calling the model, so it follows `--language`, not the language of the
+  question: a French question asked without `--language` gets it in
+  English. It is also what an embedding model with no chunks yet gets, and
   a `--language` no document carries (`en-CA`: the demo's documents are
   `en` or `fr`): the cases look the same.
 - When the model is called, it answers in the language of the question,
@@ -194,9 +196,9 @@ Known limits of `ask`, a demo command:
 
 The "Ask a question" page shares those limits, except that it shows "the
 assistant is unavailable" instead of a traceback when Ollama cannot be
-reached, that it searches only the documents in the language of the page
-(and those of unknown language), and that its "nothing close enough"
-message is in that language too. Also:
+reached, and that it searches only the documents in the language of the
+page (and those of unknown language), its "nothing close enough" message
+in that language too. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
