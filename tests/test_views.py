@@ -534,6 +534,22 @@ def test_chat_page_redirects_a_plain_post_to_the_chat_page_of_the_same_language(
     assert response.headers["Location"] == chat_url
 
 
+@pytest.mark.django_db
+@pytest.mark.parametrize("chat_url", ["/chat/", "/fr/chat/"])
+def test_chat_page_forbids_caches_from_storing_it(
+    client: Client, chat_url: str
+) -> None:
+    # A stored copy would let the back button show exchanges cleared by a reset.
+    response = client.get(chat_url)
+
+    assert response.status_code == 200
+    directives = {
+        directive.strip().lower()
+        for directive in response.headers.get("Cache-Control", "").split(",")
+    }
+    assert "no-store" in directives
+
+
 RESET_AND_CHAT_URLS = [("/chat/reset/", "/chat/"), ("/fr/chat/reset/", "/fr/chat/")]
 
 
