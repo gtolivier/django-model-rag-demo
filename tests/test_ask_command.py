@@ -25,6 +25,11 @@ def answer_calls(monkeypatch: pytest.MonkeyPatch) -> list[AnswerCall]:
     return calls
 
 
+def nothing_close_enough_in(language: str) -> str:
+    with translation.override(language):
+        return str(NOTHING_CLOSE_ENOUGH)
+
+
 def test_ask_prints_the_answer_then_one_line_per_source_in_order(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -108,8 +113,7 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
 def test_ask_says_nothing_is_close_enough_in_the_language_asked_for(
     answer_calls: list[AnswerCall],
 ) -> None:
-    with translation.override("fr"):
-        in_french = str(NOTHING_CLOSE_ENOUGH)
+    in_french = nothing_close_enough_in("fr")
     assert in_french != str(NOTHING_CLOSE_ENOUGH)
     stdout = StringIO()
 
@@ -127,8 +131,7 @@ def test_ask_says_nothing_is_close_enough_in_the_language_asked_for(
 def test_ask_says_nothing_is_close_enough_in_french_for_a_french_region(
     answer_calls: list[AnswerCall],
 ) -> None:
-    with translation.override("fr"):
-        in_french = str(NOTHING_CLOSE_ENOUGH)
+    in_french = nothing_close_enough_in("fr")
     assert in_french != str(NOTHING_CLOSE_ENOUGH)
     stdout = StringIO()
 
@@ -146,8 +149,7 @@ def test_ask_says_nothing_is_close_enough_in_french_for_a_french_region(
 def test_ask_says_nothing_is_close_enough_in_english_for_an_untranslated_language(
     answer_calls: list[AnswerCall],
 ) -> None:
-    with translation.override("en"):
-        in_english = str(NOTHING_CLOSE_ENOUGH)
+    in_english = nothing_close_enough_in("en")
     stdout = StringIO()
 
     call_command(
