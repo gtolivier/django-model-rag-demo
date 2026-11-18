@@ -1,5 +1,5 @@
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from decimal import Decimal
 from html.parser import HTMLParser
 from io import StringIO
@@ -378,6 +378,15 @@ def _form_inputs(content: str, form_id: str) -> list[dict[str, str | None]]:
     return parser.inputs
 
 
+def _use_history_inputs(content: str) -> list[tuple[str, bool]]:
+    """The type and checked state of each use_history input of the chat form."""
+    return [
+        ((attributes.get("type") or "").lower(), "checked" in attributes)
+        for attributes in _form_inputs(content, "chat-form")
+        if attributes.get("name") == "use_history"
+    ]
+
+
 @pytest.mark.django_db
 def test_chat_page_on_a_first_visit_holds_a_checked_use_history_checkbox(
     client: Client,
@@ -385,11 +394,7 @@ def test_chat_page_on_a_first_visit_holds_a_checked_use_history_checkbox(
     response = client.get("/chat/")
 
     assert response.status_code == 200
-    assert [
-        ((attributes.get("type") or "").lower(), "checked" in attributes)
-        for attributes in _form_inputs(response.content.decode(), "chat-form")
-        if attributes.get("name") == "use_history"
-    ] == [("checkbox", True)]
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
 
 
 @pytest.mark.django_db
@@ -406,11 +411,7 @@ def test_chat_page_after_a_question_without_use_history_holds_it_unchecked(
     )
 
     assert response.status_code == 200
-    assert [
-        ((attributes.get("type") or "").lower(), "checked" in attributes)
-        for attributes in _form_inputs(response.content.decode(), "chat-form")
-        if attributes.get("name") == "use_history"
-    ] == [("checkbox", False)]
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", False)]
 
 
 @pytest.mark.django_db
@@ -434,11 +435,7 @@ def test_chat_page_after_questions_without_then_with_use_history_holds_it_checke
     )
 
     assert response.status_code == 200
-    assert [
-        ((attributes.get("type") or "").lower(), "checked" in attributes)
-        for attributes in _form_inputs(response.content.decode(), "chat-form")
-        if attributes.get("name") == "use_history"
-    ] == [("checkbox", True)]
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
 
 
 @pytest.mark.django_db
@@ -455,11 +452,7 @@ def test_chat_page_after_a_french_question_without_use_history_holds_it_checked(
     response = client.get("/chat/")
 
     assert response.status_code == 200
-    assert [
-        ((attributes.get("type") or "").lower(), "checked" in attributes)
-        for attributes in _form_inputs(response.content.decode(), "chat-form")
-        if attributes.get("name") == "use_history"
-    ] == [("checkbox", True)]
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
 
 
 @pytest.mark.django_db
@@ -476,11 +469,7 @@ def test_chat_page_after_an_empty_question_with_use_history_holds_it_checked(
     response = client.post("/chat/", {"question": "", "use_history": "on"})
 
     assert response.status_code == 400
-    assert [
-        ((attributes.get("type") or "").lower(), "checked" in attributes)
-        for attributes in _form_inputs(response.content.decode(), "chat-form")
-        if attributes.get("name") == "use_history"
-    ] == [("checkbox", True)]
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
 
 
 @pytest.mark.django_db
@@ -500,11 +489,7 @@ def test_chat_page_after_an_empty_question_without_use_history_holds_it_unchecke
     response = client.post("/chat/", {"question": ""})
 
     assert response.status_code == 400
-    assert [
-        ((attributes.get("type") or "").lower(), "checked" in attributes)
-        for attributes in _form_inputs(response.content.decode(), "chat-form")
-        if attributes.get("name") == "use_history"
-    ] == [("checkbox", False)]
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", False)]
 
 
 @pytest.fixture
@@ -846,7 +831,7 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
 
 
 @pytest.mark.django_db
-def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alone(
+def test_chat_page_answers_and_shows_two_plain_post_exchanges_oldest_first(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     replies = {
@@ -931,23 +916,39 @@ def test_chat_page_shows_no_search_question_when_it_is_the_question_asked(
     assert content.count(question) == 1
 
 
+def _answer_recording_histories(
+    monkeypatch: pytest.MonkeyPatch, replies: Mapping[str, str | None]
+) -> list[Sequence[Exchange]]:
+    """Replace the chat page's answer() with a fake that answers from replies.
+
+    A None reply finds nothing. Return the list of the history of each call.
+    """
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer | None:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        reply = replies[question]
+        if reply is None:
+            return None
+        return Answer(text=reply, chunks=(), search_question=question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    return histories
+
+
 @pytest.mark.django_db
 def test_chat_page_answers_with_use_history_on_with_its_earlier_exchange_as_history(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        return Answer(
-            text="Fill it with white vinegar overnight.",
-            chunks=(),
-            search_question=question,
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "How long does it take?": "Fill it with white vinegar overnight.",
+        },
+    )
 
     client.post("/chat/", {"question": "How do I descale a kettle?"})
     client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
@@ -970,15 +971,7 @@ def test_chat_page_answers_with_use_history_on_with_both_earlier_exchanges_oldes
         "Can a toaster take bagels?": "Yes, use the bagel setting.",
         "Which of them is cheaper?": "The kettle.",
     }
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        return Answer(text=replies[question], chunks=(), search_question=question)
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(monkeypatch, replies)
 
     client.post("/chat/", {"question": "How do I descale a kettle?"})
     client.post("/chat/", {"question": "Can a toaster take bagels?"})
@@ -1012,15 +1005,7 @@ def test_chat_page_answers_with_use_history_on_with_only_the_last_five_exchanges
         "Can the oven grill?": "Yes, it has a top grill.",
     }
     replies = {**earlier, "Which of them is cheaper?": "The kettle."}
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        return Answer(text=replies[question], chunks=(), search_question=question)
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(monkeypatch, replies)
 
     for question in earlier:
         client.post("/chat/", {"question": question})
@@ -1042,17 +1027,10 @@ def test_chat_page_passes_a_nothing_close_enough_exchange_in_history_as_shown(
     # The ask command's message when answer() finds nothing is the reference,
     # so this test does not fix the wording itself.
     nothing_close_enough = _ask_command_output_when_nothing_is_found(monkeypatch)
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer | None:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        if question == "How do I descale a kettle?":
-            return None
-        return Answer(text="The kettle.", chunks=(), search_question=question)
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {"How do I descale a kettle?": None, "How long does it take?": "The kettle."},
+    )
 
     client.post("/chat/", {"question": "How do I descale a kettle?"})
     client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
@@ -1067,19 +1045,13 @@ def test_chat_page_passes_a_nothing_close_enough_exchange_in_history_as_shown(
 def test_chat_page_answers_with_use_history_on_with_no_history_after_a_reset(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        return Answer(
-            text="Fill it with white vinegar overnight.",
-            chunks=(),
-            search_question=question,
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "How long does it take?": "Fill it with white vinegar overnight.",
+        },
+    )
     client.post("/chat/", {"question": "How do I descale a kettle?"})
 
     client.post("/chat/reset/")
@@ -1093,19 +1065,13 @@ def test_chat_page_answers_with_use_history_on_with_no_history_after_a_reset(
 def test_chat_page_answers_without_use_history_with_no_history_after_an_exchange(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        return Answer(
-            text="Fill it with white vinegar overnight.",
-            chunks=(),
-            search_question=question,
-        )
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "How long does it take?": "Fill it with white vinegar overnight.",
+        },
+    )
     client.post("/chat/", {"question": "How do I descale a kettle?"})
 
     # A browser posts no use_history field when the box is unchecked.
@@ -1124,15 +1090,7 @@ def test_french_chat_page_answers_with_use_history_on_without_the_english_exchan
         "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
         "Combien de temps faut-il ?": "Une nuit.",
     }
-    histories: list[Sequence[Exchange]] = []
-
-    def fake_answer(question: str, **kwargs: object) -> Answer:
-        history = kwargs.get("history", ())
-        assert isinstance(history, Sequence)
-        histories.append(history)
-        return Answer(text=replies[question], chunks=(), search_question=question)
-
-    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    histories = _answer_recording_histories(monkeypatch, replies)
     client.post("/chat/", {"question": "How do I descale a kettle?"})
     client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
 
