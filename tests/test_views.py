@@ -871,6 +871,40 @@ def test_chat_page_answers_with_use_history_on_with_no_history_after_a_reset(
 
 
 @pytest.mark.django_db
+def test_french_chat_page_answers_with_use_history_on_without_the_english_exchanges(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
+        "Combien de temps faut-il ?": "Une nuit.",
+    }
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        return Answer(text=replies[question], chunks=(), search_question=question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+
+    client.post(
+        "/fr/chat/", {"question": "Combien de temps faut-il ?", "use_history": "on"}
+    )
+
+    assert len(histories) == 3
+    assert list(histories[2]) == [
+        Exchange(
+            question="Comment détartrer une bouilloire ?",
+            answer="Remplissez-la de vinaigre blanc.",
+        )
+    ]
+
+
+@pytest.mark.django_db
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
