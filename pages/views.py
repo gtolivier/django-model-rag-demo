@@ -53,6 +53,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             "pages/chat.html",
             {
                 "error": QUESTION_REQUIRED,
+                "exchanges": _exchanges(request),
                 "use_history": _is_history_requested(request),
             },
             status=400,
