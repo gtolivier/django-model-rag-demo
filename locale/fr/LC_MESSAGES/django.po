@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 18:14+0000\n"
+"POT-Creation-Date: 2026-11-18 21:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,8 +19,8 @@ msgstr ""
 "1000000 == 0 ? 1 : 2;\n"
 
 #: assistant/answering.py:5
-msgid "Nothing indexed is close enough to the question."
-msgstr "Rien d'indexé n'est assez proche de la question."
+msgid "No content can answer your question."
+msgstr "Aucun contenu ne permet de répondre à votre question."
 
 #: blog/templates/blog/article_list.html:3
 #: blog/templates/blog/article_list.html:5 pages/templates/pages/nav.html:4
@@ -34,6 +34,7 @@ msgid "€%(price)s"
 msgstr "%(price)s €"
 
 #: catalog/templates/catalog/product_list.html:3
+#: pages/templates/pages/nav.html:3
 msgid "Cheeses"
 msgstr "Fromages"
 
@@ -53,23 +54,24 @@ msgstr "Poser une question"
 
 #: pages/templates/pages/chat.html:6
 msgid ""
-"The answers come from the shop's own pages, cheeses and articles. With “Use "
-"the earlier exchanges” checked, the assistant also reads your last five "
-"exchanges, so you can ask a follow-up question; unchecked, each question is "
-"answered on its own."
+"The answers come from the shop's own pages, cheeses and articles. With “Keep "
+"the earlier exchanges in context” checked, the assistant also reads your "
+"last five exchanges, so you can ask a follow-up question; unchecked, each "
+"question is answered on its own."
 msgstr ""
-"Les réponses viennent des pages, des fromages et des articles de la "
-"boutique. Avec « Utiliser les échanges précédents » coché, l'assistant lit "
-"aussi vos cinq derniers échanges : vous pouvez poser une question de suite. "
-"Décoché, chaque question reçoit une réponse à part."
+"Les réponses seront tirées des pages, des fromages et des articles de la "
+"boutique. Avec « Garder les échanges précédents dans le contexte » coché, "
+"l'assistant lit aussi vos cinq derniers échanges : vous pouvez poser une "
+"question qui prolonge la précédente. Décoché, chaque question est traitée "
+"séparément."
 
 #: pages/templates/pages/chat.html:27
 msgid "Your question"
 msgstr "Votre question"
 
 #: pages/templates/pages/chat.html:29
-msgid "Use the earlier exchanges"
-msgstr "Utiliser les échanges précédents"
+msgid "Keep the earlier exchanges in context"
+msgstr "Garder les échanges précédents dans le contexte"
 
 #: pages/templates/pages/chat.html:30
 msgid "Looking for an answer…"
@@ -81,8 +83,8 @@ msgstr "Demander"
 
 #: pages/templates/pages/chat_exchange.html:3
 #, python-format
-msgid "Searched for: %(search_question)s"
-msgstr "Recherche effectuée : %(search_question)s"
+msgid "Rewritten question: %(search_question)s"
+msgstr "Question reformulée : %(search_question)s"
 
 #: pages/templates/pages/chat_exchange.html:6
 msgid "Sources"
@@ -90,11 +92,11 @@ msgstr "Sources"
 
 #: pages/templates/pages/chat_exchange.html:15
 #, python-format
-msgid "%(counter)s extract the answer comes from"
-msgid_plural "%(counter)s extracts the answer comes from"
-msgstr[0] "%(counter)s extrait d'où vient la réponse"
-msgstr[1] "%(counter)s extraits d'où vient la réponse"
-msgstr[2] "%(counter)s extraits d'où vient la réponse"
+msgid "%(counter)s extract used to answer"
+msgid_plural "%(counter)s extracts used to answer"
+msgstr[0] "%(counter)s extrait utilisé pour répondre"
+msgstr[1] "%(counter)s extraits utilisés pour répondre"
+msgstr[2] "%(counter)s extraits utilisés pour répondre"
 
 #: pages/templates/pages/chat_reset_form.html:3
 msgid "Clear the conversation"
@@ -124,10 +126,6 @@ msgid ""
 msgstr ""
 "Parcourez les <a href=\"%(products_url)s\">fromages</a> ou lisez les <a "
 "href=\"%(articles_url)s\">articles</a>."
-
-#: pages/templates/pages/nav.html:3
-msgid "Products"
-msgstr "Produits"
 
 #: pages/views.py:19
 msgid "Please type a question."

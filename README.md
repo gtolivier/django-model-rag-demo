@@ -64,12 +64,12 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   ones, both along with those of unknown language. It shows each answer
   with its sources and the extracts it comes from. The exchanges are kept
   for the visit (the session), oldest first, each page with its own: an
-  exchange asked on `/fr/chat/` does not show on `/chat/`. With "Use the
-  earlier exchanges" checked (the default), the question is asked with the
+  exchange asked on `/fr/chat/` does not show on `/chat/`. With "Keep the
+  earlier exchanges in context" checked (the default), the question is asked with the
   page's last five exchanges as history, as shown — "nothing close enough"
   and "unavailable" included — so a follow-up question ("how long is it
   matured?") can lean on them; when the assistant searched with a rewritten
-  question, the exchange shows it ("Searched for: …"). Unchecked, each
+  question, the exchange shows it ("Rewritten question: …"). Unchecked, each
   question is answered on its own. The box is remembered for the visit,
   each page with its own. Once a page has exchanges, a "Clear the
   conversation" button removes them, and only them: the other page's
@@ -185,7 +185,7 @@ Known limits of `ask`, a demo command:
   `--limit 0`, a `--language` that is empty, holds whitespace or is `*`.
 - Requests time out after 120 seconds, a setting no variable overrides; a
   slow first load of a model can exceed it.
-- "Nothing indexed is close enough to the question." is printed without
+- "No content can answer your question." is printed without
   calling the model, so it follows `--language`, not the language of the
   question: a French question asked without `--language` gets it in
   English. It is also what an embedding model with no chunks yet gets, and

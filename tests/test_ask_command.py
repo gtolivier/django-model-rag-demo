@@ -108,7 +108,7 @@ def test_ask_says_so_when_nothing_indexed_is_close_enough(
     call_command("ask", "How do I descale a kettle?", stdout=stdout)
 
     assert stdout.getvalue().splitlines() == [
-        "Nothing indexed is close enough to the question.",
+        "No content can answer your question.",
     ]
 
 
