@@ -215,9 +215,6 @@ those of unknown language), and says "nothing close enough" in it. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
-- Posting an empty question, or one made only of spaces, shows the page with
-  "Please type a question.", without the previous exchanges; they come back
-  on the next visit of the page.
 - When the server answers a question with an error, the script posts it
   again without JavaScript: the visitor waits twice for the same error.
 - The session keeps every exchange of the visit, extracts included, and two
