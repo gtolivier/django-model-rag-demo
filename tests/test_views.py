@@ -351,6 +351,47 @@ def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
     assert "question" in _posted_field_names(french_response.content.decode())
 
 
+class _FormInputs(HTMLParser):
+    """Collect the attributes of each <input> inside the form with a given id."""
+
+    def __init__(self, form_id: str) -> None:
+        super().__init__()
+        self.inputs: list[dict[str, str | None]] = []
+        self._form_id = form_id
+        self._in_form = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "form":
+            self._in_form = attributes.get("id") == self._form_id
+        elif self._in_form and tag == "input":
+            self.inputs.append(attributes)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form":
+            self._in_form = False
+
+
+def _form_inputs(content: str, form_id: str) -> list[dict[str, str | None]]:
+    parser = _FormInputs(form_id)
+    parser.feed(content)
+    return parser.inputs
+
+
+@pytest.mark.django_db
+def test_chat_page_on_a_first_visit_holds_a_checked_use_history_checkbox(
+    client: Client,
+) -> None:
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    assert [
+        ((attributes.get("type") or "").lower(), "checked" in attributes)
+        for attributes in _form_inputs(response.content.decode(), "chat-form")
+        if attributes.get("name") == "use_history"
+    ] == [("checkbox", True)]
+
+
 @pytest.fixture
 def chat_answer_kwargs() -> list[dict[str, object]]:
     """The keyword arguments of each call to the chat page's fake answer()."""
