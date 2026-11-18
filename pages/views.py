@@ -45,19 +45,20 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
-    history = (
-        tuple(
-            Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
-            for earlier in _exchanges(request)
-        )
-        if request.POST.get("use_history") == "on"
-        else None
-    )
-    exchange = _ask(question, history)
+    exchange = _ask(question, _history(request))
     request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
     return redirect(request.path)
+
+
+def _history(request: HttpRequest) -> tuple[Exchange, ...] | None:
+    if request.POST.get("use_history") != "on":
+        return None
+    return tuple(
+        Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
+        for earlier in _exchanges(request)
+    )
 
 
 def _exchanges_session_key() -> str:
