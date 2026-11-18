@@ -14,7 +14,7 @@ from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY_PREFIX = "exchanges"
-USE_HISTORY_SESSION_KEY = "use_history"
+USE_HISTORY_SESSION_KEY_PREFIX = "use_history"
 MAX_HISTORY_EXCHANGES = 5
 QUESTION_REQUIRED = _("Please type a question.")
 ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
@@ -76,11 +76,15 @@ def _is_history_requested(request: HttpRequest) -> bool:
 
 
 def _use_history_session_key() -> str:
-    return f"{USE_HISTORY_SESSION_KEY}_{get_language()}"
+    return _active_language_session_key(USE_HISTORY_SESSION_KEY_PREFIX)
 
 
 def _exchanges_session_key() -> str:
-    return f"{EXCHANGES_SESSION_KEY_PREFIX}_{get_language()}"
+    return _active_language_session_key(EXCHANGES_SESSION_KEY_PREFIX)
+
+
+def _active_language_session_key(prefix: str) -> str:
+    return f"{prefix}_{get_language()}"
 
 
 def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
