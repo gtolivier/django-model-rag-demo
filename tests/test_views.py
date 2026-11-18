@@ -441,6 +441,27 @@ def test_chat_page_after_questions_without_then_with_use_history_holds_it_checke
     ] == [("checkbox", True)]
 
 
+@pytest.mark.django_db
+def test_chat_page_after_a_french_question_without_use_history_holds_it_checked(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_each_question_from(
+        monkeypatch,
+        {"Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc."},
+    )
+    # A browser posts no use_history field when the box is unchecked.
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    assert [
+        ((attributes.get("type") or "").lower(), "checked" in attributes)
+        for attributes in _form_inputs(response.content.decode(), "chat-form")
+        if attributes.get("name") == "use_history"
+    ] == [("checkbox", True)]
+
+
 @pytest.fixture
 def chat_answer_kwargs() -> list[dict[str, object]]:
     """The keyword arguments of each call to the chat page's fake answer()."""
