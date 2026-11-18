@@ -845,6 +845,32 @@ def test_chat_page_passes_a_nothing_close_enough_exchange_in_history_as_shown(
 
 
 @pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_no_history_after_a_reset(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        return Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question=question,
+        )
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    client.post("/chat/reset/")
+    client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == []
+
+
+@pytest.mark.django_db
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
