@@ -215,6 +215,10 @@ those of unknown language), and says "nothing close enough" in it. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
+- The question searched with the earlier exchanges is sometimes rewritten
+  in another language: on `/fr/chat/`, "et aux us ?" was searched as "Do
+  you deliver to the US?", and shown so (gtolivier/django-minimal-rag#36).
+  The extracts are still the page's language.
 - When the server answers a question with an error, the script posts it
   again without JavaScript: the visitor waits twice for the same error.
 - The session keeps every exchange of the visit, extracts included, and two
