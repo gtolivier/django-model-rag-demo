@@ -51,7 +51,10 @@ def _post_question(request: HttpRequest) -> HttpResponse:
         return render(
             request,
             "pages/chat.html",
-            {"error": QUESTION_REQUIRED},
+            {
+                "error": QUESTION_REQUIRED,
+                "use_history": _is_history_requested(request),
+            },
             status=400,
         )
     request.session[_use_history_session_key()] = _is_history_requested(request)
