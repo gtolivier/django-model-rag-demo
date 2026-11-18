@@ -54,7 +54,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
-    request.session[USE_HISTORY_SESSION_KEY] = _use_history(request)
+    request.session[USE_HISTORY_SESSION_KEY] = _is_history_requested(request)
     exchange = _ask(question, _history(request))
     request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
@@ -63,7 +63,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
 
 
 def _history(request: HttpRequest) -> tuple[Exchange, ...] | None:
-    if not _use_history(request):
+    if not _is_history_requested(request):
         return None
     return tuple(
         Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
@@ -71,7 +71,7 @@ def _history(request: HttpRequest) -> tuple[Exchange, ...] | None:
     )
 
 
-def _use_history(request: HttpRequest) -> bool:
+def _is_history_requested(request: HttpRequest) -> bool:
     return request.POST.get("use_history") == "on"
 
 
