@@ -20,7 +20,11 @@ def answer_each_question_from(
 
     def fake_answer(question: str, **kwargs: object) -> Answer:
         questions.append(question)
-        return Answer(text=replies.get(question, "An unexpected question."), chunks=())
+        return Answer(
+            text=replies.get(question, "An unexpected question."),
+            chunks=(),
+            search_question=question,
+        )
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer)
     return questions

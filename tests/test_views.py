@@ -1,5 +1,5 @@
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from decimal import Decimal
 from html.parser import HTMLParser
 from io import StringIO
@@ -12,7 +12,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext, override
-from django_minimal_rag.answering import Answer
+from django_minimal_rag.answering import Answer, Exchange
 from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
@@ -351,6 +351,147 @@ def test_chat_page_is_served_in_english_and_in_french_with_a_question_form(
     assert "question" in _posted_field_names(french_response.content.decode())
 
 
+class _FormInputs(HTMLParser):
+    """Collect the attributes of each <input> inside the form with a given id."""
+
+    def __init__(self, form_id: str) -> None:
+        super().__init__()
+        self.inputs: list[dict[str, str | None]] = []
+        self._form_id = form_id
+        self._in_form = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "form":
+            self._in_form = attributes.get("id") == self._form_id
+        elif self._in_form and tag == "input":
+            self.inputs.append(attributes)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "form":
+            self._in_form = False
+
+
+def _form_inputs(content: str, form_id: str) -> list[dict[str, str | None]]:
+    parser = _FormInputs(form_id)
+    parser.feed(content)
+    return parser.inputs
+
+
+def _use_history_inputs(content: str) -> list[tuple[str, bool]]:
+    """The type and checked state of each use_history input of the chat form."""
+    return [
+        ((attributes.get("type") or "").lower(), "checked" in attributes)
+        for attributes in _form_inputs(content, "chat-form")
+        if attributes.get("name") == "use_history"
+    ]
+
+
+@pytest.mark.django_db
+def test_chat_page_on_a_first_visit_holds_a_checked_use_history_checkbox(
+    client: Client,
+) -> None:
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
+
+
+@pytest.mark.django_db
+def test_chat_page_after_a_question_without_use_history_holds_it_unchecked(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_each_question_from(
+        monkeypatch, {"How do I descale a kettle?": "Fill it with white vinegar."}
+    )
+
+    # A browser posts no use_history field when the box is unchecked.
+    response = client.post(
+        "/chat/", {"question": "How do I descale a kettle?"}, follow=True
+    )
+
+    assert response.status_code == 200
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", False)]
+
+
+@pytest.mark.django_db
+def test_chat_page_after_questions_without_then_with_use_history_holds_it_checked(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_each_question_from(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar.",
+            "How long does it take?": "About an hour.",
+        },
+    )
+    # A browser posts no use_history field when the box is unchecked.
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    response = client.post(
+        "/chat/",
+        {"question": "How long does it take?", "use_history": "on"},
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
+
+
+@pytest.mark.django_db
+def test_chat_page_after_a_french_question_without_use_history_holds_it_checked(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_each_question_from(
+        monkeypatch,
+        {"Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc."},
+    )
+    # A browser posts no use_history field when the box is unchecked.
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
+
+
+@pytest.mark.django_db
+def test_chat_page_after_an_empty_question_with_use_history_holds_it_checked(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_each_question_from(
+        monkeypatch, {"How do I descale a kettle?": "Fill it with white vinegar."}
+    )
+    # A browser posts no use_history field when the box is unchecked, so the
+    # page would hold it unchecked if it ignored the empty question's choice.
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    response = client.post("/chat/", {"question": "", "use_history": "on"})
+
+    assert response.status_code == 400
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", True)]
+
+
+@pytest.mark.django_db
+def test_chat_page_after_an_empty_question_without_use_history_holds_it_unchecked(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_each_question_from(
+        monkeypatch, {"How do I descale a kettle?": "Fill it with white vinegar."}
+    )
+    # The page would hold the box checked if it ignored the empty question's
+    # choice and kept the earlier one.
+    client.post(
+        "/chat/", {"question": "How do I descale a kettle?", "use_history": "on"}
+    )
+
+    # A browser posts no use_history field when the box is unchecked.
+    response = client.post("/chat/", {"question": ""})
+
+    assert response.status_code == 400
+    assert _use_history_inputs(response.content.decode()) == [("checkbox", False)]
+
+
 @pytest.fixture
 def chat_answer_kwargs() -> list[dict[str, object]]:
     """The keyword arguments of each call to the chat page's fake answer()."""
@@ -435,6 +576,24 @@ def test_chat_page_asks_for_a_question_when_an_empty_one_is_posted(
     content = response.content.decode()
     assert "question" in _posted_field_names(content)
     assert question_required in content
+
+
+@pytest.mark.django_db
+def test_chat_page_still_shows_its_earlier_exchange_after_an_empty_question(
+    client: Client, kettle_exchange: tuple[str, str]
+) -> None:
+    question, reply = kettle_exchange
+    client.post("/chat/", {"question": question})
+
+    response = client.post("/chat/", {"question": ""})
+
+    assert response.status_code == 400
+    content = response.content.decode()
+    assert [
+        escape(str(QUESTION_REQUIRED)) in content,
+        question in content,
+        reply in content,
+    ] == [True, True, True]
 
 
 @pytest.mark.django_db
@@ -675,6 +834,7 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
                     distance=0.1,
                 ),
             ),
+            search_question="How do I descale a kettle?",
         ),
     )
 
@@ -689,7 +849,7 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
 
 
 @pytest.mark.django_db
-def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alone(
+def test_chat_page_answers_and_shows_two_plain_post_exchanges_oldest_first(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     replies = {
@@ -712,11 +872,293 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
 
 
 @pytest.mark.django_db
+def test_chat_page_shows_a_rewritten_search_question_with_its_exchange_after_a_reload(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": (
+            "Fill it with white vinegar overnight.",
+            "How do I descale a kettle?",
+        ),
+        "And a coffee machine?": (
+            "Run a descaling tablet through a cycle.",
+            "How do I descale a coffee machine?",
+        ),
+        "Can a toaster take bagels?": (
+            "Yes, use the bagel setting.",
+            "Can a toaster take bagels?",
+        ),
+    }
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        text, search_question = replies[question]
+        return Answer(text=text, chunks=(), search_question=search_question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "And a coffee machine?", "use_history": "on"})
+    response = client.post(
+        "/chat/",
+        {"question": "Can a toaster take bagels?", "use_history": "on"},
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "How do I descale a coffee machine?" in content
+    _assert_in_order(
+        content,
+        [
+            "Fill it with white vinegar overnight.",
+            "And a coffee machine?",
+            "How do I descale a coffee machine?",
+            "Can a toaster take bagels?",
+        ],
+    )
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_no_search_question_when_it_is_the_question_asked(
+    client: Client, kettle_exchange: tuple[str, str]
+) -> None:
+    question, reply = kettle_exchange
+    client.post("/chat/", {"question": question, "use_history": "on"})
+
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert reply in content
+    # Shown once as the question asked, never a second time as the one searched.
+    assert content.count(question) == 1
+
+
+@pytest.mark.django_db
+def test_chat_page_shows_no_search_question_when_it_is_the_question_asked_stripped(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
+    )
+    client.post("/chat/", {"question": "  How do I descale a kettle?  "})
+
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Fill it with white vinegar overnight." in content
+    # Shown once as the question asked, never a second time as the one searched.
+    assert content.count("How do I descale a kettle?") == 1
+
+
+def _answer_recording_histories(
+    monkeypatch: pytest.MonkeyPatch, replies: Mapping[str, str | None]
+) -> list[Sequence[Exchange]]:
+    """Replace the chat page's answer() with a fake that answers from replies.
+
+    A None reply finds nothing. Return the list of the history of each call.
+    """
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer | None:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        reply = replies[question]
+        if reply is None:
+            return None
+        return Answer(text=reply, chunks=(), search_question=question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+    return histories
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_its_earlier_exchange_as_history(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "How long does it take?": "Fill it with white vinegar overnight.",
+        },
+    )
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == [
+        Exchange(
+            question="How do I descale a kettle?",
+            answer="Fill it with white vinegar overnight.",
+        )
+    ]
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_both_earlier_exchanges_oldest_first(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+        "Which of them is cheaper?": "The kettle.",
+    }
+    histories = _answer_recording_histories(monkeypatch, replies)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "Can a toaster take bagels?"})
+    client.post(
+        "/chat/", {"question": "Which of them is cheaper?", "use_history": "on"}
+    )
+
+    assert len(histories) == 3
+    assert list(histories[2]) == [
+        Exchange(
+            question="How do I descale a kettle?",
+            answer="Fill it with white vinegar overnight.",
+        ),
+        Exchange(
+            question="Can a toaster take bagels?",
+            answer="Yes, use the bagel setting.",
+        ),
+    ]
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_only_the_last_five_exchanges(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    earlier = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+        "Is the blender dishwasher safe?": "Only its jar.",
+        "Does the iron have a steam boost?": "Yes, press the boost button.",
+        "How loud is the fan?": "About 40 decibels.",
+        "Can the oven grill?": "Yes, it has a top grill.",
+    }
+    replies = {**earlier, "Which of them is cheaper?": "The kettle."}
+    histories = _answer_recording_histories(monkeypatch, replies)
+
+    for question in earlier:
+        client.post("/chat/", {"question": question})
+    client.post(
+        "/chat/", {"question": "Which of them is cheaper?", "use_history": "on"}
+    )
+
+    assert len(histories) == 7
+    assert list(histories[6]) == [
+        Exchange(question=question, answer=reply)
+        for question, reply in list(earlier.items())[1:]
+    ]
+
+
+@pytest.mark.django_db
+def test_chat_page_passes_a_nothing_close_enough_exchange_in_history_as_shown(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The ask command's message when answer() finds nothing is the reference,
+    # so this test does not fix the wording itself.
+    nothing_close_enough = _ask_command_output_when_nothing_is_found(monkeypatch)
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {"How do I descale a kettle?": None, "How long does it take?": "The kettle."},
+    )
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == [
+        Exchange(question="How do I descale a kettle?", answer=nothing_close_enough)
+    ]
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_no_history_after_a_reset(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "How long does it take?": "Fill it with white vinegar overnight.",
+        },
+    )
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    client.post("/chat/reset/")
+    client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == []
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_without_use_history_with_no_history_after_an_exchange(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    histories = _answer_recording_histories(
+        monkeypatch,
+        {
+            "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+            "How long does it take?": "Fill it with white vinegar overnight.",
+        },
+    )
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+
+    # A browser posts no use_history field when the box is unchecked.
+    client.post("/chat/", {"question": "How long does it take?"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == []
+
+
+@pytest.mark.django_db
+def test_french_chat_page_answers_with_use_history_on_without_the_english_exchanges(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Comment détartrer une bouilloire ?": "Remplissez-la de vinaigre blanc.",
+        "Combien de temps faut-il ?": "Une nuit.",
+    }
+    histories = _answer_recording_histories(monkeypatch, replies)
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/fr/chat/", {"question": "Comment détartrer une bouilloire ?"})
+
+    client.post(
+        "/fr/chat/", {"question": "Combien de temps faut-il ?", "use_history": "on"}
+    )
+
+    assert len(histories) == 3
+    assert list(histories[2]) == [
+        Exchange(
+            question="Comment détartrer une bouilloire ?",
+            answer="Remplissez-la de vinaigre blanc.",
+        )
+    ]
+
+
+@pytest.mark.django_db
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     answer_every_question_with(
-        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
     )
     first_visit = client.post(
         "/chat/", {"question": "How do I descale a kettle?"}, follow=True
@@ -873,6 +1315,7 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
                 chunk("Descaling a kettle", "/blog/1/", "blog.article:1", 0.2),
                 chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.3),
             ),
+            search_question="How do I toast bagels and descale?",
         ),
     )
 
@@ -910,6 +1353,7 @@ def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plai
                     distance=0.1,
                 ),
             ),
+            search_question="When will my order arrive?",
         ),
     )
 
@@ -997,6 +1441,7 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
                 )
                 for rank, (title, text) in enumerate(retrieved)
             ),
+            search_question="How do I toast bagels and descale?",
         ),
     )
 

@@ -4,9 +4,10 @@
 {% block content %}
 <h1>{% translate "Ask a question" %}</h1>
 <p class="meta">{% blocktranslate trimmed %}
-  The answers come from the shop's own pages, cheeses and articles. Each
-  question is answered on its own: the assistant does not see the previous
-  exchanges.
+  The answers come from the shop's own pages, cheeses and articles. With
+  “Use the earlier exchanges” checked, the assistant also reads your last
+  five exchanges, so you can ask a follow-up question; unchecked, each
+  question is answered on its own.
 {% endblocktranslate %}</p>
 <div id="exchanges" class="exchanges">
 {% for exchange in exchanges %}
@@ -25,6 +26,7 @@
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 <label for="question">{% translate "Your question" %}</label>
 <input type="text" name="question" id="question" autocomplete="off">
+<label class="option"><input type="checkbox" name="use_history"{% if use_history %} checked{% endif %}> {% translate "Use the earlier exchanges" %}</label>
 <button type="submit" data-waiting-label="{% translate "Looking for an answer…" %}">{% translate "Ask" %}</button>
 </form>
 <script>
@@ -68,7 +70,7 @@ form.addEventListener("submit", async (event) => {
     exchanges.insertAdjacentHTML("beforeend", await response.text());
     revealResetForm(exchanges);
     exchanges.lastElementChild.scrollIntoView({ block: "nearest" });
-    form.reset();
+    form.question.value = "";
   } finally {
     setAnswering(false);
     button.textContent = label;

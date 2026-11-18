@@ -64,12 +64,18 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   ones, both along with those of unknown language. It shows each answer
   with its sources and the extracts it comes from. The exchanges are kept
   for the visit (the session), oldest first, each page with its own: an
-  exchange asked on `/fr/chat/` does not show on `/chat/`. Each question is
-  answered on its own: the assistant does not see the previous exchanges.
-  Once a page has exchanges, a "Clear the conversation" button removes them,
-  and only them: the other page's exchanges and the rest of the session
-  stay. The page works without JavaScript; with it, an answer is added
-  without reloading.
+  exchange asked on `/fr/chat/` does not show on `/chat/`. With "Use the
+  earlier exchanges" checked (the default), the question is asked with the
+  page's last five exchanges as history, as shown — "nothing close enough"
+  and "unavailable" included — so a follow-up question ("how long is it
+  matured?") can lean on them; when the assistant searched with a rewritten
+  question, the exchange shows it ("Searched for: …"). Unchecked, each
+  question is answered on its own. The box is remembered for the visit,
+  each page with its own. Once a page has exchanges, a "Clear the
+  conversation" button removes them, and only them: the other page's
+  exchanges and the rest of the session stay; the next question starts a
+  new conversation. The page works without JavaScript; with it, an answer
+  is added without reloading.
 
 ## Minimal example
 
@@ -209,9 +215,10 @@ those of unknown language), and says "nothing close enough" in it. Also:
 
 - The page's language wins over the question's: a French question asked
   from `/chat/` gets English extracts.
-- Posting an empty question, or one made only of spaces, shows the page with
-  "Please type a question.", without the previous exchanges; they come back
-  on the next visit of the page.
+- The question searched with the earlier exchanges is sometimes rewritten
+  in another language: on `/fr/chat/`, "et aux us ?" was searched as "Do
+  you deliver to the US?", and shown so (gtolivier/django-minimal-rag#36).
+  The extracts are still the page's language.
 - When the server answers a question with an error, the script posts it
   again without JavaScript: the visitor waits twice for the same error.
 - The session keeps every exchange of the visit, extracts included, and two

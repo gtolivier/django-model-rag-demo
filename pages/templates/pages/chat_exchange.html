@@ -1,5 +1,6 @@
 {% load i18n %}<article class="card exchange">
 <p class="question">{{ exchange.question }}</p>
+{% if exchange.search_question %}<p class="meta search-question">{% blocktranslate with search_question=exchange.search_question %}Searched for: {{ search_question }}{% endblocktranslate %}</p>{% endif %}
 <div class="answer">{{ exchange.text|linebreaks }}</div>
 {% if exchange.sources %}
 <p class="meta">{% translate "Sources" %}</p>

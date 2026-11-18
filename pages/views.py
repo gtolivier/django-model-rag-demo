@@ -7,13 +7,15 @@ from django.utils.cache import add_never_cache_headers
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
-from django_minimal_rag.answering import Answer, Citation, answer
+from django_minimal_rag.answering import Answer, Citation, Exchange, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY_PREFIX = "exchanges"
+USE_HISTORY_SESSION_KEY_PREFIX = "use_history"
+MAX_HISTORY_EXCHANGES = 5
 QUESTION_REQUIRED = _("Please type a question.")
 ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
 
@@ -25,7 +27,14 @@ def home(request: HttpRequest) -> HttpResponse:
 def chat(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         return _post_question(request)
-    response = render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
+    response = render(
+        request,
+        "pages/chat.html",
+        {
+            "exchanges": _exchanges(request),
+            "use_history": request.session.get(_use_history_session_key(), True),
+        },
+    )
     add_never_cache_headers(response)
     return response
 
@@ -42,18 +51,43 @@ def _post_question(request: HttpRequest) -> HttpResponse:
         return render(
             request,
             "pages/chat.html",
-            {"error": QUESTION_REQUIRED},
+            {
+                "error": QUESTION_REQUIRED,
+                "exchanges": _exchanges(request),
+                "use_history": _is_history_requested(request),
+            },
             status=400,
         )
-    exchange = _ask(question)
+    is_history_requested = _is_history_requested(request)
+    request.session[_use_history_session_key()] = is_history_requested
+    exchange = _ask(question, _history(request) if is_history_requested else None)
     request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
     return redirect(request.path)
 
 
+def _history(request: HttpRequest) -> tuple[Exchange, ...]:
+    return tuple(
+        Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
+        for earlier in _exchanges(request)[-MAX_HISTORY_EXCHANGES:]
+    )
+
+
+def _is_history_requested(request: HttpRequest) -> bool:
+    return request.POST.get("use_history") == "on"
+
+
+def _use_history_session_key() -> str:
+    return _active_language_session_key(USE_HISTORY_SESSION_KEY_PREFIX)
+
+
 def _exchanges_session_key() -> str:
-    return f"{EXCHANGES_SESSION_KEY_PREFIX}_{get_language()}"
+    return _active_language_session_key(EXCHANGES_SESSION_KEY_PREFIX)
+
+
+def _active_language_session_key(prefix: str) -> str:
+    return f"{prefix}_{get_language()}"
 
 
 def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
@@ -63,7 +97,8 @@ def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
     return exchanges
 
 
-def _ask(question: str) -> dict[str, object]:
+def _ask(question: str, history: tuple[Exchange, ...] | None) -> dict[str, object]:
+    history_kwargs = {} if history is None else {"history": history}
     try:
         reply = answer(
             question,
@@ -71,6 +106,7 @@ def _ask(question: str) -> dict[str, object]:
             permissions=frozenset(),
             max_distance=MAX_DISTANCE,
             limit=MAX_CHUNKS,
+            **history_kwargs,
         )
     except httpx.HTTPError:
         return _message_exchange(question, str(ASSISTANT_UNAVAILABLE))
@@ -82,6 +118,9 @@ def _ask(question: str) -> dict[str, object]:
 def _exchange(question: str, reply: Answer) -> dict[str, object]:
     return {
         "question": question,
+        "search_question": (
+            reply.search_question if reply.search_question != question.strip() else ""
+        ),
         "text": reply.text,
         "sources": _sources(reply.citations),
         "extracts": _extracts(reply.chunks),

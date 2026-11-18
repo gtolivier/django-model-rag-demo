@@ -12,6 +12,7 @@ from tests.chat_answers import (
 )
 
 QUESTION_FIELD = '[name="question"]'
+USE_HISTORY_CHECKBOX = '[name="use_history"]'
 RESET_BUTTON = 'form[action$="/chat/reset/"] [type="submit"]'
 
 
@@ -54,7 +55,12 @@ def test_chat_page_still_shows_an_exchange_asked_without_reloading_after_a_reloa
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     answer_every_question_with(
-        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
     )
     page.goto(f"{live_server.url}/chat/")
     page.evaluate("window.chatPageMarker = 'still the same page'")
@@ -74,7 +80,12 @@ def test_chat_page_offers_a_reset_once_the_first_answer_is_added_without_reloadi
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     answer_every_question_with(
-        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
     )
     reset_button = page.locator(RESET_BUTTON)
     page.goto(f"{live_server.url}/chat/")
@@ -104,8 +115,14 @@ def test_chat_page_disables_the_reset_while_a_question_is_being_answered(
     def fake_answer(question: str, **kwargs: object) -> Answer:
         if question == "Can a toaster take bagels?":
             second_answer_may_go.wait(timeout=30)
-            return Answer(text="Yes, use the bagel setting.", chunks=())
-        return Answer(text="Fill it with white vinegar overnight.", chunks=())
+            return Answer(
+                text="Yes, use the bagel setting.", chunks=(), search_question=question
+            )
+        return Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question=question,
+        )
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer)
     reset_button = page.locator(RESET_BUTTON)
@@ -136,7 +153,11 @@ def test_chat_page_makes_the_question_read_only_while_it_is_being_answered(
     def fake_answer(question: str, **kwargs: object) -> Answer:
         questions_received.append(question)
         answer_may_go.wait(timeout=30)
-        return Answer(text="Fill it with white vinegar overnight.", chunks=())
+        return Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question=question,
+        )
 
     monkeypatch.setattr(CHAT_ANSWER, fake_answer)
     question_field = page.locator(QUESTION_FIELD)
@@ -154,6 +175,32 @@ def test_chat_page_makes_the_question_read_only_while_it_is_being_answered(
     expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
     expect(question_field).to_be_editable()
     assert questions_received == ["How do I descale a kettle?"]
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("_allow_the_orm_beside_playwright")
+def test_chat_page_keeps_use_history_unchecked_after_an_answer_added_without_reloading(
+    live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
+    )
+    use_history = page.locator(USE_HISTORY_CHECKBOX)
+    page.goto(f"{live_server.url}/chat/")
+    expect(use_history).to_be_checked()
+    use_history.uncheck()
+    page.evaluate("window.chatPageMarker = 'still the same page'")
+
+    _ask(page, "How do I descale a kettle?")
+
+    expect(page.get_by_text("Fill it with white vinegar overnight.")).to_be_visible()
+    assert page.evaluate("window.chatPageMarker") == "still the same page"
+    expect(use_history).not_to_be_checked()
 
 
 @pytest.mark.django_db
@@ -181,7 +228,12 @@ def test_chat_page_without_javascript_offers_a_reset_only_for_its_own_exchanges(
     live_server: LiveServer, page: Page, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     answer_every_question_with(
-        monkeypatch, Answer(text="Remplissez-la de vinaigre blanc.", chunks=())
+        monkeypatch,
+        Answer(
+            text="Remplissez-la de vinaigre blanc.",
+            chunks=(),
+            search_question="Comment détartrer une bouilloire ?",
+        ),
     )
     reset_button = page.locator(RESET_BUTTON)
 
