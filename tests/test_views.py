@@ -781,6 +781,42 @@ def test_chat_page_answers_with_use_history_on_with_both_earlier_exchanges_oldes
 
 
 @pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_only_the_last_five_exchanges(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    earlier = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+        "Is the blender dishwasher safe?": "Only its jar.",
+        "Does the iron have a steam boost?": "Yes, press the boost button.",
+        "How loud is the fan?": "About 40 decibels.",
+        "Can the oven grill?": "Yes, it has a top grill.",
+    }
+    replies = {**earlier, "Which of them is cheaper?": "The kettle."}
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        return Answer(text=replies[question], chunks=(), search_question=question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    for question in earlier:
+        client.post("/chat/", {"question": question})
+    client.post(
+        "/chat/", {"question": "Which of them is cheaper?", "use_history": "on"}
+    )
+
+    assert len(histories) == 7
+    assert list(histories[6]) == [
+        Exchange(question=question, answer=reply)
+        for question, reply in list(earlier.items())[1:]
+    ]
+
+
+@pytest.mark.django_db
 def test_chat_page_passes_a_nothing_close_enough_exchange_in_history_as_shown(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
