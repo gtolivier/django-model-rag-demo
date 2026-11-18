@@ -12,7 +12,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext, override
-from django_minimal_rag.answering import Answer
+from django_minimal_rag.answering import Answer, Exchange
 from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
@@ -710,6 +710,36 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
     shown_in_order = [text for exchange in replies.items() for text in exchange]
     assert [text in content for text in shown_in_order] == [True] * 4
     _assert_in_order(content, shown_in_order)
+
+
+@pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_its_earlier_exchange_as_history(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        return Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question=question,
+        )
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == [
+        Exchange(
+            question="How do I descale a kettle?",
+            answer="Fill it with white vinegar overnight.",
+        )
+    ]
 
 
 @pytest.mark.django_db
