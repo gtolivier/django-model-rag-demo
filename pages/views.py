@@ -115,6 +115,9 @@ def _ask(question: str, history: tuple[Exchange, ...] | None) -> dict[str, objec
 def _exchange(question: str, reply: Answer) -> dict[str, object]:
     return {
         "question": question,
+        "search_question": (
+            reply.search_question if reply.search_question != question else ""
+        ),
         "text": reply.text,
         "sources": _sources(reply.citations),
         "extracts": _extracts(reply.chunks),
