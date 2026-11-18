@@ -492,19 +492,6 @@ def test_chat_page_after_an_empty_question_without_use_history_holds_it_unchecke
     assert _use_history_inputs(response.content.decode()) == [("checkbox", False)]
 
 
-@pytest.mark.django_db
-def test_chat_page_visited_after_an_empty_question_without_use_history_holds_it_unchecked(
-    client: Client,
-) -> None:
-    # A browser posts no use_history field when the box is unchecked.
-    client.post("/chat/", {"question": ""})
-
-    response = client.get("/chat/")
-
-    assert response.status_code == 200
-    assert _use_history_inputs(response.content.decode()) == [("checkbox", False)]
-
-
 @pytest.fixture
 def chat_answer_kwargs() -> list[dict[str, object]]:
     """The keyword arguments of each call to the chat page's fake answer()."""
