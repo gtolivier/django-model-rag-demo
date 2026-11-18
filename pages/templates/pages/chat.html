@@ -25,6 +25,7 @@
 {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 <label for="question">{% translate "Your question" %}</label>
 <input type="text" name="question" id="question" autocomplete="off">
+<label><input type="checkbox" name="use_history" checked> {% translate "Use the earlier exchanges" %}</label>
 <button type="submit" data-waiting-label="{% translate "Looking for an answer…" %}">{% translate "Ask" %}</button>
 </form>
 <script>
