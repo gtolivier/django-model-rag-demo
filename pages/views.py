@@ -7,7 +7,7 @@ from django.utils.cache import add_never_cache_headers
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
-from django_minimal_rag.answering import Answer, Citation, answer
+from django_minimal_rag.answering import Answer, Citation, Exchange, answer
 from django_minimal_rag.retrieval import RetrievedChunk
 
 from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
@@ -45,7 +45,15 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
-    exchange = _ask(question)
+    history = (
+        tuple(
+            Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
+            for earlier in _exchanges(request)
+        )
+        if request.POST.get("use_history") == "on"
+        else None
+    )
+    exchange = _ask(question, history)
     request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
         return render(request, "pages/chat_exchange.html", {"exchange": exchange})
@@ -63,7 +71,8 @@ def _exchanges(request: HttpRequest) -> list[dict[str, object]]:
     return exchanges
 
 
-def _ask(question: str) -> dict[str, object]:
+def _ask(question: str, history: tuple[Exchange, ...] | None) -> dict[str, object]:
+    history_kwargs = {} if history is None else {"history": history}
     try:
         reply = answer(
             question,
@@ -71,6 +80,7 @@ def _ask(question: str) -> dict[str, object]:
             permissions=frozenset(),
             max_distance=MAX_DISTANCE,
             limit=MAX_CHUNKS,
+            **history_kwargs,
         )
     except httpx.HTTPError:
         return _message_exchange(question, str(ASSISTANT_UNAVAILABLE))
