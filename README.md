@@ -64,12 +64,18 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   ones, both along with those of unknown language. It shows each answer
   with its sources and the extracts it comes from. The exchanges are kept
   for the visit (the session), oldest first, each page with its own: an
-  exchange asked on `/fr/chat/` does not show on `/chat/`. Each question is
-  answered on its own: the assistant does not see the previous exchanges.
-  Once a page has exchanges, a "Clear the conversation" button removes them,
-  and only them: the other page's exchanges and the rest of the session
-  stay. The page works without JavaScript; with it, an answer is added
-  without reloading.
+  exchange asked on `/fr/chat/` does not show on `/chat/`. With "Use the
+  earlier exchanges" checked (the default), the question is asked with the
+  page's last five exchanges as history, as shown — "nothing close enough"
+  and "unavailable" included — so a follow-up question ("how long is it
+  matured?") can lean on them; when the assistant searched with a rewritten
+  question, the exchange shows it ("Searched for: …"). Unchecked, each
+  question is answered on its own. The box is remembered for the visit,
+  each page with its own. Once a page has exchanges, a "Clear the
+  conversation" button removes them, and only them: the other page's
+  exchanges and the rest of the session stay; the next question starts a
+  new conversation. The page works without JavaScript; with it, an answer
+  is added without reloading.
 
 ## Minimal example
 
