@@ -120,7 +120,7 @@ def _exchange(question: str, reply: Answer) -> dict[str, object]:
     return {
         "question": question,
         "search_question": (
-            reply.search_question if reply.search_question != question else ""
+            reply.search_question if reply.search_question != question.strip() else ""
         ),
         "text": reply.text,
         "sources": _sources(reply.citations),
