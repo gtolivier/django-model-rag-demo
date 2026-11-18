@@ -52,6 +52,7 @@ def test_ask_prints_the_answer_then_one_line_per_source_in_order(
                     distance=0.2,
                 ),
             ),
+            search_question=question,
         )
 
     monkeypatch.setattr(ASK_ANSWER, fake_answer)
@@ -81,6 +82,7 @@ def test_ask_prints_a_source_without_url_as_its_title_alone(
                     distance=0.1,
                 ),
             ),
+            search_question=question,
         )
 
     monkeypatch.setattr(ASK_ANSWER, fake_answer)

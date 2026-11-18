@@ -675,6 +675,7 @@ def test_chat_page_shows_the_question_and_the_answer_text_after_a_plain_post(
                     distance=0.1,
                 ),
             ),
+            search_question="How do I descale a kettle?",
         ),
     )
 
@@ -716,7 +717,12 @@ def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     answer_every_question_with(
-        monkeypatch, Answer(text="Fill it with white vinegar overnight.", chunks=())
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
     )
     first_visit = client.post(
         "/chat/", {"question": "How do I descale a kettle?"}, follow=True
@@ -873,6 +879,7 @@ def test_chat_page_shows_the_answer_s_sources_in_order_linked_after_a_plain_post
                 chunk("Descaling a kettle", "/blog/1/", "blog.article:1", 0.2),
                 chunk("Toasting bagels", "/blog/2/", "blog.article:2", 0.3),
             ),
+            search_question="How do I toast bagels and descale?",
         ),
     )
 
@@ -910,6 +917,7 @@ def test_chat_page_shows_a_source_without_url_as_its_title_unlinked_after_a_plai
                     distance=0.1,
                 ),
             ),
+            search_question="When will my order arrive?",
         ),
     )
 
@@ -997,6 +1005,7 @@ def test_chat_page_shows_the_retrieved_extracts_nearest_first_with_their_titles(
                 )
                 for rank, (title, text) in enumerate(retrieved)
             ),
+            search_question="How do I toast bagels and descale?",
         ),
     )
 
