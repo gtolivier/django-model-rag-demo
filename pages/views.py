@@ -14,7 +14,7 @@ from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY_PREFIX = "exchanges"
-HISTORY_EXCHANGES = 5
+MAX_HISTORY_EXCHANGES = 5
 QUESTION_REQUIRED = _("Please type a question.")
 ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
 
@@ -58,7 +58,7 @@ def _history(request: HttpRequest) -> tuple[Exchange, ...] | None:
         return None
     return tuple(
         Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
-        for earlier in _exchanges(request)[-HISTORY_EXCHANGES:]
+        for earlier in _exchanges(request)[-MAX_HISTORY_EXCHANGES:]
     )
 
 
