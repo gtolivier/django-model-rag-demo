@@ -64,8 +64,8 @@ so the documents land in its chunk tables, in PostgreSQL with pgvector
   ones, both along with those of unknown language. It shows each answer
   with its sources and the extracts it comes from. The exchanges are kept
   for the visit (the session), oldest first, each page with its own: an
-  exchange asked on `/fr/chat/` does not show on `/chat/`. With "Use the
-  earlier exchanges" checked (the default), the question is asked with the
+  exchange asked on `/fr/chat/` does not show on `/chat/`. With "Keep the
+  earlier exchanges in context" checked (the default), the question is asked with the
   page's last five exchanges as history, as shown — "nothing close enough"
   and "unavailable" included — so a follow-up question ("how long is it
   matured?") can lean on them; when the assistant searched with a rewritten

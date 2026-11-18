@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-18 21:37+0000\n"
+"POT-Creation-Date: 2026-11-18 21:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,23 +54,24 @@ msgstr "Poser une question"
 
 #: pages/templates/pages/chat.html:6
 msgid ""
-"The answers come from the shop's own pages, cheeses and articles. With “Use "
-"the earlier exchanges” checked, the assistant also reads your last five "
-"exchanges, so you can ask a follow-up question; unchecked, each question is "
-"answered on its own."
+"The answers come from the shop's own pages, cheeses and articles. With “Keep "
+"the earlier exchanges in context” checked, the assistant also reads your "
+"last five exchanges, so you can ask a follow-up question; unchecked, each "
+"question is answered on its own."
 msgstr ""
 "Les réponses viennent des pages, des fromages et des articles de la "
-"boutique. Avec « Utiliser les échanges précédents » coché, l'assistant lit "
-"aussi vos cinq derniers échanges : vous pouvez poser une question qui "
-"prolonge la précédente. Décoché, chaque question est traitée séparément."
+"boutique. Avec « Garder les échanges précédents dans le contexte » coché, "
+"l'assistant lit aussi vos cinq derniers échanges : vous pouvez poser une "
+"question qui prolonge la précédente. Décoché, chaque question est traitée "
+"séparément."
 
 #: pages/templates/pages/chat.html:27
 msgid "Your question"
 msgstr "Votre question"
 
 #: pages/templates/pages/chat.html:29
-msgid "Use the earlier exchanges"
-msgstr "Utiliser les échanges précédents"
+msgid "Keep the earlier exchanges in context"
+msgstr "Garder les échanges précédents dans le contexte"
 
 #: pages/templates/pages/chat.html:30
 msgid "Looking for an answer…"
