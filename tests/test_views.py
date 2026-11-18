@@ -871,6 +871,22 @@ def test_chat_page_shows_a_rewritten_search_question_with_its_exchange_after_a_r
 
 
 @pytest.mark.django_db
+def test_chat_page_shows_no_search_question_when_it_is_the_question_asked(
+    client: Client, kettle_exchange: tuple[str, str]
+) -> None:
+    question, reply = kettle_exchange
+    client.post("/chat/", {"question": question, "use_history": "on"})
+
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert reply in content
+    # Shown once as the question asked, never a second time as the one searched.
+    assert content.count(question) == 1
+
+
+@pytest.mark.django_db
 def test_chat_page_answers_with_use_history_on_with_its_earlier_exchange_as_history(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
