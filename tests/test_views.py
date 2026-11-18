@@ -781,6 +781,34 @@ def test_chat_page_answers_with_use_history_on_with_both_earlier_exchanges_oldes
 
 
 @pytest.mark.django_db
+def test_chat_page_passes_a_nothing_close_enough_exchange_in_history_as_shown(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The ask command's message when answer() finds nothing is the reference,
+    # so this test does not fix the wording itself.
+    nothing_close_enough = _ask_command_output_when_nothing_is_found(monkeypatch)
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer | None:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        if question == "How do I descale a kettle?":
+            return None
+        return Answer(text="The kettle.", chunks=(), search_question=question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "How long does it take?", "use_history": "on"})
+
+    assert len(histories) == 2
+    assert list(histories[1]) == [
+        Exchange(question="How do I descale a kettle?", answer=nothing_close_enough)
+    ]
+
+
+@pytest.mark.django_db
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
