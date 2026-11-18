@@ -579,6 +579,24 @@ def test_chat_page_asks_for_a_question_when_an_empty_one_is_posted(
 
 
 @pytest.mark.django_db
+def test_chat_page_still_shows_its_earlier_exchange_after_an_empty_question(
+    client: Client, kettle_exchange: tuple[str, str]
+) -> None:
+    question, reply = kettle_exchange
+    client.post("/chat/", {"question": question})
+
+    response = client.post("/chat/", {"question": ""})
+
+    assert response.status_code == 400
+    content = response.content.decode()
+    assert [
+        escape(str(QUESTION_REQUIRED)) in content,
+        question in content,
+        reply in content,
+    ] == [True, True, True]
+
+
+@pytest.mark.django_db
 def test_chat_page_answers_in_english_as_an_anonymous_reader_with_ask_s_limits(
     client: Client,
     chat_questions: list[str],
