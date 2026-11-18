@@ -934,6 +934,29 @@ def test_chat_page_shows_no_search_question_when_it_is_the_question_asked(
     assert content.count(question) == 1
 
 
+@pytest.mark.django_db
+def test_chat_page_shows_no_search_question_when_it_is_the_question_asked_stripped(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    answer_every_question_with(
+        monkeypatch,
+        Answer(
+            text="Fill it with white vinegar overnight.",
+            chunks=(),
+            search_question="How do I descale a kettle?",
+        ),
+    )
+    client.post("/chat/", {"question": "  How do I descale a kettle?  "})
+
+    response = client.get("/chat/")
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Fill it with white vinegar overnight." in content
+    # Shown once as the question asked, never a second time as the one searched.
+    assert content.count("How do I descale a kettle?") == 1
+
+
 def _answer_recording_histories(
     monkeypatch: pytest.MonkeyPatch, replies: Mapping[str, str | None]
 ) -> list[Sequence[Exchange]]:
