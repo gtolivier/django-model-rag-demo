@@ -743,6 +743,44 @@ def test_chat_page_answers_with_use_history_on_with_its_earlier_exchange_as_hist
 
 
 @pytest.mark.django_db
+def test_chat_page_answers_with_use_history_on_with_both_earlier_exchanges_oldest_first(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": "Fill it with white vinegar overnight.",
+        "Can a toaster take bagels?": "Yes, use the bagel setting.",
+        "Which of them is cheaper?": "The kettle.",
+    }
+    histories: list[Sequence[Exchange]] = []
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        history = kwargs.get("history", ())
+        assert isinstance(history, Sequence)
+        histories.append(history)
+        return Answer(text=replies[question], chunks=(), search_question=question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "Can a toaster take bagels?"})
+    client.post(
+        "/chat/", {"question": "Which of them is cheaper?", "use_history": "on"}
+    )
+
+    assert len(histories) == 3
+    assert list(histories[2]) == [
+        Exchange(
+            question="How do I descale a kettle?",
+            answer="Fill it with white vinegar overnight.",
+        ),
+        Exchange(
+            question="Can a toaster take bagels?",
+            answer="Yes, use the bagel setting.",
+        ),
+    ]
+
+
+@pytest.mark.django_db
 def test_chat_page_does_not_show_one_visitor_s_exchanges_to_another_visitor(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
