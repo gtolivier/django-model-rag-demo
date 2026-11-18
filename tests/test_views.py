@@ -824,6 +824,53 @@ def test_chat_page_shows_two_plain_post_exchanges_oldest_first_each_answered_alo
 
 
 @pytest.mark.django_db
+def test_chat_page_shows_a_rewritten_search_question_with_its_exchange_after_a_reload(
+    client: Client, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    replies = {
+        "How do I descale a kettle?": (
+            "Fill it with white vinegar overnight.",
+            "How do I descale a kettle?",
+        ),
+        "And a coffee machine?": (
+            "Run a descaling tablet through a cycle.",
+            "How do I descale a coffee machine?",
+        ),
+        "Can a toaster take bagels?": (
+            "Yes, use the bagel setting.",
+            "Can a toaster take bagels?",
+        ),
+    }
+
+    def fake_answer(question: str, **kwargs: object) -> Answer:
+        text, search_question = replies[question]
+        return Answer(text=text, chunks=(), search_question=search_question)
+
+    monkeypatch.setattr(CHAT_ANSWER, fake_answer)
+
+    client.post("/chat/", {"question": "How do I descale a kettle?"})
+    client.post("/chat/", {"question": "And a coffee machine?", "use_history": "on"})
+    response = client.post(
+        "/chat/",
+        {"question": "Can a toaster take bagels?", "use_history": "on"},
+        follow=True,
+    )
+
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "How do I descale a coffee machine?" in content
+    _assert_in_order(
+        content,
+        [
+            "Fill it with white vinegar overnight.",
+            "And a coffee machine?",
+            "How do I descale a coffee machine?",
+            "Can a toaster take bagels?",
+        ],
+    )
+
+
+@pytest.mark.django_db
 def test_chat_page_answers_with_use_history_on_with_its_earlier_exchange_as_history(
     client: Client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
