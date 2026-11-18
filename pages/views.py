@@ -14,6 +14,7 @@ from assistant.answering import MAX_CHUNKS, MAX_DISTANCE, NOTHING_CLOSE_ENOUGH
 from pages.models import pages_in_active_language
 
 EXCHANGES_SESSION_KEY_PREFIX = "exchanges"
+USE_HISTORY_SESSION_KEY = "use_history"
 MAX_HISTORY_EXCHANGES = 5
 QUESTION_REQUIRED = _("Please type a question.")
 ASSISTANT_UNAVAILABLE = _("The assistant is unavailable right now. Try again later.")
@@ -26,7 +27,14 @@ def home(request: HttpRequest) -> HttpResponse:
 def chat(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         return _post_question(request)
-    response = render(request, "pages/chat.html", {"exchanges": _exchanges(request)})
+    response = render(
+        request,
+        "pages/chat.html",
+        {
+            "exchanges": _exchanges(request),
+            "use_history": request.session.get(USE_HISTORY_SESSION_KEY, True),
+        },
+    )
     add_never_cache_headers(response)
     return response
 
@@ -46,6 +54,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
+    request.session[USE_HISTORY_SESSION_KEY] = _use_history(request)
     exchange = _ask(question, _history(request))
     request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
@@ -54,12 +63,16 @@ def _post_question(request: HttpRequest) -> HttpResponse:
 
 
 def _history(request: HttpRequest) -> tuple[Exchange, ...] | None:
-    if request.POST.get("use_history") != "on":
+    if not _use_history(request):
         return None
     return tuple(
         Exchange(question=str(earlier["question"]), answer=str(earlier["text"]))
         for earlier in _exchanges(request)[-MAX_HISTORY_EXCHANGES:]
     )
+
+
+def _use_history(request: HttpRequest) -> bool:
+    return request.POST.get("use_history") == "on"
 
 
 def _exchanges_session_key() -> str:
