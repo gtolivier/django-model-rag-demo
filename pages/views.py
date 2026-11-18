@@ -32,7 +32,7 @@ def chat(request: HttpRequest) -> HttpResponse:
         "pages/chat.html",
         {
             "exchanges": _exchanges(request),
-            "use_history": request.session.get(USE_HISTORY_SESSION_KEY, True),
+            "use_history": request.session.get(_use_history_session_key(), True),
         },
     )
     add_never_cache_headers(response)
@@ -54,7 +54,7 @@ def _post_question(request: HttpRequest) -> HttpResponse:
             {"error": QUESTION_REQUIRED},
             status=400,
         )
-    request.session[USE_HISTORY_SESSION_KEY] = _is_history_requested(request)
+    request.session[_use_history_session_key()] = _is_history_requested(request)
     exchange = _ask(question, _history(request))
     request.session[_exchanges_session_key()] = [*_exchanges(request), exchange]
     if _is_fetch_request(request):
@@ -73,6 +73,10 @@ def _history(request: HttpRequest) -> tuple[Exchange, ...] | None:
 
 def _is_history_requested(request: HttpRequest) -> bool:
     return request.POST.get("use_history") == "on"
+
+
+def _use_history_session_key() -> str:
+    return f"{USE_HISTORY_SESSION_KEY}_{get_language()}"
 
 
 def _exchanges_session_key() -> str:
